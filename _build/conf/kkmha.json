@@ -1,0 +1,46 @@
+{
+    "log": {
+        "console": {
+            "level": "debug",
+            "outputTimestamp": false,
+            "outputLevel": true
+        },
+        "file": {
+            "level": "debug",
+            "directory": "logs"
+        },
+        "eventLog": {
+            "level": "none"
+        },
+        "appendLocation": false
+    },
+    "server": {
+        "ipv4Only": false,
+        "port": 5757,
+        "enableLegacyTls": "no",
+        "securityLevel": 5,
+        "certificateChainFile": "conf\\kkmha.test.ss.crt",
+        "privateKeyFile": "conf\\kkmha.test.ss.key",
+        "privateKeyPassword": "",
+        "secret": "lorem.ipsum.dolor.sit.amet",
+        "loopbackWithoutSecret": false,
+        "enableStatic": false,
+        "enableUnknownType": true,
+        "staticDirectory": "static",
+        "mimeMap": "conf\\mime.json",
+        "--headersMap": "conf\\headers.json"
+    },
+    "kkm": {
+        "directory": "conf\\kkm",
+        "defaultBaudRate": 115200,
+        "defaultLineLength": 42,
+        "cliOperator": {
+            "name": "Оператор",
+            "--inn": "770000000000"
+        },
+        "--documentClosedChecking": {
+            "--attempts": 5,
+            "--waiting": 100
+        }
+    }
+}

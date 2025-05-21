@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="ru-RU">
+<!-- TODO: Реализовать базовую функциональность для взаимодействия с KKMHA API. -->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Language" content="ru-RU">
+    <title>ККМ Инструменты</title>
+    <link rel="stylesheet" type="text/css" href="kkmha.css">
+    <script crossOrigin="anonymous" defer="defer" type="application/javascript" src="kkmha.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('#statusButton').addEventListener('click', function (/*element*/) {
+                performGet('/kkm/00106308755095/status', responseLogger);
+            });
+            document.querySelector('#learnButton').addEventListener('click', function (/*element*/) {
+                performPost('/kkm/learn', {"connParams":"com,4"}, responseLogger);
+            });
+        });
+    </script>
+</head>
+<body>
+<h1>Тест</h1>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam lectus risus, finibus ornare vestibulum et,
+    feugiat quis dui. Vivamus sit amet dolor et magna facilisis rhoncus. Curabitur maximus est sed porta scelerisque.
+    Sed suscipit, arcu volutpat feugiat posuere, eros nisi tristique nibh, mollis vehicula lectus tortor eu purus.</p>
+<button id="statusButton">Status</button>
+<button id="learnButton">Learn</button>
+</body>
+</html>

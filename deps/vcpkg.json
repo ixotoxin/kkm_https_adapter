@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    { "name": "asio", "features": [ "openssl" ] },
+    { "name": "openssl", "features": [ "tools", "ssl3", "weak-ssl-ciphers" ] },
+    { "name": "nlohmann-json" },
+    { "name": "catch2" }
+  ]
+}
