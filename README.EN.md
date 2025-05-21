@@ -2,7 +2,7 @@
 
 ## Description
 
-This is yet another HTTPS server on C++, but with ~~blackjack and hoo...~~ Asio, OpenSSL and coroutines.
+This is yet another HTTPS server in C++, but with ~~blackjack and hoo...~~ Asio, OpenSSL and coroutines.
 
 The implementation of a service for Windows OS that provides access to a cash register (hereinafter CR) connected
 to a computer supported by the ATOL driver. The REST JSON API over HTTPS is used to access the CR. This is not an
