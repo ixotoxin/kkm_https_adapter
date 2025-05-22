@@ -32,7 +32,8 @@ class Utils
     {
         return array_filter(
             $response,
-            function($v, $k) { return str_starts_with($k, '!'); },
+            /* function($v, $k) { return str_starts_with($k, '!'); }, */
+            fn ($v, $k) => str_starts_with($k, '!'),
             ARRAY_FILTER_USE_BOTH
         );
     }

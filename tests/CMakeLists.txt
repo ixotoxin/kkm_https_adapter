@@ -20,7 +20,7 @@ add_executable(test_lib_datetime lib_datetime.cpp ../src/library/datetime.cpp)
 target_link_libraries(test_lib_datetime PRIVATE Catch2::Catch2WithMain)
 add_test(NAME test_lib_datetime COMMAND test_lib_datetime)
 
-add_executable(test_lib_json lib_json.cpp)
+add_executable(test_lib_json lib_json.cpp ../src/library/text.cpp)
 target_link_libraries(test_lib_json PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
 add_test(NAME test_lib_json COMMAND test_lib_json)
 
