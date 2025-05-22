@@ -9,6 +9,6 @@ using namespace std;
 namespace UnitTests {
     TEST_CASE("utils", "[path_check]") {
         // TODO: Реализовать.
-        REQUIRE(1 - 2 == 3 - 4);
+        SUCCEED("TODO: Реализовать.");
     }
 }

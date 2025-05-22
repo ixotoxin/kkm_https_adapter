@@ -12,19 +12,14 @@ in applications with a web interface and business logic implemented on a remote 
 interactive interaction with CR is difficult in some cases. Therefore, all stages of the operation (sell registration,
 shift closure, etc.) are performed atomically.
 
-## Requirements
-
-The following libraries are used:
-- Library from the ATOL KKT Driver V10.10.6+ ([Official website](http://fs.atol.ru/))
-- Asio C++ Library ([Git](https://github.com/chriskohlhoff/asio), [Official website](https://think-async.com/Asio/))
-- OpenSSL ([Git](https://github.com/openssl/openssl), [Official website](https://www.openssl.org/))
-- JSON for Modern C++ ([Git](https://github.com/nlohmann/json), [Official website](https://json.nlohmann.me/))
-- Catch2 ([Git](https://github.com/catchorg/Catch2))
-
 ## Building
 
 For assembly, first of all, you will need:
 - ATOL KKT Driver version not lower than 10.10.6 ([Official website](http://fs.atol.ru/))
+- Asio C++ Library ([Git](https://github.com/chriskohlhoff/asio), [Official website](https://think-async.com/Asio/))
+- OpenSSL ([Git](https://github.com/openssl/openssl), [Official website](https://www.openssl.org/))
+- JSON for Modern C++ ([Git](https://github.com/nlohmann/json), [Official website](https://json.nlohmann.me/))
+- Catch2 ([Git](https://github.com/catchorg/Catch2))
 - vcpkg ([Git](https://github.com/microsoft/vcpkg), [Official website](https://learn.microsoft.com/en-us/vcpkg/))
 
 **vcpkg** can be replaced with another dependency manager for C++ or use ready-made assemblies of the above libraries.

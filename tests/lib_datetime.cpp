@@ -12,18 +12,12 @@ namespace UnitTests {
         using Catch::Matchers::Equals;
 
         std::tm dateTime {
-            .tm_sec = 1,
-            .tm_min = 2,
-            .tm_hour = 3,
-            .tm_mday = 4,
-            .tm_mon = 4,
-            .tm_year = 106,
-            .tm_wday = 4,
-            .tm_yday = 124,
-            .tm_isdst = 0
+            .tm_sec = 1, .tm_min = 2, .tm_hour = 3,
+            .tm_mday = 4, .tm_mon = 4, .tm_year = 106,
+            .tm_wday = 4, .tm_yday = 124, .tm_isdst = 0
         };
 
         REQUIRE_THAT(DateTime::cast<std::string>(dateTime), Equals("2006-05-04 03:02:01"));
-        REQUIRE(DateTime::cast<std::wstring>(dateTime).compare(L"2006-05-04 03:02:01") == 0);
+        REQUIRE(DateTime::cast<std::wstring>(dateTime) == L"2006-05-04 03:02:01");
     }
 }

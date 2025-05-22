@@ -12,25 +12,21 @@ namespace UnitTests {
         std::string mbString;
         REQUIRE(Basic::convert(mbString, L""));
         REQUIRE(mbString.empty());
-        REQUIRE(mbString.compare("") == 0);
         REQUIRE(Basic::convert(wcString, ""));
         REQUIRE(wcString.empty());
-        REQUIRE(wcString.compare(L"") == 0);
         REQUIRE(Basic::convert(mbString, L"Test string"));
-        REQUIRE(mbString.compare("Test string") == 0);
+        REQUIRE(mbString == "Test string");
         REQUIRE(Basic::convert(wcString, "Test string"));
-        REQUIRE(wcString.compare(L"Test string") == 0);
+        REQUIRE(wcString == L"Test string");
         REQUIRE(Basic::convert(mbString, L"Тестовая строка"));
-        REQUIRE(mbString.compare("Тестовая строка") == 0);
+        REQUIRE(mbString == "Тестовая строка");
         REQUIRE(Basic::convert(wcString, "Тестовая строка"));
-        REQUIRE(wcString.compare(L"Тестовая строка") == 0);
+        REQUIRE(wcString == L"Тестовая строка");
         REQUIRE(Basic::convert(L"").empty());
         REQUIRE(Basic::convert("").empty());
-        REQUIRE(Basic::convert(L"").compare("") == 0);
-        REQUIRE(Basic::convert("").compare(L"") == 0);
-        REQUIRE(Basic::convert(L"Test string").compare("Test string") == 0);
-        REQUIRE(Basic::convert("Test string").compare(L"Test string") == 0);
-        REQUIRE(Basic::convert(L"Тестовая строка").compare("Тестовая строка") == 0);
-        REQUIRE(Basic::convert("Тестовая строка").compare(L"Тестовая строка") == 0);
+        REQUIRE(Basic::convert(L"Test string") == "Test string");
+        REQUIRE(Basic::convert("Test string") == L"Test string");
+        REQUIRE(Basic::convert(L"Тестовая строка") == "Тестовая строка");
+        REQUIRE(Basic::convert("Тестовая строка") == L"Тестовая строка");
     }
 }

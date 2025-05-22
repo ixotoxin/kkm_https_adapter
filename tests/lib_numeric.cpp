@@ -32,23 +32,23 @@ namespace UnitTests {
         REQUIRE_THAT(Numeric::cast<std::string>(u64), Equals("789"));
 
         wcStrNum.assign(Numeric::cast<std::wstring>(0));
-        REQUIRE(wcStrNum.compare(L"0") == 0);
+        REQUIRE(wcStrNum == L"0");
         wcStrNum.assign(Numeric::cast<std::wstring>(123456789));
-        REQUIRE(wcStrNum.compare(L"123456789") == 0);
+        REQUIRE(wcStrNum == L"123456789");
         wcStrNum.assign(Numeric::cast<std::wstring>(-123456789));
-        REQUIRE(wcStrNum.compare(L"-123456789") == 0);
+        REQUIRE(wcStrNum == L"-123456789");
         wcStrNum.assign(Numeric::cast<std::wstring>(i16));
-        REQUIRE(wcStrNum.compare(L"-123") == 0);
+        REQUIRE(wcStrNum == L"-123");
         wcStrNum.assign(Numeric::cast<std::wstring>(i32));
-        REQUIRE(wcStrNum.compare(L"-456") == 0);
+        REQUIRE(wcStrNum == L"-456");
         wcStrNum.assign(Numeric::cast<std::wstring>(i64));
-        REQUIRE(wcStrNum.compare(L"-789") == 0);
+        REQUIRE(wcStrNum == L"-789");
         wcStrNum.assign(Numeric::cast<std::wstring>(u16));
-        REQUIRE(wcStrNum.compare(L"123") == 0);
+        REQUIRE(wcStrNum == L"123");
         wcStrNum.assign(Numeric::cast<std::wstring>(u32));
-        REQUIRE(wcStrNum.compare(L"456") == 0);
+        REQUIRE(wcStrNum == L"456");
         wcStrNum.assign(Numeric::cast<std::wstring>(u64));
-        REQUIRE(wcStrNum.compare(L"789") == 0);
+        REQUIRE(wcStrNum == L"789");
 
         REQUIRE_THAT(
             Numeric::cast<std::string>(0.5),
@@ -65,8 +65,8 @@ namespace UnitTests {
         REQUIRE_THAT(Numeric::cast<std::string>(nDouble), Equals("-123.456789"));
 
         wcStrNum.assign(Numeric::cast<std::wstring>(pDouble));
-        REQUIRE(wcStrNum.compare(L"123.456789") == 0);
+        REQUIRE(wcStrNum == L"123.456789");
         wcStrNum.assign(Numeric::cast<std::wstring>(nDouble));
-        REQUIRE(wcStrNum.compare(L"-123.456789") == 0);
+        REQUIRE(wcStrNum == L"-123.456789");
     }
 }

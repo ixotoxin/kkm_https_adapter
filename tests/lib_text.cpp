@@ -39,70 +39,71 @@ namespace UnitTests {
         }
     }
 
-    // TEST(LibText, trim) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, lower) {
-    //     // TODO: Реализовать.
-    // }
-    //
-    // TEST(LibText, cast) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, convert) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, splitTo) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, splitVariable) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, joinTo) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
-    //
-    // TEST(LibText, concat) {
-    //     // TODO: Реализовать.
-    //     SUCCEED();
-    // }
+    TEST_CASE("text", "[trim]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[lower]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[cast]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[convert]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[splitTo]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[splitVariable]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[joinTo]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("text", "[concat]" ) {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
 
     TEST_CASE("text", "[bool_to_str_cast]" ) {
-        REQUIRE(Text::Wcs::yesNo(true).compare(L"yes") == 0);
-        REQUIRE(Text::Mbs::yesNo(true).compare("yes") == 0);
-        REQUIRE(Text::yesNo<Meta::Wcs>(true).compare(L"yes") == 0);
-        REQUIRE(Text::yesNo<Meta::Mbs>(true).compare("yes") == 0);
-        REQUIRE(Text::Wcs::yesNo(false).compare(L"no") == 0);
-        REQUIRE(Text::Mbs::yesNo(false).compare("no") == 0);
-        REQUIRE(Text::yesNo<Meta::Wcs>(false).compare(L"no") == 0);
-        REQUIRE(Text::yesNo<Meta::Mbs>(false).compare("no") == 0);
-        REQUIRE(Text::Wcs::enaDis(true).compare(L"enable") == 0);
-        REQUIRE(Text::Mbs::enaDis(true).compare("enable") == 0);
-        REQUIRE(Text::enaDis<Meta::Wcs>(true).compare(L"enable") == 0);
-        REQUIRE(Text::enaDis<Meta::Mbs>(true).compare("enable") == 0);
-        REQUIRE(Text::Wcs::enaDis(false).compare(L"disable") == 0);
-        REQUIRE(Text::Mbs::enaDis(false).compare("disable") == 0);
-        REQUIRE(Text::enaDis<Meta::Wcs>(false).compare(L"disable") == 0);
-        REQUIRE(Text::enaDis<Meta::Mbs>(false).compare("disable") == 0);
-        REQUIRE(Text::Wcs::trueFalse(true).compare(L"true") == 0);
-        REQUIRE(Text::Mbs::trueFalse(true).compare("true") == 0);
-        REQUIRE(Text::trueFalse<Meta::Wcs>(true).compare(L"true") == 0);
-        REQUIRE(Text::trueFalse<Meta::Mbs>(true).compare("true") == 0);
-        REQUIRE(Text::Wcs::trueFalse(false).compare(L"false") == 0);
-        REQUIRE(Text::Mbs::trueFalse(false).compare("false") == 0);
-        REQUIRE(Text::trueFalse<Meta::Wcs>(false).compare(L"false") == 0);
-        REQUIRE(Text::trueFalse<Meta::Mbs>(false).compare("false") == 0);
+        REQUIRE(Text::Wcs::yesNo(true) == L"yes");
+        REQUIRE(Text::Mbs::yesNo(true) == "yes");
+        REQUIRE(Text::yesNo<Meta::Wcs>(true) == L"yes");
+        REQUIRE(Text::yesNo<Meta::Mbs>(true) == "yes");
+        REQUIRE(Text::Wcs::yesNo(false) == L"no");
+        REQUIRE(Text::Mbs::yesNo(false) == "no");
+        REQUIRE(Text::yesNo<Meta::Wcs>(false) == L"no");
+        REQUIRE(Text::yesNo<Meta::Mbs>(false) == "no");
+        REQUIRE(Text::Wcs::enaDis(true) == L"enable");
+        REQUIRE(Text::Mbs::enaDis(true) == "enable");
+        REQUIRE(Text::enaDis<Meta::Wcs>(true) == L"enable");
+        REQUIRE(Text::enaDis<Meta::Mbs>(true) == "enable");
+        REQUIRE(Text::Wcs::enaDis(false) == L"disable");
+        REQUIRE(Text::Mbs::enaDis(false) == "disable");
+        REQUIRE(Text::enaDis<Meta::Wcs>(false) == L"disable");
+        REQUIRE(Text::enaDis<Meta::Mbs>(false) == "disable");
+        REQUIRE(Text::Wcs::trueFalse(true) == L"true");
+        REQUIRE(Text::Mbs::trueFalse(true) == "true");
+        REQUIRE(Text::trueFalse<Meta::Wcs>(true) == L"true");
+        REQUIRE(Text::trueFalse<Meta::Mbs>(true) == "true");
+        REQUIRE(Text::Wcs::trueFalse(false) == L"false");
+        REQUIRE(Text::Mbs::trueFalse(false) == "false");
+        REQUIRE(Text::trueFalse<Meta::Wcs>(false) == L"false");
+        REQUIRE(Text::trueFalse<Meta::Mbs>(false) == "false");
     }
 }
 

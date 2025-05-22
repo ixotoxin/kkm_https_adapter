@@ -9,6 +9,16 @@ using namespace std;
 namespace UnitTests {
     TEST_CASE("json", "[cast]") {
         // TODO: Реализовать.
-        REQUIRE(1 - 2 == 3 - 4);
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("json", "[handle]") {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
+    }
+
+    TEST_CASE("json", "[handleKey]") {
+        // TODO: Реализовать.
+        SUCCEED("TODO: Реализовать.");
     }
 }
