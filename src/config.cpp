@@ -29,15 +29,15 @@ namespace Config {
                 s_binaryFile.assign(binaryFile);
                 s_workDirectory = s_binaryFile.parent_path();
                 /*if (!::SetCurrentDirectoryW(s_workDirectory.c_str())) {
-                    throw Failure(System::explainError(L"SetCurrentDirectoryW(...)"));
+                    throw Failure(System::explainError(L"SetCurrentDirectoryW(...)")); // NOLINT(*-exception-baseclass)
                 }*/
                 std::error_code error;
                 std::filesystem::current_path(s_workDirectory, error);
                 if (error) {
-                    throw Failure(error);
+                    throw Failure(error); // NOLINT(*-exception-baseclass)
                 }
             } else {
-                throw Failure(System::explainError(L"GetModuleFileName(...)"));
+                throw Failure(System::explainError(L"GetModuleFileName(...)")); // NOLINT(*-exception-baseclass)
             }
         }
         {
@@ -55,18 +55,18 @@ namespace Config {
             std::error_code error;
             s_configDirectory.assign(std::filesystem::absolute(confDirectory, error));
             if (error) {
-                throw Failure(error);
+                throw Failure(error); // NOLINT(*-exception-baseclass)
             }
             s_configFile.assign(s_configDirectory);
             s_configFile /= c_configFile;
             Log::File::s_directory.assign(std::filesystem::absolute(logsDirectory, error));
             if (error) {
-                throw Failure(error);
+                throw Failure(error); // NOLINT(*-exception-baseclass)
             }
         }
         {
             if (!std::filesystem::is_regular_file(s_configFile)) {
-                throw Failure(std::format(Wcs::c_cantReadConfig, s_configFile.c_str()));
+                throw Failure(std::format(Wcs::c_cantReadConfig, s_configFile.c_str())); // NOLINT(*-exception-baseclass)
             }
             try {
                 Nln::Json json(Nln::Json::parse(std::ifstream(s_configFile)));
@@ -195,17 +195,17 @@ namespace Config {
                 );
                 if (Http::s_enableStatic) {
                     if (!std::filesystem::is_regular_file(Http::s_mimeMapFile)) {
-                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_mimeMapFile.c_str()));
+                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
                     }
                     json.clear();
                     std::ifstream input { Http::s_mimeMapFile };
                     input >> json;
                     if (!json.empty() && !json.is_object()) {
-                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str()));
+                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
                     }
                     for (auto & [key, value] : json.items()) {
                         if (!value.is_string()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str()));
+                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
                         }
                         auto ext = Text::lowered(key);
                         std::replace_if(ext.begin(), ext.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
@@ -214,25 +214,26 @@ namespace Config {
                         std::replace_if(type.begin(), type.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
                         Text::trim(type);
                         if (ext.empty() || type.empty()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str()));
+                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile/*.c_str()*/)); // NOLINT(*-exception-baseclass)
                         }
                         if (ext[0] != '.') {
-                            ext = "."s + ext;
+                            ext = "."s;
+                            ext += ext;
                         }
                         Http::s_mimeMap[ext] = std::move(type);
                     }
                     /*if (!std::filesystem::is_regular_file(Http::s_headersMapFile)) {
-                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_headersMapFile.c_str()));
+                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
                     }
                     json.clear();
                     std::ifstream input2 { Http::s_headersMapFile };
                     input2 >> json;
                     if (!json.empty() && !json.is_object()) {
-                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str()));
+                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
                     }
                     for (auto & [key1, value1] : json.items()) {
                         if (!value1.is_object()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str()));
+                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
                         }
                         auto ext = Text::lowered(key1);
                         std::replace_if(ext.begin(), ext.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
@@ -240,7 +241,7 @@ namespace Config {
                         Nln::Json item(Nln::EmptyJsonObject);
                         for (auto & [key2, value2] : value1.items()) {
                             if (!value2.is_string()) {
-                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str()));
+                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
                             }
                             auto headerName = Text::lowered(key2);
                             std::replace_if(
@@ -268,7 +269,7 @@ namespace Config {
                     for (auto & [key, value] : Http::s_headersMap.items()) {
                         for (auto & [key2, value2] : value.items()) {
                             if (key2 == "+" && !Http::s_headersMap.contains(value2)) {
-                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str()));
+                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
                             }
                         }
                     }*/
@@ -281,7 +282,7 @@ namespace Config {
             } catch (...) {
                 ntsLogWarning(Wcs::c_somethingWrong);
             }
-            throw Failure(Wcs::c_invalidConfig);
+            throw Failure(Wcs::c_invalidConfig); // NOLINT(*-exception-baseclass)
         }
     }
 }

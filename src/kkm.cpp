@@ -36,13 +36,13 @@ namespace Kkm {
         } else if (m_params[0] == L"bluetooth" || m_params[0] == L"bt") {
             applyBluetooth(kkm);
         } else {
-            throw Failure(Wcs::c_invalidConnParams);
+            throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         }
     }
 
     void Device::ConnParams::applyCom(Device & kkm) const {
         if (m_params.size() < 2) {
-            throw Failure(Wcs::c_invalidConnParams);
+            throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         }
         std::wstring port { L"COM" };
         port.append(m_params[1]);
@@ -52,7 +52,7 @@ namespace Kkm {
         } else if (std::ranges::find(s_allowedBaudRate, m_params[2]) != s_allowedBaudRate.end()) {
             baudRate.assign(m_params[2]);
         } else {
-            throw Failure(Wcs::c_invalidConnParams);
+            throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         }
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_COM));
@@ -64,61 +64,61 @@ namespace Kkm {
         //  всегда передаются и проблем с ФФД 1.2+ не должно возникнуть.
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_AUTO_MEASUREMENT_UNIT, std::to_wstring(Atol::LIBFPTR_IU_PIECE));
         if (kkm.m_kkm.applySingleSettings() < 0) {
-            throw Failure(kkm);
+            throw Failure(kkm); // NOLINT(*-exception-baseclass)
         }
     }
 
     void Device::ConnParams::applyUsb(Device &) const { // NOLINT(*-convert-member-functions-to-static)
         // TODO: Реализовать.
         // if (m_params.size() < 2) {
-        //     throw Failure(Wcs::c_invalidConnParams);
+        //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_USB));
         // ...
-        throw Failure(Wcs::c_notImplemented);
+        throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
     }
 
     void Device::ConnParams::applyTcpIp(Device &) const { // NOLINT(*-convert-member-functions-to-static)
         // TODO: Реализовать.
         // if (m_params.size() < 2) {
-        //     throw Failure(Wcs::c_invalidConnParams);
+        //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_TCPIP));
         // ...
-        throw Failure(Wcs::c_notImplemented);
+        throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
     }
 
     void Device::ConnParams::applyBluetooth(Device &) const { // NOLINT(*-convert-member-functions-to-static)
         // TODO: Реализовать.
         // if (m_params.size() < 2) {
-        //     throw Failure(Wcs::c_invalidConnParams);
+        //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_BLUETOOTH));
         // ...
-        throw Failure(Wcs::c_notImplemented);
+        throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
     }
 
     Device::NewConnParams::NewConnParams(const std::wstring & params)
     : ConnParams() {
         Text::splitTo(m_params, params, c_connParamsSeparator);
         if (m_params.size() < 2) {
-            throw Failure(Wcs::c_invalidConnParams);
+            throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         }
         Text::lower(m_params[0]);
     }
 
     void Device::NewConnParams::save(const std::wstring & serialNumber) {
         if (serialNumber.empty()) {
-            throw Failure(std::format(Wcs::c_cantSave, L"???"));
+            throw Failure(std::format(Wcs::c_cantSave, L"???")); // NOLINT(*-exception-baseclass)
         }
         std::filesystem::path filePath { s_directory };
         if (!std::filesystem::is_directory(filePath)) {
             std::filesystem::create_directories(filePath);
             if (!std::filesystem::is_directory(filePath)) {
-                throw Failure(std::format(Wcs::c_cantSave, serialNumber));
+                throw Failure(std::format(Wcs::c_cantSave, serialNumber)); // NOLINT(*-exception-baseclass)
             }
         }
         filePath /= serialNumber + L".json";
@@ -127,7 +127,7 @@ namespace Kkm {
         file << json.dump();
         file.close();
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_cantSave, serialNumber));
+            throw Failure(std::format(Wcs::c_cantSave, serialNumber)); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -145,7 +145,7 @@ namespace Kkm {
         std::filesystem::path filePath { s_directory };
         filePath /= m_serialNumber + L".json";
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber));
+            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
         Nln::Json json(Nln::Json::parse(std::ifstream(filePath)));
         Json::handle(json, m_params);
@@ -154,7 +154,7 @@ namespace Kkm {
     Device::KnownConnParams::KnownConnParams(const std::filesystem::path & filePath)
     : KnownConnParams(serialNumber(filePath)) {
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber));
+            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
         Nln::Json json(Nln::Json::parse(std::ifstream(filePath)));
         Json::handle(json, m_params);
@@ -184,7 +184,7 @@ namespace Kkm {
     : Device(logPrefix) {
         connect(connParams);
         if (m_serialNumber != connParams.m_serialNumber) {
-            throw Failure(std::format(Wcs::c_serialNumberMismatch, connParams.m_serialNumber, m_serialNumber));
+            throw Failure(std::format(Wcs::c_serialNumberMismatch, connParams.m_serialNumber, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -198,22 +198,22 @@ namespace Kkm {
     void Device::connect(const ConnParams & connParams) {
         connParams.apply(*this);
         if (m_kkm.open() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         if (!m_kkm.isOpened()) {
-            throw Failure(Wcs::c_notAvailable);
+            throw Failure(Wcs::c_notAvailable); // NOLINT(*-exception-baseclass)
         }
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_SERIAL_NUMBER);
         if (m_kkm.queryData() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         m_serialNumber = m_kkm.getParamString(Atol::LIBFPTR_PARAM_SERIAL_NUMBER);
         if (m_serialNumber.empty()) {
-            throw Failure(Wcs::c_exchangeError);
+            throw Failure(Wcs::c_exchangeError); // NOLINT(*-exception-baseclass)
         }
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_RECEIPT_LINE_LENGTH);
         if (m_kkm.queryData() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         m_lineLength = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_RECEIPT_LINE_LENGTH);
         if (m_lineLength < 1) {
@@ -291,7 +291,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_TEXT, separator);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DEFER, Atol::LIBFPTR_DEFER_NONE);
         if (m_kkm.printText() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -336,7 +336,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_TEXT, text);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DEFER, static_cast<int>(position));
         if (m_kkm.printText() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -382,7 +382,7 @@ namespace Kkm {
             m_kkm.setParam(1203, details.m_operatorInn);
         }
         if (m_kkm.operatorLogin() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -424,7 +424,7 @@ namespace Kkm {
         }
         if (hasRequisite1256) {
             if (m_kkm.utilFormTlv() < 0) {
-                throw Failure(*this);
+                throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
             std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
             m_kkm.setParam(1256, clientInfo);
@@ -437,7 +437,7 @@ namespace Kkm {
             m_kkm.setParam(1085, s_customerAccountField); // Наименование дополнительного реквизита пользователя
             m_kkm.setParam(1086, customerAccount); // Значение дополнительного реквизита пользователя
             if (m_kkm.utilFormTlv() < 0) {
-                throw Failure(*this);
+                throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
             std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
             m_kkm.setParam(1084, clientInfo);
@@ -531,7 +531,7 @@ namespace Kkm {
         /** Запрос информации о ККТ **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_STATUS);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_blocked = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_BLOCKED);
         result.m_cashDrawerOpened = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_CASHDRAWER_OPENED);
@@ -586,7 +586,7 @@ namespace Kkm {
         /** Запрос состояния смены **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_SHIFT_STATE);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_shiftNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_SHIFT_NUMBER);
         result.m_shiftState = static_cast<ShiftState>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_SHIFT_STATE));
@@ -595,20 +595,20 @@ namespace Kkm {
         /** Запрос информации о текущей смене в ФН **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_SHIFT);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_receiptNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_RECEIPT_NUMBER);
         auto shiftNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_SHIFT_NUMBER);
         // ISSUE: Проверка дублирующейся информации. Не факт, что она должна совпадать.
         if (shiftNumber != result.m_shiftNumber) {
-            // throw Failure(Wcs::c_invalidData);
+            // throw Failure(Wcs::c_invalidData); // NOLINT(*-exception-baseclass)
             tsLogWarning(Wcs::c_shiftMismatch, m_logPrefix, m_serialNumber);
         }
 
         /** Запрос количества ФД за смену **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_DOCUMENTS_COUNT_IN_SHIFT);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_documentsCount = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENTS_COUNT);
     }
@@ -635,7 +635,7 @@ namespace Kkm {
         /** Запрос состояния чека **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_RECEIPT_STATE);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_receiptType = static_cast<ReceiptType>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_RECEIPT_TYPE));
         result.m_receiptNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_RECEIPT_NUMBER);
@@ -669,7 +669,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Atol::LIBFPTR_PT_CASH);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, Atol::LIBFPTR_RT_SELL);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_sellCashSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM);
 
@@ -678,42 +678,42 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Atol::LIBFPTR_PT_CASH);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, Atol::LIBFPTR_RT_SELL_RETURN);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_sellReturnCashSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM);
 
         /** Запрос суммы внесений **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASHIN_SUM);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_cashInSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM);
 
         /** Запрос суммы выплат **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASHOUT_SUM);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_cashOutSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM);
 
         /** Запрос количества внесений **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASHIN_COUNT);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_cashInCount = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENTS_COUNT);
 
         /** Запрос количества выплат **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASHOUT_COUNT);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_cashOutCount = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENTS_COUNT);
 
         /** Запрос суммы наличных в денежном ящике **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASH_SUM);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_cashSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM);
     }
@@ -739,7 +739,7 @@ namespace Kkm {
         /** Запрос статуса информационного обмена с ОФД **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_OFD_EXCHANGE_STATUS);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_exchangeStatus = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_OFD_EXCHANGE_STATUS);
         result.m_unsentCount = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENTS_COUNT);
@@ -776,7 +776,7 @@ namespace Kkm {
         /** Запрос информации и статуса ФН **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_FN_INFO);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_serial = m_kkm.getParamString(Atol::LIBFPTR_PARAM_SERIAL_NUMBER);
         result.m_version = m_kkm.getParamString(Atol::LIBFPTR_PARAM_FN_VERSION);
@@ -812,7 +812,7 @@ namespace Kkm {
         /** Запрос информации о последней регистрации / перерегистрации **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_LAST_REGISTRATION);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_documentNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENT_NUMBER);
         result.m_registrationsCount = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_REGISTRATIONS_COUNT);
@@ -838,7 +838,7 @@ namespace Kkm {
         /** Запрос информации о последнем чеке **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_LAST_RECEIPT);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_documentNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENT_NUMBER);
         result.m_receiptSum = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_RECEIPT_SUM);
@@ -864,7 +864,7 @@ namespace Kkm {
         /** Запрос информации о последнем фискальном документе **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_LAST_DOCUMENT);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_documentNumber = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DOCUMENT_NUMBER);
         result.m_fiscalSign = m_kkm.getParamString(Atol::LIBFPTR_PARAM_FISCAL_SIGN);
@@ -896,7 +896,7 @@ namespace Kkm {
         /** Запрос ошибок обмена с ОФД **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_ERRORS);
         if (m_kkm.fnQueryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_networkError = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_NETWORK_ERROR);
         result.m_networkErrorText = m_kkm.getParamString(Atol::LIBFPTR_PARAM_NETWORK_ERROR_TEXT);
@@ -928,7 +928,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_UNIT_TYPE, Atol::LIBFPTR_UT_FIRMWARE);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_firmwareVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
 
@@ -936,7 +936,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_UNIT_TYPE, Atol::LIBFPTR_UT_BOOT);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_bootVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
     }
@@ -946,7 +946,7 @@ namespace Kkm {
 
         /** Открытие нефискального документа **/
         if (m_kkm.beginNonfiscalDocument() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
 
         subPrintSeparator(0, 1);
@@ -958,7 +958,7 @@ namespace Kkm {
 
         /** Закрытие нефискального документа без печати подвала **/
         if (m_kkm.endNonfiscalDocument() < 0) {
-            throw Failure(*this);
+            throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -997,7 +997,7 @@ namespace Kkm {
                     separated = true;
                 } else {
                     if (!Json::handleKey(block, "content", content, L"document[].content")) {
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"document[].content"));
+                        throw Failure(std::format(Wcs::c_requiresProperty, L"document[].content")); // NOLINT(*-exception-baseclass)
                     }
                     Json::handleKey(block, "center", center, L"document[].center");
                     Json::handleKey(block, "magnified", magnified, L"document[].magnified");
@@ -1007,7 +1007,7 @@ namespace Kkm {
                 m_document.emplace_back(std::move(content), center, magnified, separated, actualMargin);
             }
         } else {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"document"));
+            throw Failure(std::format(Wcs::c_requiresProperty, L"document")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1016,10 +1016,10 @@ namespace Kkm {
 
         /** Открытие нефискального документа **/
         if (m_kkm.beginNonfiscalDocument() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         if (details.m_cliche && m_kkm.printCliche() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
 
         for (auto & block : details.m_document) {
@@ -1031,7 +1031,7 @@ namespace Kkm {
         /** Закрытие нефискального документа **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_PRINT_FOOTER, details.m_footer);
         if (m_kkm.endNonfiscalDocument() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1042,7 +1042,7 @@ namespace Kkm {
         /** Печать информации о ККТ **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_KKT_INFO);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1053,7 +1053,7 @@ namespace Kkm {
         /** Печать итогов регистрации / перерегистрации **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_FN_REGISTRATIONS);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1064,7 +1064,7 @@ namespace Kkm {
         /** Отчет о состоянии расчетов **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_OFD_EXCHANGE_STATUS);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         subCheckDocumentClosed(result);
     }
@@ -1076,7 +1076,7 @@ namespace Kkm {
         /** Диагностика соединения с ОФД **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_OFD_TEST);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1087,7 +1087,7 @@ namespace Kkm {
         /** Печать нераспечатанных отчетов о закрытии смены **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_CLOSE_SHIFT_REPORTS);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1098,7 +1098,7 @@ namespace Kkm {
         /** Копия последнего документа **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_LAST_DOCUMENT);
         if (m_kkm.report() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1116,14 +1116,14 @@ namespace Kkm {
                         path
                     );
                 if (!success) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"operator.name"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"operator.name")); // NOLINT(*-exception-baseclass)
                 }
                 Json::handleKey(json, "inn", this->m_operatorInn, path);
                 return true;
             }
         );
         if (!result) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"operator"));
+            throw Failure(std::format(Wcs::c_requiresProperty, L"operator")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1133,7 +1133,7 @@ namespace Kkm {
     Device::Call::CashDetails::CashDetails(const Nln::Json & details)
     : OperatorDetails(details) {
         if (!Json::handleKey(details, "cashSum", m_cashSum)) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"cashSum"));
+            throw Failure(std::format(Wcs::c_requiresProperty, L"cashSum")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1148,7 +1148,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_SUM, details.m_cashSum);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DOCUMENT_ELECTRONICALLY, details.m_electronically);
         if (m_kkm.cashIncome() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1163,7 +1163,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_SUM, details.m_cashSum);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DOCUMENT_ELECTRONICALLY, details.m_electronically);
         if (m_kkm.cashOutcome() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1239,27 +1239,27 @@ namespace Kkm {
                 double quantity;
                 std::wstring title;
                 if (!Json::handleKey(item, "title", title)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title")); // NOLINT(*-exception-baseclass)
                 }
                 if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, c_maxPrice))) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].price"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].price")); // NOLINT(*-exception-baseclass)
                 }
                 if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, c_maxQuantity))) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].quantity"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].quantity")); // NOLINT(*-exception-baseclass)
                 }
                 Json::handleKey(item, "unit", unit, s_measurementUnitMap);
                 if (!Json::handleKey(item, "tax", tax, s_taxCastMap)) {
                     if (hasDefaultTax) {
                         tax = defaultTax;
                     } else {
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"items[].tax"));
+                        throw Failure(std::format(Wcs::c_requiresProperty, L"items[].tax")); // NOLINT(*-exception-baseclass)
                     }
                 }
                 m_paymentSum += price * quantity;
                 m_items.emplace_back(std::move(title), price, quantity, unit, tax);
             }
         } else {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"items"));
+            throw Failure(std::format(Wcs::c_requiresProperty, L"items")); // NOLINT(*-exception-baseclass)
         }
         bool payment = Json::handleKey(
             details,
@@ -1275,19 +1275,19 @@ namespace Kkm {
                             this->m_paymentSum = Text::cast<double>(sum);
                         }
                     } catch (...) {
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum"));
+                        throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum")); // NOLINT(*-exception-baseclass)
                     }
                 } else {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum")); // NOLINT(*-exception-baseclass)
                 }
                 if (!Json::handleKey(json, "type", this->m_paymentType, s_paymentTypeCastMap, path)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.type"));
+                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.type")); // NOLINT(*-exception-baseclass)
                 }
                 return true;
             }
         );
         if (!payment) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"payment"));
+            throw Failure(std::format(Wcs::c_requiresProperty, L"payment")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1297,11 +1297,11 @@ namespace Kkm {
         Call::Result & result
     ) {
         if (type != ReceiptType::Sell && type != ReceiptType::SellReturn) {
-            throw Failure(Wcs::c_notImplemented);
+            throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
         }
 
         if (details.m_items.empty()) {
-            throw Failure(Wcs::c_requiresItems);
+            throw Failure(Wcs::c_requiresItems); // NOLINT(*-exception-baseclass)
         }
 
         /** Печать текста после клише **/
@@ -1317,7 +1317,7 @@ namespace Kkm {
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, static_cast<unsigned>(type));
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_ELECTRONICALLY, details.m_electronically); // Открытие электрочека
         if (m_kkm.openReceipt() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         m_needToCancelReceipt = true;
 
@@ -1352,7 +1352,7 @@ namespace Kkm {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_MEASUREMENT_UNIT, static_cast<int>(item.m_unit));
             m_kkm.setParam(Atol::LIBFPTR_PARAM_TAX_TYPE, s_tax.at(item.m_tax));
             if (m_kkm.registration() < 0) {
-                return result.fail(*this); // throw Failure(*this);
+                return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
         }
 
@@ -1363,7 +1363,7 @@ namespace Kkm {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, s_paymentType.at(details.m_paymentType));
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_SUM, details.m_paymentSum);
             if (m_kkm.payment() < 0) {
-                return result.fail(*this); // throw Failure(*this);
+                return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
             // result.m_remainder = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_REMAINDER); // Неоплаченный остаток чека
             // result.m_change = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_CHANGE); // Сдача по чеку
@@ -1374,7 +1374,7 @@ namespace Kkm {
         /** Закрытие чека **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, s_paymentType.at(details.m_paymentType));
         if (m_kkm.closeReceipt() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
 
         m_needToCancelReceipt = false;
@@ -1408,7 +1408,7 @@ namespace Kkm {
         /** Запрос состояния смены **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_SHIFT_STATE);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         if (static_cast<ShiftState>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_SHIFT_STATE)) == ShiftState::Closed) {
             tsLogDebug(Wcs::c_subCloseShiftNoNeed, m_logPrefix, m_serialNumber);
@@ -1419,7 +1419,7 @@ namespace Kkm {
             /** Закрытие смены **/
             m_kkm.setParam(Atol::LIBFPTR_PARAM_REPORT_TYPE, Atol::LIBFPTR_RT_CLOSE_SHIFT);
             if (m_kkm.report() < 0) {
-                return result.fail(*this); // throw Failure(*this);
+                return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
             subCheckDocumentClosed(result);
         }
@@ -1429,7 +1429,7 @@ namespace Kkm {
         /** Запрос суммы наличных в денежном ящике **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_CASH_SUM);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         double cashSum { m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_SUM) };
         if (cashSum > 0) {
@@ -1439,7 +1439,7 @@ namespace Kkm {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_SUM, cashSum);
             m_kkm.setParam(Atol::LIBFPTR_PARAM_DOCUMENT_ELECTRONICALLY, details.m_electronically);
             if (m_kkm.cashOutcome() < 0) {
-                return result.fail(*this); // throw Failure(*this);
+                return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
         } else {
             tsLogDebug(Wcs::c_subCashOutNoNeed, m_logPrefix, m_serialNumber);
@@ -1481,7 +1481,7 @@ namespace Kkm {
         /** Запрос состояния чека **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_RECEIPT_STATE);
         if (m_kkm.queryData() < 0) {
-            return result.fail(*this); // throw Failure(*this);
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         if (static_cast<ReceiptType>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_RECEIPT_TYPE)) == ReceiptType::Closed) {
             tsLogDebug(Wcs::c_subCancelReceiptNoNeed, m_logPrefix, m_serialNumber);
@@ -1489,7 +1489,7 @@ namespace Kkm {
             tsLogDebug(Wcs::c_subCancelReceipt, m_logPrefix, m_serialNumber);
             /** Отмена чека **/
             if (m_kkm.cancelReceipt() < 0) {
-                return result.fail(*this); // throw Failure(*this);
+                return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
         }
 

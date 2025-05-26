@@ -2,6 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "text.h"
+#include <cwctype>
 
 [[nodiscard, maybe_unused]]
 bool Meta::Wcs::trimPredicate(wchar_t c) {
@@ -17,7 +18,7 @@ bool Meta::Wcs::noTrimPredicate(wchar_t c) {
 
 [[nodiscard, maybe_unused]]
 wchar_t Meta::Wcs::toLower(wchar_t c) {
-    return static_cast<wchar_t>(::towlower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    return static_cast<wchar_t>(std::towlower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
 }
 
 [[nodiscard, maybe_unused]]
@@ -36,5 +37,5 @@ bool Meta::Mbs::noTrimPredicate(unsigned char c) {
 
 [[nodiscard, maybe_unused]]
 char Meta::Mbs::toLower(unsigned char c) {
-    return static_cast<Char>(::tolower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    return static_cast<Char>(std::tolower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
 }

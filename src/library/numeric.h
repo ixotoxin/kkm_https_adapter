@@ -55,7 +55,7 @@ namespace Numeric {
         return
             [min] (const T value) -> T {
                 if (value < min) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
@@ -67,7 +67,7 @@ namespace Numeric {
         return
             [max] (const T value) -> T {
                 if (value > max) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
@@ -79,7 +79,7 @@ namespace Numeric {
         return
             [min, max] (const T value) -> T {
                 if (value < min || value > max) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };

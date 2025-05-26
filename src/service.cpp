@@ -77,7 +77,7 @@ namespace Service {
     void WINAPI mainFunc(DWORD, PWSTR *) {
         s_statusHandle = ::RegisterServiceCtrlHandlerW(c_systemName, controlHandler);
         if (!s_statusHandle) {
-            throw Failure(System::explainError());
+            throw Failure(System::explainError()); // NOLINT(*-exception-baseclass)
         }
         startWorker();
     }
@@ -93,7 +93,7 @@ namespace Service {
         ::SERVICE_TABLE_ENTRYW serviceTable[] = { { const_cast<LPWSTR>(c_systemName), mainFunc }, { nullptr, nullptr } };
 
         if (!::StartServiceCtrlDispatcherW(serviceTable)) {
-            throw Failure(System::explainError(L"StartServiceCtrlDispatcherW(...)"));
+            throw Failure(System::explainError(L"StartServiceCtrlDispatcherW(...)")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -114,7 +114,7 @@ namespace Service {
 
         manager = ::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE);
         if (!manager) {
-            throw Failure(System::explainError(L"OpenSCManagerW(...)"));
+            throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         service
@@ -135,7 +135,7 @@ namespace Service {
             );
 
         if (!service) {
-            throw Failure(System::explainError(L"CreateServiceW(...)"));
+            throw Failure(System::explainError(L"CreateServiceW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         ntsLogInfo(Wcs::c_installed);
@@ -159,12 +159,12 @@ namespace Service {
 
         manager = ::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
         if (!manager) {
-            throw Failure(System::explainError(L"OpenSCManagerW(...)"));
+            throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         service = ::OpenServiceW(manager, c_systemName, SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE);
         if (!service) {
-            throw Failure(System::explainError(L"OpenServiceW(...)"));
+            throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         if (::ControlService(service, SERVICE_CONTROL_STOP, &status)) {
@@ -177,12 +177,12 @@ namespace Service {
             if (status.dwCurrentState == SERVICE_STOPPED) {
                 ntsLogInfo(Wcs::c_stopped);
             } else {
-                throw Failure(Wcs::c_stoppingFailed);
+                throw Failure(Wcs::c_stoppingFailed); // NOLINT(*-exception-baseclass)
             }
         }
 
         if (!::DeleteService(service)) {
-            throw Failure(System::explainError(L"DeleteService(...)"));
+            throw Failure(System::explainError(L"DeleteService(...)")); // NOLINT(*-exception-baseclass)
         }
 
         ntsLogInfo(Wcs::c_uninstalled);
@@ -197,7 +197,7 @@ namespace Service {
             );
 
         if (!result) {
-            throw Failure(System::explainError(L"QueryServiceStatusEx(...)"));
+            throw Failure(System::explainError(L"QueryServiceStatusEx(...)")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -222,17 +222,17 @@ namespace Service {
 
         manager = ::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
         if (!manager) {
-            throw Failure(System::explainError(L"OpenSCManagerW(...)"));
+            throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         service = ::OpenServiceW(manager, c_systemName, SERVICE_ALL_ACCESS);
         if (!service) {
-            throw Failure(System::explainError(L"OpenServiceW(...)"));
+            throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         queryServiceStatus(service, status);
         if(status.dwCurrentState != SERVICE_STOPPED && status.dwCurrentState != SERVICE_STOP_PENDING) {
-            throw Failure(Wcs::c_alreadyStarted);
+            throw Failure(Wcs::c_alreadyStarted); // NOLINT(*-exception-baseclass)
         }
 
         tickCount = ::GetTickCount();
@@ -247,12 +247,12 @@ namespace Service {
                 tickCount = ::GetTickCount();
                 oldCheckPoint = status.dwCheckPoint;
             } else if(::GetTickCount() - tickCount > status.dwWaitHint) {
-                throw Failure(Wcs::c_stoppingTimeout);
+                throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
         }
 
         if (!::StartServiceW(service, 0, nullptr)) {
-            throw Failure(System::explainError(L"StartServiceW(...)"));
+            throw Failure(System::explainError(L"StartServiceW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         queryServiceStatus(service, status);
@@ -275,7 +275,7 @@ namespace Service {
         if (status.dwCurrentState == SERVICE_RUNNING) {
             ntsLogInfo(Wcs::c_started);
         } else {
-            throw Failure(Wcs::c_startingFailed);
+            throw Failure(Wcs::c_startingFailed); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -299,19 +299,19 @@ namespace Service {
 
         manager = ::OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
         if (!manager) {
-            throw Failure(System::explainError(L"OpenSCManagerW(...)"));
+            throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         service
             = ::OpenServiceW(manager, c_systemName, SERVICE_STOP | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS);
 
         if (!service) {
-            throw Failure(System::explainError(L"OpenServiceW(...)"));
+            throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
         }
 
         queryServiceStatus(service, status);
         if (status.dwCurrentState == SERVICE_STOPPED) {
-            throw Failure(Wcs::c_alreadyStopped);
+            throw Failure(Wcs::c_alreadyStopped); // NOLINT(*-exception-baseclass)
         }
 
         if (status.dwCurrentState == SERVICE_STOP_PENDING) {
@@ -324,7 +324,7 @@ namespace Service {
                     break;
                 }
                 if (::GetTickCount() - startTime > c_stoppingTimeout) {
-                    throw Failure(Wcs::c_stoppingTimeout);
+                    throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
                 }
             } while (status.dwCurrentState == SERVICE_STOP_PENDING);
         } else {
@@ -334,7 +334,7 @@ namespace Service {
             //  https://learn.microsoft.com/en-us/windows/win32/services/svccontrol-cpp
 
             if (!::ControlService(service, SERVICE_CONTROL_STOP, (LPSERVICE_STATUS) &status)) {
-                throw Failure(System::explainError(L"ControlService(...)"));
+                throw Failure(System::explainError(L"ControlService(...)")); // NOLINT(*-exception-baseclass)
             }
 
             while (status.dwCurrentState != SERVICE_STOPPED) {
@@ -345,7 +345,7 @@ namespace Service {
                     break;
                 }
                 if (::GetTickCount() - startTime > c_stoppingTimeout) {
-                    throw Failure(Wcs::c_stoppingTimeout);
+                    throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
                 }
             }
         }
@@ -353,7 +353,7 @@ namespace Service {
         // if (status.dwCurrentState == SERVICE_STOPPED) {
             ntsLogInfo(Wcs::c_stopped);
         // } else {
-        //     throw Failure(Wcs::c_stoppingFailed);
+        //     throw Failure(Wcs::c_stoppingFailed); // NOLINT(*-exception-baseclass)
         // }
     }
 }

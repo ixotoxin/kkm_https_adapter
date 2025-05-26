@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace UnitTests {
-    TEST_CASE("utils", "[isGoodPath]") {
+    TEST_CASE("utils", "[path_check]") {
         REQUIRE(System::isGoodPath("\\temp\\"));
         REQUIRE(System::isGoodPath(L"\\temp\\"));
         REQUIRE(System::isGoodPath("\\temp/file.ext"));

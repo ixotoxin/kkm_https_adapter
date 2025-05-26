@@ -6,9 +6,17 @@
 #include "basic.h"
 #include <stringapiset.h>
 
-namespace Basic {
+namespace Text {
+    namespace Wcs {
+        using Basic::Wcs::c_fallbackErrorMessage;
+    }
+
+    namespace Mbs {
+        using Basic::Mbs::c_fallbackErrorMessage;
+    }
+
     inline bool convert(std::wstring & result, const std::string_view text) noexcept try {
-        if (text.length() < 1) {
+        if (text.empty()) {
             result.clear();
             return true;
         }
@@ -37,7 +45,7 @@ namespace Basic {
     }
 
     inline bool convert(std::string & result, const std::wstring_view text) noexcept try {
-        if (text.length() < 1) {
+        if (text.empty()) {
             result.clear();
             return true;
         }

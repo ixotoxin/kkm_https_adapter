@@ -77,7 +77,7 @@ namespace Server {
                 const auto & [handshakeError] = co_await stream.async_handshake(asio::ssl::stream_base::server);
                 if (handshakeError) {
                     request.m_response.m_status = Http::Status::BadRequest;
-                    throw Failure(handshakeError);
+                    throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
                 }
             }
             { /** Читаем запрос **/
@@ -88,7 +88,7 @@ namespace Server {
 
                 if (headerReadingError) {
                     request.m_response.m_status = Http::Status::BadRequest;
-                    throw Failure(headerReadingError);
+                    throw Failure(headerReadingError); // NOLINT(*-exception-baseclass)
                 } else {
                     Http::Parser parser(request);
                     parser(buffer);
@@ -191,7 +191,7 @@ namespace Server {
             //     failed = true;
             // }
             // if (failed) {
-            //     throw Failure(Wcs::c_osslInitializationFailed);
+            //     throw Failure(Wcs::c_osslInitializationFailed); // NOLINT(*-exception-baseclass)
             // }
             // }}}
 

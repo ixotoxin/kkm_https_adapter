@@ -32,17 +32,17 @@ namespace Basic {
         explicit Failure(
             const std::string_view message,
             std::source_location && location = std::source_location::current()
-        ) : m_message(Basic::convert(message)), m_location(std::forward<std::source_location>(location)) {}
+        ) : m_message(Text::convert(message)), m_location(std::forward<std::source_location>(location)) {}
 
         explicit Failure(
             const std::exception & e,
             std::source_location && location = std::source_location::current()
-        ) : m_message(Basic::convert(e.what())), m_location(std::forward<std::source_location>(location)) {}
+        ) : m_message(Text::convert(e.what())), m_location(std::forward<std::source_location>(location)) {}
 
         explicit Failure(
             const std::error_code & e,
             std::source_location && location = std::source_location::current()
-        ) : m_message(Basic::convert(e.message())), m_location(std::forward<std::source_location>(location)) {}
+        ) : m_message(Text::convert(e.message())), m_location(std::forward<std::source_location>(location)) {}
 
         virtual ~Failure() = default;
 

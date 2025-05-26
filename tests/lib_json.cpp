@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// FIXME: Реализовать полноценное тестирование.
+// TODO: Реализовать полноценное тестирование.
 
 namespace UnitTests {
     nlohmann::json null_j;
@@ -18,7 +18,7 @@ namespace UnitTests {
     nlohmann::json str2_j("-123");
 
     nlohmann::json obj_j(
-        "{\"null\": null, \"bool\": true, \"int\": -123, \"dbl\": -123.000, \"str1\": \"yes\", \"str2\": -123}"_json
+        R"({"null": null, "bool": true, "int": -123, "dbl": -123.000, "str1": "yes", "str2": -123})"_json
     );
 
     TEST_CASE("json", "[cast]") {
@@ -45,42 +45,77 @@ namespace UnitTests {
 
     TEST_CASE("json", "[handle]") {
         bool bool_v { false };
-
         REQUIRE(
             Json::handle(
                 bool_j,
-                [& bool_v] (nlohmann::json v, std::wstring) {
-                    bool_v = Json::cast<bool>(bool_j);
+                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
+                    bool_v = Json::cast<bool>(v);
                     return true;
                 }
             )
         );
         REQUIRE(bool_v);
+
+        int int_v { 456 };
+        REQUIRE(
+            Json::handle(
+                int_j,
+                [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                    int_v = Json::cast<int>(v);
+                    return true;
+                }
+            )
+        );
+        REQUIRE(int_v == -123);
     }
 
-    TEST_CASE("json", "[handleKey]") {
+    TEST_CASE("json", "[handle_key]") {
         bool bool_v { false };
-
         REQUIRE_FALSE(
             Json::handleKey(
                 obj_j,
                 "--bool",
-                [& bool_v] (nlohmann::json v, std::wstring) {
-                    bool_v = Json::cast<bool>(bool_j);
+                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
+                    bool_v = Json::cast<bool>(v);
                     return true;
                 }
             )
         );
+        REQUIRE_FALSE(bool_v);
         REQUIRE(
             Json::handleKey(
                 obj_j,
                 "bool",
-                [& bool_v] (nlohmann::json v, std::wstring) {
-                    bool_v = Json::cast<bool>(bool_j);
+                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
+                    bool_v = Json::cast<bool>(v);
                     return true;
                 }
             )
         );
         REQUIRE(bool_v);
+
+        int int_v { 456 };
+        REQUIRE_FALSE(
+            Json::handleKey(
+                obj_j,
+                "--int",
+                [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                    int_v = Json::cast<int>(v);
+                    return true;
+                }
+            )
+        );
+        REQUIRE(int_v == 456);
+        REQUIRE(
+            Json::handleKey(
+                obj_j,
+                "int",
+                [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                    int_v = Json::cast<int>(v);
+                    return true;
+                }
+            )
+        );
+        REQUIRE(int_v == -123);
     }
 }

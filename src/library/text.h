@@ -233,7 +233,6 @@ namespace Text {
     }
 
     using Basic::DataError;
-    using Basic::convert;
 
     template<Meta::Char T>
     [[nodiscard, maybe_unused]]
@@ -276,47 +275,7 @@ namespace Text {
     }
 
     template<Meta::Char T>
-    [[nodiscard, maybe_unused]]
-    inline T * chomp(T * text) {
-        if (text && *text) {
-            while (Meta::TextTrait<T>::chompPredicate(*text)) { ++text; }
-            if (*text) {
-                auto end = text + Meta::TextTrait<T>::length(text) - 1;
-                while (Meta::TextTrait<T>::chompPredicate(*end)) { --end; }
-                end[1] = Meta::TextTrait<T>::c_terminator;
-            }
-        }
-        return text;
-    }
-
-    template<Meta::String T>
     [[maybe_unused]]
-    inline void chomp(T & text) {
-        text.erase(text.begin(), std::find_if(text.begin(), text.end(), Meta::TextTrait<T>::noChompPredicate));
-        text.erase(std::find_if(text.rbegin(), text.rend(), Meta::TextTrait<T>::noChompPredicate).base(), text.end());
-    }
-
-    template<Meta::View T>
-    [[nodiscard, maybe_unused]]
-    inline Meta::TextTrait<T>::String chomped(const T text) {
-        auto end = std::find_if(text.rbegin(), text.rend(), Meta::TextTrait<T>::noChompPredicate).base();
-        return { std::find_if(text.begin(), end, Meta::TextTrait<T>::noChompPredicate), end };
-    }
-
-    template<Meta::Char T>
-    [[nodiscard, maybe_unused]]
-    inline auto chomped(const T * text) {
-        return chomped<typename Meta::TextTrait<T>::View>(text);
-    }
-
-    template<Meta::String T>
-    [[nodiscard, maybe_unused]]
-    inline auto chomped(const T & text) {
-        return chomped<typename Meta::TextTrait<T>::View>(text);
-    }
-
-    template<Meta::Char T>
-    [[nodiscard, maybe_unused]]
     inline T * lower(T * text) {
         if (*text) {
             std::transform(text, text + Meta::TextTrait<T>::length(text) - 1, text, Meta::TextTrait<T>::toLower);
@@ -355,7 +314,7 @@ namespace Text {
     inline T cast(const U text) {
         using Txt = Meta::TextTrait<U>;
         if (text.empty()) {
-            throw DataError(Wcs::c_invalidValue);
+            throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
         }
         typename Txt::String lcText(text.length(), Txt::c_terminator);
         std::transform(text.begin(), text.end(), lcText.begin(), Txt::toLower);
@@ -364,7 +323,7 @@ namespace Text {
         } else if (Txt::c_falseValueStrings.contains(lcText)) {
             return false;
         }
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::Bool T, Meta::Char U>
@@ -386,24 +345,24 @@ namespace Text {
         using Txt = Meta::TextTrait<U>;
         if constexpr (std::is_signed_v<T>) {
             if (Txt::length(text) == 0) {
-                throw DataError(Wcs::c_invalidValue);
+                throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
             }
         } else {
             if (Txt::length(text) == 0 || Txt::contains(text, Txt::c_minus)) {
-                throw DataError(Wcs::c_invalidValue);
+                throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
             }
         }
         typename Txt::Char * end {};
         typename Num::CastType value = Txt::template toNumeric<typename Num::CastType>(text, &end);
         if (end == text || *end) {
-            throw DataError(Wcs::c_invalidValue);
+            throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
         }
         if constexpr (sizeof(T) != sizeof(typename Num::CastType)) {
             if (
                 value < static_cast<typename Num::CastType>(std::numeric_limits<T>::min())
                 || value > static_cast<typename Num::CastType>(std::numeric_limits<T>::max())
             ) {
-                throw DataError(Wcs::c_invalidValue);
+                throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
             }
         }
         return static_cast<T>(value);
@@ -414,12 +373,12 @@ namespace Text {
     inline T cast(const U * text) {
         using Txt = Meta::TextTrait<U>;
         if (Txt::length(text) == 0) {
-            throw DataError(Wcs::c_invalidValue);
+            throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
         }
         typename Txt::Char * end {};
         T value = Txt::template toNumeric<T>(text, &end);
         if (end == text || *end) {
-            throw DataError(Wcs::c_invalidValue);
+            throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
         }
         return value;
     }
@@ -479,7 +438,7 @@ namespace Text {
         return
             [] (const T & value) -> T {
                 if (value.empty()) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
@@ -492,7 +451,7 @@ namespace Text {
             [subFilter] (const T & value) -> T {
                 auto filtered { subFilter(value) };
                 if (filtered.empty()) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
@@ -504,7 +463,7 @@ namespace Text {
         return
             [min, max] (const T & value) -> T {
                 if ((min && value.length() < min) || (max && value.length() > max)) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
@@ -517,7 +476,7 @@ namespace Text {
             [min, max, subFilter] (const T & value) -> T {
                 auto filtered { subFilter(value) };
                 if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
-                    throw DataError(Wcs::c_rangeError);
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
@@ -531,10 +490,10 @@ namespace Text {
         const typename Meta::TextTrait<typename T::value_type>::View delims,
         bool clear = false
     ) {
-        if (clear) {
+        if (clear && !receiver.empty()) {
             receiver.clear();
         }
-        if (text.empty()) {
+        if (text.empty() || delims.empty()) {
             return 0;
         }
         auto first = text.find_first_not_of(delims);
@@ -563,11 +522,15 @@ namespace Text {
     ) {
         name.clear();
         value.clear();
-        if (text.empty()) {
+        if (text.empty() || separator.empty()) {
             return;
         }
         auto position = text.find_first_of(separator);
         if (position == T::npos) {
+            name.assign(trimmed(text));
+            if (lowerName) {
+                lower(name);
+            }
             return;
         }
         name.assign(text, 0, position);
@@ -592,14 +555,16 @@ namespace Text {
         const typename Meta::TextTrait<typename T::value_type>::View glue,
         bool clear = false
     ) {
-        if (clear) {
+        if (clear && !receiver.empty()) {
             receiver.clear();
         }
         for (const auto & str : container) {
-            if (!receiver.empty()) {
-                receiver.append(glue);
+            if (!str.empty()) {
+                if (!receiver.empty()) {
+                    receiver.append(glue);
+                }
+                receiver.append(str);
             }
-            receiver.append(str);
         }
         return receiver.length();
     }
@@ -712,7 +677,7 @@ namespace Text {
             return
                 [] (const std::wstring & value) -> std::wstring {
                     if (value.empty()) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
                 };
@@ -724,7 +689,7 @@ namespace Text {
                 [subFilter] (const std::wstring & value) -> std::wstring {
                     auto filtered { subFilter(value) };
                     if (filtered.empty()) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;
                 };
@@ -735,7 +700,7 @@ namespace Text {
             return
                 [min, max] (const std::wstring & value) -> std::wstring {
                     if ((min && value.length() < min) || (max && value.length() > max)) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
                 };
@@ -748,7 +713,7 @@ namespace Text {
                 [min, max, subFilter] (const std::wstring & value) -> std::wstring {
                     auto filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;
                 };
@@ -802,7 +767,7 @@ namespace Text {
             return
                 [] (const std::string & value) -> std::string {
                     if (value.empty()) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
                 };
@@ -814,7 +779,7 @@ namespace Text {
                 [subFilter] (const std::string & value) -> std::string {
                     auto filtered { subFilter(value) };
                     if (filtered.empty()) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;
                 };
@@ -825,7 +790,7 @@ namespace Text {
             return
                 [min, max] (const std::string & value) -> std::string {
                     if ((min && value.length() < min) || (max && value.length() > max)) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
                 };
@@ -838,7 +803,7 @@ namespace Text {
                 [min, max, subFilter] (const std::string & value) -> std::string {
                     auto filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
-                        throw DataError(Wcs::c_rangeError);
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;
                 };

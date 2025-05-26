@@ -33,15 +33,15 @@ namespace Json {
         } else if (json.is_number()) {
             return static_cast<T>(json.get<int64_t>());
         }
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e));
+        throw DataError(std::move(e)); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e);
+        throw DataError(e); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::Numeric T>
@@ -54,15 +54,15 @@ namespace Json {
         } else if (json.is_boolean()) {
             return static_cast<T>(json.get<bool>());
         }
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e));
+        throw DataError(std::move(e)); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e);
+        throw DataError(e); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::FloatingPoint T>
@@ -75,15 +75,15 @@ namespace Json {
         } else if (json.is_boolean()) {
             return static_cast<T>(json.get<bool>());
         }
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e));
+        throw DataError(std::move(e)); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e);
+        throw DataError(e); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::String T>
@@ -104,15 +104,15 @@ namespace Json {
             // auto value = Numeric::boolCast<typename Meta::TextTrait<T>::View, Meta::YesNo>(json.get<bool>());
             return { value.begin(), value.end() };
         }
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e));
+        throw DataError(std::move(e)); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e);
+        throw DataError(e); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue);
+        throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     }
 
     [[maybe_unused]]
@@ -129,11 +129,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     [[maybe_unused]]
@@ -159,11 +159,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -183,11 +183,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -215,11 +215,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -239,11 +239,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -271,11 +271,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T, Meta::EnumCastMap<T> U>
@@ -294,7 +294,7 @@ namespace Json {
         Text::lower(text);
         auto it = castMap.find(text);
         if (it == castMap.end()) {
-            throw DataError(Wcs::c_rangeError, jsonPath);
+            throw DataError(Wcs::c_rangeError, jsonPath); // NOLINT(*-exception-baseclass)
         }
         variable = it->second;
         return true;
@@ -302,11 +302,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -334,11 +334,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -363,11 +363,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -396,11 +396,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T, Meta::EnumDomain<T> U>
@@ -428,11 +428,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -460,11 +460,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -489,11 +489,11 @@ namespace Json {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<typename T>
@@ -522,11 +522,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::BackSideGrowingRange T>
@@ -544,16 +544,16 @@ namespace Json {
         } else if (json.is_null()) {
             return false;
         }
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     [[maybe_unused]]
@@ -579,11 +579,11 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::BackSideGrowingRange T>
@@ -602,16 +602,16 @@ namespace Json {
         } else if (json.is_null()) {
             return false;
         }
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
     } catch (Failure & e) {
-        throw DataError(std::move(e), jsonPath);
+        throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
-        throw DataError(e, jsonPath);
+        throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
     } catch (...) {
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 
     template<Meta::BackSideGrowingRange T>
@@ -638,10 +638,10 @@ namespace Json {
             e.variable(jsonPath);
             throw;
         } catch (Failure & e) {
-            throw DataError(std::move(e), jsonPath);
+            throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
         } catch (const std::exception & e) {
-            throw DataError(e, jsonPath);
+            throw DataError(e, jsonPath); // NOLINT(*-exception-baseclass)
         } catch (...) {}
-        throw DataError(Wcs::c_invalidValue, jsonPath);
+        throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
     }
 }
