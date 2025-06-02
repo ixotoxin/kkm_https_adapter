@@ -278,7 +278,7 @@ namespace Text {
     [[maybe_unused]]
     inline T * lower(T * text) {
         if (*text) {
-            std::transform(text, text + Meta::TextTrait<T>::length(text) - 1, text, Meta::TextTrait<T>::toLower);
+            std::transform(text, text + Meta::TextTrait<T>::length(text), text, Meta::TextTrait<T>::toLower);
         }
         return text;
     }
@@ -289,38 +289,36 @@ namespace Text {
         std::transform(text.begin(), text.end(), text.begin(), Meta::TextTrait<T>::toLower);
     }
 
-    template<Meta::View T>
+    template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::TextTrait<T>::String lowered(const T text) {
-        typename Meta::TextTrait<T>::String result(text.length(), Meta::TextTrait<T>::c_terminator);
-        std::transform(text.begin(), text.end(), result.begin(), Meta::TextTrait<T>::toLower);
-        return result;
+    inline T lowered(T text) {
+        std::transform(text.begin(), text.end(), text.begin(), Meta::TextTrait<T>::toLower);
+        return text;
     }
 
     template<Meta::Char T>
     [[nodiscard, maybe_unused]]
     inline auto lowered(const T * text) {
-        return lowered<typename Meta::TextTrait<T>::View>(text);
+        return lowered<typename Meta::TextTrait<T>::String>(text);
     }
 
-    template<Meta::String T>
+    template<Meta::View T>
     [[nodiscard, maybe_unused]]
-    inline auto lowered(const T & text) {
-        return lowered<typename Meta::TextTrait<T>::View>(text);
+    inline auto lowered(T text) {
+        return lowered<typename Meta::TextTrait<T>::String>({ text.data(), text.length() });
     }
 
-    template<Meta::Bool T, Meta::View U>
+    template<Meta::Bool T, Meta::String U>
     [[nodiscard, maybe_unused]]
-    inline T cast(const U text) {
+    inline T cast(U text) {
         using Txt = Meta::TextTrait<U>;
         if (text.empty()) {
             throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
         }
-        typename Txt::String lcText(text.length(), Txt::c_terminator);
-        std::transform(text.begin(), text.end(), lcText.begin(), Txt::toLower);
-        if (Txt::c_trueValueStrings.contains(lcText)) {
+        std::transform(text.begin(), text.end(), text.begin(), Txt::toLower);
+        if (Txt::c_trueValueStrings.contains(text)) {
             return true;
-        } else if (Txt::c_falseValueStrings.contains(lcText)) {
+        } else if (Txt::c_falseValueStrings.contains(text)) {
             return false;
         }
         throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
@@ -329,13 +327,13 @@ namespace Text {
     template<Meta::Bool T, Meta::Char U>
     [[nodiscard, maybe_unused]]
     inline T cast(const U * text) {
-        return cast<T, typename Meta::TextTrait<U>::View>(text);
+        return cast<T, typename Meta::TextTrait<U>::String>(text);
     }
 
-    template<Meta::Bool T, Meta::String U>
+    template<Meta::Bool T, Meta::View U>
     [[nodiscard, maybe_unused]]
-    inline T cast(const U & text) {
-        return cast<T, typename Meta::TextTrait<U>::View>(text);
+    inline T cast(const U text) {
+        return cast<T, typename Meta::TextTrait<U>::String>(text);
     }
 
     template<Meta::Integral T, Meta::Char U>

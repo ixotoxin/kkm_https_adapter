@@ -142,6 +142,11 @@ namespace UnitTests {
                 Text::lower<std::wstring>(t);
                 REQUIRE(lv == t);
             }
+            {
+                std::wstring t { L"Z" };
+                Text::lower<wchar_t>(const_cast<wchar_t *>(t.c_str()));
+                REQUIRE(t == L"z");
+            }
         }
         {
             std::string_view sv {
@@ -171,6 +176,11 @@ namespace UnitTests {
                 std::string t { sv };
                 Text::lower<std::string>(t);
                 REQUIRE(lv == t);
+            }
+            {
+                std::string t { "Z" };
+                Text::lower<char>(const_cast<char *>(t.c_str()));
+                REQUIRE(t == "z");
             }
         }
     }

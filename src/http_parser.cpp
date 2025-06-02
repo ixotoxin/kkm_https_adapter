@@ -27,7 +27,7 @@ namespace Http {
         }
         m_request.m_path.assign(line.data() + pos1, line.data() + pos2);
 
-        Text::splitTo(m_request.m_hint, Text::lowered(std::string_view(line.data(), pos2)), " /\\");
+        Text::splitTo(m_request.m_hint, Text::lowered(std::string(line.c_str(), pos2)), " /\\");
         if (m_request.m_hint.empty()) {
             m_request.m_response.m_status = Status::BadRequest;
             m_reader = &Parser::dummyParser;
