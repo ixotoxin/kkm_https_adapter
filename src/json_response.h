@@ -45,6 +45,10 @@ namespace Http {
         JsonResponse & operator=(const JsonResponse &) = delete;
         JsonResponse & operator=(JsonResponse &&) = delete;
 
+        explicit operator bool() override {
+            return !m_data.empty();
+        }
+
         void render(Asio::StreamBuffer & buffer, Status status) override {
             assert(m_data.is_object());
             if (!m_data.contains("!success") || !m_data["!success"].is_boolean()) {

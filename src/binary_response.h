@@ -29,6 +29,10 @@ namespace Http {
         BinaryResponse & operator=(const BinaryResponse &) = delete;
         BinaryResponse & operator=(BinaryResponse &&) = delete;
 
+        explicit operator bool() override {
+            return m_data && m_size;
+        }
+
         void render(Asio::StreamBuffer & buffer, Status status) override {
             std::ostream output { &buffer };
             if (m_data && m_size) {

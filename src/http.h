@@ -74,6 +74,8 @@ namespace Http {
         ResponseData & operator=(const ResponseData &) = default;
         ResponseData & operator=(ResponseData &&) = default;
 
+        virtual explicit operator bool() = 0;
+
         virtual void render(Asio::StreamBuffer &, Status) = 0;
     };
 
@@ -115,6 +117,10 @@ namespace Http {
     using RequestHeader = std::unordered_map<std::string, std::string>;
 
     struct Request {
+        using SequenceType = int64_t;
+        using IdType = uint16_t;
+        constexpr static SequenceType s_idMask = 0x0fff;
+
         RequestHeader m_header {};
         Response m_response {};
         std::string m_verb {};
@@ -129,7 +135,7 @@ namespace Http {
 
         inline explicit Request(Asio::IpAddress remote)
         : m_remote(std::move(remote)),
-          m_id(static_cast<decltype(m_id)>(s_sequence.fetch_add(DateTime::windows() & 0x0fff))) {};
+          m_id(static_cast<IdType>(s_sequence.fetch_add(DateTime::windows() & s_idMask))) {};
 
         Request(const Request &) = delete;
         Request(Request &&) = delete;
@@ -141,8 +147,13 @@ namespace Http {
         [[nodiscard]]
         inline bool emptyResponse() const {
             return m_response.m_data.index() == 0
-                || (m_response.m_data.index() == 1 && std::get<1>(m_response.m_data).empty())
-                || (m_response.m_data.index() == 2 && !std::get<2>(m_response.m_data));
+                || (m_response.m_data.index() == 1
+                    && std::get<1>(m_response.m_data).empty()
+                   )
+                || (m_response.m_data.index() == 2
+                    && !std::get<2>(m_response.m_data)
+                    /*&& !*std::get<2>(m_response.m_data)*/
+                   );
         }
 
         [[maybe_unused]]
@@ -162,7 +173,7 @@ namespace Http {
         }
 
     private:
-        inline static std::atomic<int64_t> s_sequence { DateTime::windows() & 0xffff };
+        inline static std::atomic<SequenceType> s_sequence { DateTime::windows() & s_idMask };
     };
 
     class RequestHandler {

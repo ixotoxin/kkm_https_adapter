@@ -10,24 +10,24 @@ namespace UnitTests {
     TEST_CASE("wconv", "[convert]") {
         std::wstring wcString;
         std::string mbString;
-        REQUIRE(Text::convert(mbString, L""));
+        REQUIRE(Text::convert(mbString, L""sv));
         REQUIRE(mbString.empty());
-        REQUIRE(Text::convert(wcString, ""));
+        REQUIRE(Text::convert(wcString, ""sv));
         REQUIRE(wcString.empty());
-        REQUIRE(Text::convert(mbString, L"Test string"));
-        REQUIRE(mbString == "Test string");
-        REQUIRE(Text::convert(wcString, "Test string"));
-        REQUIRE(wcString == L"Test string");
-        REQUIRE(Text::convert(mbString, L"Тестовая строка"));
-        REQUIRE(mbString == "Тестовая строка");
-        REQUIRE(Text::convert(wcString, "Тестовая строка"));
-        REQUIRE(wcString == L"Тестовая строка");
+        REQUIRE(Text::convert(mbString, L"Test string"sv));
+        REQUIRE(mbString == "Test string"sv);
+        REQUIRE(Text::convert(wcString, "Test string"sv));
+        REQUIRE(wcString == L"Test string"sv);
+        REQUIRE(Text::convert(mbString, L"Тестовая строка"sv));
+        REQUIRE(mbString == "Тестовая строка"sv);
+        REQUIRE(Text::convert(wcString, "Тестовая строка"sv));
+        REQUIRE(wcString == L"Тестовая строка"sv);
         REQUIRE(Text::convert(L"").empty());
         REQUIRE(Text::convert("").empty());
-        REQUIRE(Text::convert(L"Test string") == "Test string");
-        REQUIRE(Text::convert("Test string") == L"Test string");
-        REQUIRE(Text::convert(L"Тестовая строка") == "Тестовая строка");
-        REQUIRE(Text::convert("Тестовая строка") == L"Тестовая строка");
+        REQUIRE(Text::convert(L"Test string") == "Test string"sv);
+        REQUIRE(Text::convert("Test string") == L"Test string"sv);
+        REQUIRE(Text::convert(L"Тестовая строка") == "Тестовая строка"sv);
+        REQUIRE(Text::convert("Тестовая строка") == L"Тестовая строка"sv);
         std::wstring_view wcString0 {
             L"\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
             L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

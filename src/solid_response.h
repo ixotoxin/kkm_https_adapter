@@ -26,6 +26,10 @@ namespace Http {
         SolidResponse & operator=(const SolidResponse &) = delete;
         SolidResponse & operator=(SolidResponse &&) = delete;
 
+        explicit operator bool() override {
+            return !m_data.empty();
+        }
+
         void render(Asio::StreamBuffer & buffer, Status) override {
             std::ostream output { &buffer };
             output << m_data;
