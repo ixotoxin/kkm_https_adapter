@@ -277,7 +277,7 @@ namespace Text {
     template<Meta::Char T>
     [[maybe_unused]]
     inline T * lower(T * text) {
-        if (*text) {
+        if (text && *text) {
             std::transform(text, text + Meta::TextTrait<T>::length(text), text, Meta::TextTrait<T>::toLower);
         }
         return text;
@@ -414,8 +414,12 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> trim(const Meta::Filter<T> & subFilter) {
-        return [subFilter] (const T & value) -> T { return Text::trimmed(subFilter(value)); };
+    inline Meta::Filter<T> trim(Meta::Filter<T> && subFilter0) {
+        return
+            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            (const T & value) -> T {
+                return Text::trimmed(subFilter(value));
+            };
     }
 
     template<Meta::String T>
@@ -426,8 +430,12 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> lower(const Meta::Filter<T> & subFilter) {
-        return [subFilter] (const T & value) -> T { return Text::lowered(subFilter(value)); };
+    inline Meta::Filter<T> lower(Meta::Filter<T> && subFilter0) {
+        return
+            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            (const T & value) -> T {
+                return Text::lowered(subFilter(value));
+            };
     }
 
     template<Meta::String T>
@@ -444,9 +452,10 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> noEmpty(const Meta::Filter<T> & subFilter) {
+    inline Meta::Filter<T> noEmpty(Meta::Filter<T> && subFilter0) {
         return
-            [subFilter] (const T & value) -> T {
+            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            (const T & value) -> T {
                 auto filtered { subFilter(value) };
                 if (filtered.empty()) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -469,9 +478,10 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> sizeBetween(size_t min, size_t max, const Meta::Filter<T> & subFilter) {
+    inline Meta::Filter<T> sizeBetween(size_t min, size_t max, Meta::Filter<T> && subFilter0) {
         return
-            [min, max, subFilter] (const T & value) -> T {
+            [min, max, subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            (const T & value) -> T {
                 auto filtered { subFilter(value) };
                 if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -627,7 +637,7 @@ namespace Text {
 
     template<Meta::Wideness T>
     [[nodiscard, maybe_unused]]
-    inline /*const*/ typename T::View yesNo(bool value) {
+    inline typename T::View yesNo(bool value) {
         return static_cast<bool>(value)
            ? Meta::BoolLabels<typename T::View, Meta::YesNo>::c_true
            : Meta::BoolLabels<typename T::View, Meta::YesNo>::c_false;
@@ -635,7 +645,7 @@ namespace Text {
 
     template<Meta::Wideness T>
     [[nodiscard, maybe_unused]]
-    inline /*const*/ typename T::View enaDis(bool value) {
+    inline typename T::View enaDis(bool value) {
         return static_cast<bool>(value)
             ? Meta::BoolLabels<typename T::View, Meta::EnaDis>::c_true
             : Meta::BoolLabels<typename T::View, Meta::EnaDis>::c_false;
@@ -643,35 +653,45 @@ namespace Text {
 
     template<Meta::Wideness T>
     [[nodiscard, maybe_unused]]
-    inline /*const*/ typename T::View trueFalse(bool value) {
+    inline typename T::View trueFalse(bool value) {
         return static_cast<bool>(value)
            ? Meta::BoolLabels<typename T::View, Meta::TrueFalse>::c_true
            : Meta::BoolLabels<typename T::View, Meta::TrueFalse>::c_false;
     }
 
     namespace Wcs {
+        using Filter = Meta::Filter<std::wstring>;
+
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> trim() {
+        inline Filter trim() {
             return [] (const std::wstring & value) -> std::wstring { return Text::trimmed(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> trim(const Meta::Filter<std::wstring> & subFilter) {
-            return [subFilter] (const std::wstring & value) -> std::wstring { return Text::trimmed(subFilter(value)); };
+        inline Filter trim(Filter && subFilter0) {
+            return
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::wstring & value) -> std::wstring {
+                    return Text::trimmed(subFilter(value));
+                };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> lower() {
+        inline Filter lower() {
             return [] (const std::wstring & value) -> std::wstring { return Text::lowered(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> lower(const Meta::Filter<std::wstring> & subFilter) {
-            return [subFilter] (const std::wstring & value) -> std::wstring { return Text::lowered(subFilter(value)); };
+        inline Filter lower(Filter && subFilter0) {
+            return
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::wstring & value) -> std::wstring {
+                    return Text::lowered(subFilter(value));
+                };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> noEmpty() {
+        inline Filter noEmpty() {
             return
                 [] (const std::wstring & value) -> std::wstring {
                     if (value.empty()) {
@@ -682,9 +702,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> noEmpty(const Meta::Filter<std::wstring> & subFilter) {
+        inline Filter noEmpty(Filter && subFilter0) {
             return
-                [subFilter] (const std::wstring & value) -> std::wstring {
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::wstring & value) -> std::wstring {
                     auto filtered { subFilter(value) };
                     if (filtered.empty()) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -694,7 +715,7 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring> sizeBetween(size_t min, size_t max) {
+        inline Filter sizeBetween(size_t min, size_t max) {
             return
                 [min, max] (const std::wstring & value) -> std::wstring {
                     if ((min && value.length() < min) || (max && value.length() > max)) {
@@ -705,10 +726,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::wstring>
-        sizeBetween(size_t min, size_t max, const Meta::Filter<std::wstring> & subFilter) {
+        inline Filter sizeBetween(size_t min, size_t max, Filter && subFilter0) {
             return
-                [min, max, subFilter] (const std::wstring & value) -> std::wstring {
+                [min, max, subFilter = std::forward<Filter>(subFilter0)]
+                (const std::wstring & value) -> std::wstring {
                     auto filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -718,21 +739,21 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::wstring_view yesNo(bool value) {
+        inline std::wstring_view yesNo(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::wstring_view, Meta::YesNo>::c_true
                 : Meta::BoolLabels<std::wstring_view, Meta::YesNo>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::wstring_view enaDis(bool value) {
+        inline std::wstring_view enaDis(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::wstring_view, Meta::EnaDis>::c_true
                 : Meta::BoolLabels<std::wstring_view, Meta::EnaDis>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::wstring_view trueFalse(bool value) {
+        inline std::wstring_view trueFalse(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::wstring_view, Meta::TrueFalse>::c_true
                 : Meta::BoolLabels<std::wstring_view, Meta::TrueFalse>::c_false;
@@ -740,28 +761,38 @@ namespace Text {
     }
 
     namespace Mbs {
+        using Filter = Meta::Filter<std::string>;
+
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> trim() {
+        inline Filter trim() {
             return [] (const std::string & value) -> std::string { return Text::trimmed(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> trim(const Meta::Filter<std::string> & subFilter) {
-            return [subFilter] (const std::string & value) -> std::string { return Text::trimmed(subFilter(value)); };
+        inline Filter trim(Filter && subFilter0) {
+            return
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::string & value) -> std::string {
+                    return Text::trimmed(subFilter(value));
+                };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> lower() {
+        inline Filter lower() {
             return [] (const std::string & value) -> std::string { return Text::lowered(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> lower(const Meta::Filter<std::string> & subFilter) {
-            return [subFilter] (const std::string & value) -> std::string { return Text::lowered(subFilter(value)); };
+        inline Filter lower(Filter && subFilter0) {
+            return
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::string & value) -> std::string {
+                    return Text::lowered(subFilter(value));
+                };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> noEmpty() {
+        inline Filter noEmpty() {
             return
                 [] (const std::string & value) -> std::string {
                     if (value.empty()) {
@@ -772,9 +803,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> noEmpty(const Meta::Filter<std::string> & subFilter) {
+        inline Filter noEmpty(Filter && subFilter0) {
             return
-                [subFilter] (const std::string & value) -> std::string {
+                [subFilter = std::forward<Filter>(subFilter0)]
+                (const std::string & value) -> std::string {
                     auto filtered { subFilter(value) };
                     if (filtered.empty()) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -784,7 +816,7 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string> sizeBetween(size_t min, size_t max) {
+        inline Filter sizeBetween(size_t min, size_t max) {
             return
                 [min, max] (const std::string & value) -> std::string {
                     if ((min && value.length() < min) || (max && value.length() > max)) {
@@ -795,10 +827,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Meta::Filter<std::string>
-        sizeBetween(size_t min, size_t max, const Meta::Filter<std::string> & subFilter) {
+        inline Filter sizeBetween(size_t min, size_t max, Filter && subFilter0) {
             return
-                [min, max, subFilter] (const std::string & value) -> std::string {
+                [min, max, subFilter = std::forward<Filter>(subFilter0)]
+                (const std::string & value) -> std::string {
                     auto filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -808,21 +840,21 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::string_view yesNo(bool value) {
+        inline std::string_view yesNo(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::string_view, Meta::YesNo>::c_true
                 : Meta::BoolLabels<std::string_view, Meta::YesNo>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::string_view enaDis(bool value) {
+        inline std::string_view enaDis(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::string_view, Meta::EnaDis>::c_true
                 : Meta::BoolLabels<std::string_view, Meta::EnaDis>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
-        inline /*const*/ std::string_view trueFalse(bool value) {
+        inline std::string_view trueFalse(bool value) {
             return static_cast<bool>(value)
                 ? Meta::BoolLabels<std::string_view, Meta::TrueFalse>::c_true
                 : Meta::BoolLabels<std::string_view, Meta::TrueFalse>::c_false;

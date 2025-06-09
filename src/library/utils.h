@@ -86,7 +86,7 @@ namespace Deferred {
 
     class Exec {
         std::function<void()> m_func;
-        std::shared_ptr<bool> m_except;
+        bool * m_except;
         bool m_permitted { true };
 
     public:
@@ -95,12 +95,8 @@ namespace Deferred {
         Exec(Exec &&) = delete;
 
         [[maybe_unused]]
-        explicit Exec(std::function<void()> & func, std::shared_ptr<bool> except = nullptr)
-        : m_func(func), m_except(std::move(except)) {}
-
-        [[maybe_unused]]
-        explicit Exec(std::function<void()> && func, std::shared_ptr<bool> except = nullptr)
-        : m_func(std::forward<std::function<void()>>(func)), m_except(std::move(except)) {}
+        explicit Exec(std::function<void()> && func, bool * except = nullptr)
+        : m_func(std::forward<std::function<void()>>(func)), m_except(except) {}
 
         ~Exec() noexcept {
             try {
@@ -121,25 +117,6 @@ namespace Deferred {
                 }
             }
         }
-
-        /*~Exec() noexcept try {
-            if (m_permitted) {
-                m_func();
-            }
-            if (m_except) {
-                *m_except = false;
-            }
-        } catch (...) {
-            if (m_except) {
-                *m_except = true;
-            } else {
-                std::wclog << Wcs::c_somethingWrong << std::endl;
-#ifdef DEBUG
-                __debugbreak();
-#endif
-            }
-            return;
-        }*/
 
         Exec & operator=(const Exec &) = delete;
         Exec & operator=(Exec &&) = delete;
