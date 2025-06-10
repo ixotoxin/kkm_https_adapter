@@ -70,10 +70,17 @@ namespace Server {
     }
 
     asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
-        if (s_requestCounter.fetch_add(1) >= c_maxRequests) {
-            tsLogError(Wcs::c_maximumIsExceeded);
-            --s_requestCounter;
-            co_return;
+        {
+            int64_t requestCounter { s_requestCounter.load() };
+            if (requestCounter < 0) {
+                tsLogError(Wcs::c_somethingWrong);
+                co_return;
+            }
+            if (requestCounter >= s_concurrencyLimit) {
+                tsLogError(Wcs::c_maximumIsExceeded);
+                co_return;
+            }
+            ++s_requestCounter;
         }
 
         Asio::Stream stream { std::forward<decltype(socket)>(socket), sslContext };

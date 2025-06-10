@@ -119,6 +119,12 @@ namespace Config {
                             Numeric::between(Server::c_minPort, Server::c_maxPort),
                             path
                         );
+                        Json::handleKey(
+                            json, "concurrencyLimit",
+                            Server::s_concurrencyLimit,
+                            Numeric::between(Server::c_minConcurrencyLimit, Server::c_maxConcurrencyLimit),
+                            path
+                        );
                         Json::handleKey(json, "enableLegacyTls", Server::s_enableLegacyTls, path);
                         Json::handleKey(json, "securityLevel", Server::s_securityLevel, Numeric::between(0, 5), path);
                         Json::handleKey(

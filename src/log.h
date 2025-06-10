@@ -27,11 +27,11 @@ namespace Log {
 
     enum class Level : int { Debug, Info, Warning, Error };
 
-    constexpr int LEVEL_DEBUG [[maybe_unused]] = static_cast<int>(Level::Debug);
-    constexpr int LEVEL_INFO [[maybe_unused]] = static_cast<int>(Level::Info);
-    constexpr int LEVEL_WARNING [[maybe_unused]] = static_cast<int>(Level::Warning);
-    constexpr int LEVEL_ERROR [[maybe_unused]] = static_cast<int>(Level::Error);
-    constexpr int c_levelNone [[maybe_unused]] = static_cast<int>(Level::Error) + 1;
+    constexpr int LEVEL_DEBUG [[maybe_unused]] { static_cast<int>(Level::Debug) };
+    constexpr int LEVEL_INFO [[maybe_unused]] { static_cast<int>(Level::Info) };
+    constexpr int LEVEL_WARNING [[maybe_unused]] { static_cast<int>(Level::Warning) };
+    constexpr int LEVEL_ERROR [[maybe_unused]] { static_cast<int>(Level::Error) };
+    constexpr int c_levelNone [[maybe_unused]] { static_cast<int>(Level::Error) + 1 };
 
     namespace Console {
         inline int s_level { LEVEL_DEBUG };
