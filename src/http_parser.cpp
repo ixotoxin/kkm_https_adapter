@@ -104,6 +104,8 @@ namespace Http {
                 (this->*m_reader)(input);
             }
             return;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {

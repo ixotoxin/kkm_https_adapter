@@ -85,8 +85,9 @@ namespace Deferred {
     }
 
     class Exec {
+        using Func = std::function<void()>;
+
         std::function<void()> m_func;
-        bool * m_except;
         bool m_permitted { true };
 
     public:
@@ -95,44 +96,21 @@ namespace Deferred {
         Exec(Exec &&) = delete;
 
         [[maybe_unused]]
-        explicit Exec(std::function<void()> && func, bool * except = nullptr)
-        : m_func(std::forward<std::function<void()>>(func)), m_except(except) {}
+        explicit Exec(Func && func)
+        : m_func(std::forward<Func>(func)) {}
 
         ~Exec() noexcept {
-            try {
-                if (m_permitted) {
-                    m_func();
-                }
-                if (m_except) {
-                    *m_except = false;
-                }
-            } catch (...) {
-                if (m_except) {
-                    *m_except = true;
-                } else {
-                    std::wclog << Wcs::c_somethingWrong << std::endl;
-#ifdef DEBUG
-                    __debugbreak();
-#endif
-                }
+            if (m_permitted) {
+                m_func();
             }
         }
 
         Exec & operator=(const Exec &) = delete;
         Exec & operator=(Exec &&) = delete;
 
-        void perform(bool repeatable = false) {
+        void perform(bool repeatable = false) noexcept {
             if (m_permitted) {
-                if (m_except) {
-                    try {
-                        m_func();
-                        *m_except = false;
-                    } catch (...) {
-                        *m_except = true;
-                    }
-                } else {
-                    m_func();
-                }
+                m_func();
                 m_permitted = repeatable;
             }
         }

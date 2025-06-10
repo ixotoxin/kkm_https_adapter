@@ -25,6 +25,8 @@ namespace Http {
             return;
         }
         request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+
+    // TODO: Исправить перехват исключений
     } catch (const Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {

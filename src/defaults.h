@@ -42,6 +42,7 @@ namespace Server {
     constexpr unsigned short c_minPort = 1;
     constexpr unsigned short c_maxPort = 65'535;
     constexpr unsigned short c_defPort = 5'757;
+    constexpr int64_t c_maxRequests = 100;
     constexpr std::string_view c_defCertificateChainFile { "conf\\kkmha.crt" };
     constexpr std::string_view c_defPrivateKeyFile { "conf\\kkmha.key" };
 }

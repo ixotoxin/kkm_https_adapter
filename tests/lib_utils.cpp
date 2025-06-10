@@ -13,13 +13,7 @@ namespace UnitTests {
             Deferred::Exec scopeGuard([&var] () { var = 456; });
             REQUIRE(var == 123);
         }
-        bool except { false };
-        {
-            Deferred::Exec scopeGuard([&var] () { var = 789; throw std::runtime_error("Error"); }, &except);
-            var = 321;
-        }
-        REQUIRE(var == 789);
-        REQUIRE(except);
+        REQUIRE(var == 456);
         char * buffer { nullptr };
         {
             Deferred::LocalFree scopeGuard(buffer);

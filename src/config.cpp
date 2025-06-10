@@ -275,6 +275,8 @@ namespace Config {
                     }*/
                 }
                 return;
+
+            // TODO: Исправить перехват исключений
             } catch (const Failure & e) {
                 ntsLogWarning(e);
             } catch (const std::exception & e) {

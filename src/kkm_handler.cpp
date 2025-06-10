@@ -492,6 +492,8 @@ namespace Kkm {
             request.m_response.m_status = payload.m_status;
             request.m_response.m_data = response;
         }
+
+    // TODO: Исправить перехват исключений
     } catch (Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (std::exception & e) {

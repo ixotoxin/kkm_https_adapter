@@ -197,6 +197,8 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                             connParams.save(serialNumber);
                         }
                         ntsLogInfo(Basic::Wcs::c_connParamsSaved, n, serialNumber);
+
+                    // TODO: Исправить перехват исключений
                     } catch (const Basic::Failure & e) {
                         ntsLogWarning(std::format(Basic::Wcs::c_prefixedText, n, e.explain()));
                     } catch (const std::exception & e) {
@@ -476,6 +478,8 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
         usage(std::wcerr, argv[0]);
 
+
+    // TODO: Исправить перехват исключений
     } catch (const Basic::Failure & e) {
         if (jsonOut) {
             Nln::Json json {{"!success", false }, { "!message", Text::convert(e.explain()) }};

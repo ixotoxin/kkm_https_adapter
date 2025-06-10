@@ -24,6 +24,7 @@ namespace Server {
 
     static std::atomic<bool> s_started { false };
     static std::atomic<bool> s_running { true };
+    static std::atomic<int64_t> s_requestCounter { 0 };
     static std::shared_ptr<Asio::IoContext> s_ioContext { nullptr };
 
     static const std::array<std::shared_ptr<Http::RequestHandler>, 5> s_handlers {
@@ -69,6 +70,12 @@ namespace Server {
     }
 
     asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
+        if (s_requestCounter.fetch_add(1) >= c_maxRequests) {
+            tsLogError(Wcs::c_maximumIsExceeded);
+            --s_requestCounter;
+            co_return;
+        }
+
         Asio::Stream stream { std::forward<decltype(socket)>(socket), sslContext };
         Http::Request request { stream.lowest_layer().remote_endpoint().address() };
 
@@ -150,6 +157,8 @@ namespace Server {
                     tsLogError(writingError);
                 }
             }
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             request.m_response.m_status = Http::Status::InternalServerError;
             tsLogError(e);
@@ -166,7 +175,9 @@ namespace Server {
         } else {
             tsLogError(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
         }
-        co_return; // ???
+
+        --s_requestCounter;
+        co_return;
     }
 
     asio::awaitable<void> listen() {
@@ -251,6 +262,8 @@ namespace Server {
             }
 
             error = false;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -263,6 +276,7 @@ namespace Server {
             tsLogDebug(Wcs::c_stopping);
             s_ioContext->stop();
         }
+
         co_return; // ???
     }
 
@@ -285,6 +299,8 @@ namespace Server {
             co_spawn(*s_ioContext, listen(), asio::detached);
             s_ioContext->run();
             error = false;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -328,6 +344,8 @@ namespace Server {
                 s_ioContext->stop();
             }
             error = false;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {

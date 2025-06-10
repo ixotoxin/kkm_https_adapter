@@ -34,6 +34,8 @@ namespace Json {
             return static_cast<T>(json.get<int64_t>());
         }
         throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
@@ -55,6 +57,8 @@ namespace Json {
             return static_cast<T>(json.get<bool>());
         }
         throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
@@ -76,6 +80,8 @@ namespace Json {
             return static_cast<T>(json.get<bool>());
         }
         throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
@@ -105,6 +111,8 @@ namespace Json {
             return { value.begin(), value.end() };
         }
         throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError &) {
         throw;
     } catch (Failure & e) {
@@ -128,6 +136,8 @@ namespace Json {
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
+
+    // TODO: Исправить перехват исключений
     } catch (Failure & e) {
         throw DataError(std::move(e), jsonPath); // NOLINT(*-exception-baseclass)
     } catch (const std::exception & e) {
@@ -155,6 +165,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -179,6 +191,8 @@ namespace Json {
         }
         variable = cast<T>(json);
         return true;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -211,6 +225,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -235,6 +251,8 @@ namespace Json {
         }
         variable = filter(cast<T>(json));
         return true;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -267,6 +285,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -298,6 +318,8 @@ namespace Json {
         }
         variable = it->second;
         return true;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -330,6 +352,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -359,6 +383,8 @@ namespace Json {
             return true;
         }
         return false;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -392,6 +418,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -424,6 +452,8 @@ namespace Json {
         }
         variable = value;
         return true;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -456,6 +486,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -485,6 +517,8 @@ namespace Json {
             return true;
         }
         return false;
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -518,6 +552,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -545,6 +581,8 @@ namespace Json {
             return false;
         }
         throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -575,6 +613,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;
@@ -603,6 +643,8 @@ namespace Json {
             return false;
         }
         throw DataError(Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
+
+    // TODO: Исправить перехват исключений
     } catch (DataError & e) {
         e.variable(jsonPath);
         throw;
@@ -634,6 +676,8 @@ namespace Json {
             } else if (json.is_null()) {
                 return false;
             }
+
+        // TODO: Исправить перехват исключений
         } catch (DataError & e) {
             e.variable(jsonPath);
             throw;

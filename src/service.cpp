@@ -34,6 +34,8 @@ namespace Service {
             Server::start();
             setServiceStatus(SERVICE_RUNNING);
             error = std::nullopt;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -55,6 +57,8 @@ namespace Service {
             Server::stop();
             setServiceStatus(SERVICE_STOPPED);
             originalState = std::nullopt;
+
+        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
