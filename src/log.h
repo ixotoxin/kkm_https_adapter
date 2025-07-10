@@ -39,7 +39,7 @@ namespace Log {
         inline bool s_outputLevel { c_outputLevel };
 
         [[nodiscard, maybe_unused]] bool ready(Level) noexcept;
-        [[maybe_unused]] void write(Level, const std::wstring_view) noexcept;
+        [[maybe_unused]] void write(Level, std::wstring_view) noexcept;
     }
 
     namespace File {
@@ -49,7 +49,7 @@ namespace Log {
         [[maybe_unused]] bool open() noexcept;
         [[maybe_unused]] void close() noexcept;
         [[nodiscard, maybe_unused]] bool ready(Level) noexcept;
-        [[maybe_unused]] void write(Level, const std::wstring_view) noexcept;
+        [[maybe_unused]] void write(Level, std::wstring_view) noexcept;
     }
 
     namespace EventLog {

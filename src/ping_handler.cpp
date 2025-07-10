@@ -20,13 +20,13 @@ namespace Http {
         if (request.m_response.m_status != Status::Ok) {
             return;
         }
+
         if (request.m_method == Method::Get) {
             request.m_response.m_data = "Pong";
-            return;
+        } else {
+            request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
-        request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
 
-    // TODO: Исправить перехват исключений
     } catch (const Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {

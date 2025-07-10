@@ -36,15 +36,15 @@ namespace Http {
         if (request.m_response.m_status != Status::Ok) {
             return;
         }
+
         if (s_enableStatic && request.m_hint.size() < 2) {
             request.m_response.m_status = Status::MovedTemporarily;
             request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStatic);
             tsLogDebug(Wcs::c_redirectToStatic, request.m_id);
-            return;
+        } else {
+            request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
-        request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
 
-    // TODO: Исправить перехват исключений
     } catch (const Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {

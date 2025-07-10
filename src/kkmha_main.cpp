@@ -188,6 +188,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 for (int i = 2, n = 1; i < argc; ++i, ++n) {
                     try {
                         std::wstring serialNumber;
+
                         {
                             Kkm::Device::NewConnParams connParams { std::wstring { argv[i] }};
                             Kkm::Device kkm { connParams, std::format(Basic::Wcs::c_commandPrefix, n) };
@@ -196,24 +197,21 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                             kkm.printHello();
                             connParams.save(serialNumber);
                         }
-                        ntsLogInfo(Basic::Wcs::c_connParamsSaved, n, serialNumber);
 
-                    // TODO: Исправить перехват исключений
-                    } catch (const Basic::Failure & e) {
+                        ntsLogInfo(Basic::Wcs::c_connParamsSaved, n, serialNumber);
+                    } catch (const Kkm::Failure & e) {
                         ntsLogWarning(std::format(Basic::Wcs::c_prefixedText, n, e.explain()));
-                    } catch (const std::exception & e) {
-                        ntsLogWarning(std::format(Basic::Wcs::c_prefixedText, n, Text::convert(e.what())));
-                    } catch (...) {
-                        ntsLogWarning(std::format(Basic::Wcs::c_prefixedText, n, Kkm::Wcs::c_invalidConnParams));
                     }
                 }
                 return EXIT_SUCCESS;
             }
 
+            jsonOut = true;
+            Log::Console::s_level = Log::c_levelNone;
+
             if (command == L"status" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -221,17 +219,18 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.getStatus(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"full-status" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
+
                     {
                         Kkm::Device::Call::StatusResult result;
                         kkm.getStatus(result);
@@ -288,14 +287,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                         result.exportTo(json);
                     }
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"cash-stat" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -303,14 +302,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.getCashStat(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"demo-print" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -318,14 +317,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printDemo(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"info" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -333,14 +332,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printInfo(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"fn-regs" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -348,14 +347,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printFnRegistrations(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"ofd-status" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -363,14 +362,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printOfdExchangeStatus(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"ofd-test" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -378,14 +377,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printOfdTest(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"shift-reports" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -393,14 +392,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printCloseShiftReports(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"last-document" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -408,14 +407,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.printLastDocument(result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"report-x" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -429,14 +428,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.reportX(details, result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"close-shift" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -450,14 +449,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.closeShift(details, result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"reset-state" && argc == 3) {
-                Log::Console::s_level = Log::c_levelNone;
-                jsonOut = true;
                 Nln::Json json(Nln::EmptyJsonObject);
+
                 {
                     Kkm::Device::KnownConnParams connParams { argv[2] };
                     Kkm::Device kkm { connParams };
@@ -471,6 +470,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     kkm.resetState(details, result);
                     result.exportTo(json);
                 }
+
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
@@ -478,8 +478,6 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
         usage(std::wcerr, argv[0]);
 
-
-    // TODO: Исправить перехват исключений
     } catch (const Basic::Failure & e) {
         if (jsonOut) {
             Nln::Json json {{"!success", false }, { "!message", Text::convert(e.explain()) }};

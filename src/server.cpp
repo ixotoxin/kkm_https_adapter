@@ -22,8 +22,9 @@ namespace Server {
 
     using Basic::Failure;
 
-    static std::atomic<bool> s_started { false };
-    static std::atomic<bool> s_running { true };
+    enum class State { Initial, Starting, Running, Stopping };
+
+    static std::atomic<State> s_state { State::Initial };
     static std::atomic<int64_t> s_requestCounter { 0 };
     static std::shared_ptr<Asio::IoContext> s_ioContext { nullptr };
 
@@ -57,13 +58,12 @@ namespace Server {
         return
             asio::async_compose<CompletionToken, void()>(
                 [& handler, & request] (auto && self) {
-                    std::thread thread(
+                    std::thread{
                         [task = std::move(self), & handler, & request] () mutable {
                             handler(request);
                             task.complete();
                         }
-                    );
-                    thread.detach();
+                    }.detach();
                 },
                 token
             );
@@ -165,7 +165,6 @@ namespace Server {
                 }
             }
 
-        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             request.m_response.m_status = Http::Status::InternalServerError;
             tsLogError(e);
@@ -187,32 +186,12 @@ namespace Server {
         co_return;
     }
 
-    asio::awaitable<void> listen() {
-        bool error = true;
+    asio::awaitable<void> listen() noexcept {
+        assert(s_state.load() == State::Starting);
 
         try {
             auto port = static_cast<asio::ip::port_type>(s_port);
             Asio::Endpoint endpoint(s_ipv4Only ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), port);
-
-            // ISSUE: А есть ли в этом необходимость? {{{
-            // bool failed { false };
-            // defaultProvider = OSSL_PROVIDER_load(nullptr, "default");
-            // if (s_enableLegacyTls) {
-            //     legacyProvider = OSSL_PROVIDER_load(nullptr, "legacy");
-            // }
-            // if (!defaultProvider || !::OSSL_PROVIDER_available(nullptr, "default")) {
-            //     tsLogError(Wcs::c_osslProviderNotLoaded, L"default");
-            //     failed = true;
-            // }
-            // if (s_enableLegacyTls && (!legacyProvider || !::OSSL_PROVIDER_available(nullptr, "legacy"))) {
-            //     tsLogError(Wcs::c_osslProviderNotLoaded, L"legacy");
-            //     failed = true;
-            // }
-            // if (failed) {
-            //     throw Failure(Wcs::c_osslInitializationFailed); // NOLINT(*-exception-baseclass)
-            // }
-            // }}}
-
             Asio::SslContext sslContext(Asio::SslContext::tls_server);
 
             constexpr auto alwaysClear
@@ -221,31 +200,21 @@ namespace Server {
             constexpr auto alwaysSet
                 = Asio::SslContext::default_workarounds | Asio::SslContext::no_sslv2 | Asio::SslContext::no_sslv3;
 
+            constexpr auto noLegacyTls
+                = Asio::SslContext::no_tlsv1 | Asio::SslContext::no_tlsv1_1;
+
             if (s_enableLegacyTls) {
-                sslContext.clear_options(alwaysClear | Asio::SslContext::no_tlsv1 | Asio::SslContext::no_tlsv1_1);
-                sslContext.set_options(alwaysSet);
-                // ISSUE: А есть ли в этом необходимость? {{{
-                ::SSL_CTX_clear_options(
-                    sslContext.native_handle(),
-                    SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 | SSL_OP_NO_TLSv1_2 | SSL_OP_NO_TLSv1_3
-                );
-                ::SSL_CTX_set_options(
-                    sslContext.native_handle(),
-                    SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION | SSL_OP_LEGACY_SERVER_CONNECT
-                    | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3
-                );
-                ::SSL_CTX_set_cipher_list(sslContext.native_handle(), "ALL:COMPLEMENTOFALL");
-                // ::SSL_CTX_set_cipher_list(sslContext.native_handle(), "ALL:COMPLEMENTOFALL:TLSv1.2:TLSv1.0");
-                // ::SSL_CTX_set_cipher_list(sslContext.native_handle(), "ALL:COMPLEMENTOFALL:TLSv1.2:TLSv1.0:SSLv3");
-                // }}}
                 ::SSL_CTX_set_security_level(sslContext.native_handle(), 0);
                 ::SSL_CTX_set_min_proto_version(sslContext.native_handle(), TLS1_VERSION);
+                sslContext.clear_options(alwaysClear | noLegacyTls);
+                sslContext.set_options(alwaysSet);
+                sslContext.set_verify_mode(asio::ssl::verify_none);
             } else {
-                sslContext.clear_options(alwaysClear);
-                sslContext.set_options(alwaysSet | Asio::SslContext::no_tlsv1 | Asio::SslContext::no_tlsv1_1);
                 if (s_securityLevel >= 0) {
                     ::SSL_CTX_set_security_level(sslContext.native_handle(), s_securityLevel);
                 }
+                sslContext.clear_options(alwaysClear);
+                sslContext.set_options(alwaysSet | noLegacyTls);
             }
 
             sslContext.set_password_callback([] (auto, auto) { return s_privateKeyPassword; });
@@ -255,120 +224,101 @@ namespace Server {
             auto executor = co_await asio::this_coro::executor;
             Asio::Acceptor acceptor(executor, endpoint);
 
-            s_started = true;
             tsLogInfo(Wcs::c_started);
+            s_state.store(State::Running);
 
-            while (s_running) {
+            while (s_state == State::Running) {
                 auto [acceptingError, socket] = co_await acceptor.async_accept();
-                if (!acceptingError && socket.is_open()) {
-                    co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
-                } else {
-                    tsLogError(acceptingError);
-                    tsLogError(Wcs::c_servicingFailed);
+                if (s_state == State::Running) {
+                    if (!acceptingError && socket.is_open()) {
+                        co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
+                    } else {
+                        tsLogError(acceptingError);
+                        tsLogError(Wcs::c_servicingFailed);
+                    }
                 }
             }
 
-            error = false;
+            assert(s_state.load() == State::Stopping);
 
-        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
             tsLogError(e);
         } catch (...) {
             tsLogError(Wcs::c_somethingWrong);
-        }
-
-        if (error && s_ioContext) {
-            tsLogDebug(Wcs::c_stopping);
-            s_ioContext->stop();
         }
 
         co_return; // ???
     }
 
-    void run() {
-        bool error = true;
+    inline void logError() noexcept {
+        switch (s_state.load()) {
+            case State::Starting:
+                tsLogError(Wcs::c_startingFailed);
+                break;
+            case State::Stopping:
+                tsLogError(Wcs::c_stoppingFailed);
+                break;
+            default:
+                tsLogError(Wcs::c_servicingFailed);
+        }
+    }
 
-        try {
-            tsLogDebug(Wcs::c_starting);
+    void shutdown() {
+        static_assert(c_stopWaiting > 0);
 
-            s_ioContext = std::make_shared<Asio::IoContext>(1);
+        if (s_state.load() != State::Running || !s_ioContext || s_ioContext->stopped()) {
+            return;
+        }
+
+        tsLogDebug(Wcs::c_stopping);
+
+        std::thread{[] {
+            // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
+            s_state.store(State::Stopping);
+            size_t wait = c_stopWaiting * 5;
+            while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {
+                ::Sleep(200);
+                --wait;
+            }
+            ::Sleep(200);
+            if (s_ioContext && !s_ioContext->stopped()) {
+                s_ioContext->stop();
+            }
+        }}.detach();
+    }
+
+    void run() try {
+        assert(s_state.load() == State::Initial);
+
+        tsLogDebug(Wcs::c_starting);
+        s_state.store(State::Starting);
+        s_ioContext = std::make_shared<Asio::IoContext>(1);
+
+        {
             asio::signal_set signals(*s_ioContext, SIGINT, SIGTERM);
-
-            signals.async_wait(
-                [ioContext = s_ioContext] (auto, auto) {
-                    tsLogDebug(Wcs::c_stopping);
-                    ioContext->stop();
-                }
-            );
-
+            signals.async_wait([] (auto, auto) { shutdown(); });
             co_spawn(*s_ioContext, listen(), asio::detached);
             s_ioContext->run();
-            error = false;
-
-        // TODO: Исправить перехват исключений
-        } catch (const Failure & e) {
-            tsLogError(e);
-        } catch (const std::exception & e) {
-            tsLogError(e);
-        } catch (...) {
-            tsLogError(Wcs::c_somethingWrong);
         }
 
-        if (error) {
-            if (s_started) {
-                tsLogError(Wcs::c_servicingFailed);
-            } else {
-                tsLogError(Wcs::c_startingFailed);
-            }
-        } else {
-            // ISSUE: А есть ли в этом необходимость? {{{
-            // if (legacyProvider) {
-            //     ::OSSL_PROVIDER_unload(legacyProvider);
-            // }
-            // if (defaultProvider) {
-            //     ::OSSL_PROVIDER_unload(defaultProvider);
-            // }
-            // }}}
-            tsLogInfo(Wcs::c_stopped);
-        }
+        s_ioContext.reset();
+        tsLogInfo(Wcs::c_stopped);
+
+    } catch (...) {
+        logError();
+        throw;
     }
 
     void start() {
-        std::thread thread([] { run(); });
-        thread.detach();
+        std::thread{[] { run(); }}.detach();
     }
 
-    void stop() {
-        bool error = true;
-
-        try {
-            tsLogDebug(Wcs::c_stopping);
-            s_running = false;
-            ::Sleep(500);
-            if (s_ioContext) {
-                s_ioContext->stop();
-            }
-            error = false;
-
-        // TODO: Исправить перехват исключений
-        } catch (const Failure & e) {
-            tsLogError(e);
-        } catch (const std::exception & e) {
-            tsLogError(e);
-        } catch (...) {
-            tsLogError(Wcs::c_somethingWrong);
-        }
-
-        if (error) {
-            if (s_started) {
-                tsLogError(Wcs::c_stoppingFailed);
-            } else {
-                tsLogError(Wcs::c_servicingFailed);
-            }
-        } else {
-            tsLogInfo(Wcs::c_stopped);
-        }
+    void stop() try {
+        shutdown();
+    } catch (...) {
+        logError();
+        throw;
     }
 }

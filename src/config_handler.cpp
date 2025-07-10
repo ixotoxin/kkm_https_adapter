@@ -21,6 +21,7 @@ namespace Http {
         if (request.m_response.m_status != Status::Ok) {
             return;
         }
+
         if (request.m_method == Method::Get && request.m_hint.size() == 3 && request.m_hint[2] == "general") {
             auto response = std::make_shared<JsonResponse>();
             response->m_data["cliOperator"] = {
@@ -38,11 +39,10 @@ namespace Http {
             }
             response->m_data["knownDevices"] = serials;
             request.m_response.m_data = response;
-            return;
+        } else {
+            request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
-        request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
 
-    // TODO: Исправить перехват исключений
     } catch (const Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {

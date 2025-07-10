@@ -133,7 +133,6 @@ namespace Http {
             request.m_response.m_data = response;
         }
 
-    // TODO: Исправить перехват исключений
     } catch (const Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {

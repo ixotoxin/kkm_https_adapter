@@ -27,6 +27,4 @@ namespace Http {
     inline std::wstring s_mimeMapFile { c_mimeMapFile };
     inline Nln::Json s_mimeMap(Nln::EmptyJsonObject);
     inline bool s_enableUnknownType { c_enableUnknownType };
-    // inline std::wstring s_headersMapFile { c_headersMapFile };
-    // inline Nln::Json s_headersMap({});
 }

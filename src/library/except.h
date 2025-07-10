@@ -24,21 +24,25 @@ namespace Basic {
         Failure(const Failure &) = default;
         Failure(Failure &&) = default;
 
+        [[maybe_unused]]
         explicit Failure(
             const std::wstring_view message,
             std::source_location && location = std::source_location::current()
         ) : m_message(message.begin(), message.end()), m_location(std::forward<std::source_location>(location)) {}
 
+        [[maybe_unused]]
         explicit Failure(
             const std::string_view message,
             std::source_location && location = std::source_location::current()
         ) : m_message(Text::convert(message)), m_location(std::forward<std::source_location>(location)) {}
 
+        [[maybe_unused]]
         explicit Failure(
             const std::exception & e,
             std::source_location && location = std::source_location::current()
         ) : m_message(Text::convert(e.what())), m_location(std::forward<std::source_location>(location)) {}
 
+        [[maybe_unused]]
         explicit Failure(
             const std::error_code & e,
             std::source_location && location = std::source_location::current()
@@ -77,29 +81,34 @@ namespace Basic {
         DataError(const DataError &) = default;
         DataError(DataError &&) = default;
 
+        [[maybe_unused]]
         explicit DataError(
             Basic::Failure && e,
             const std::wstring_view variable = {}
         ) : Failure(std::forward<Basic::Failure>(e)), m_variable(variable) {}
 
+        [[maybe_unused]]
         explicit DataError(
             const std::wstring_view message,
             const std::wstring_view variable = {},
             std::source_location && location = std::source_location::current()
         ) : Failure(message, std::forward<std::source_location>(location)), m_variable(variable) {}
 
+        [[maybe_unused]]
         explicit DataError(
             const std::string_view message,
             const std::wstring_view variable = {},
             std::source_location && location = std::source_location::current()
         ) : Failure(message, std::forward<std::source_location>(location)), m_variable(variable) {}
 
+        [[maybe_unused]]
         explicit DataError(
             const std::exception & e,
             const std::wstring_view variable = {},
             std::source_location && location = std::source_location::current()
         ) : Failure(e, std::forward<std::source_location>(location)), m_variable(variable) {}
 
+        [[maybe_unused]]
         explicit DataError(
             const std::error_code & e,
             const std::wstring_view variable = {},

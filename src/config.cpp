@@ -146,11 +146,6 @@ namespace Config {
                         if (Http::s_enableStatic) {
                             Json::handleKey(json, "staticDirectory", Http::s_staticDirectory, path);
                             Json::handleKey(json, "mimeMap", Http::s_mimeMapFile, Text::Wcs::noEmpty(), path);
-                            // Json::handleKey(
-                            //     json, "headersMap",
-                            //     Http::s_headersMapFile, Text::noEmpty<std::wstring>(),
-                            //     path
-                            // );
                             Json::handleKey(json, "enableUnknownType", Http::s_enableUnknownType, path);
                         }
                         return true;
@@ -201,17 +196,17 @@ namespace Config {
                 );
                 if (Http::s_enableStatic) {
                     if (!std::filesystem::is_regular_file(Http::s_mimeMapFile)) {
-                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
+                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                     }
                     json.clear();
                     std::ifstream input { Http::s_mimeMapFile };
                     input >> json;
                     if (!json.empty() && !json.is_object()) {
-                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
+                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                     }
                     for (auto & [key, value] : json.items()) {
                         if (!value.is_string()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile.c_str())); // NOLINT(*-exception-baseclass)
+                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                         }
                         auto ext = Text::lowered(key);
                         std::replace_if(ext.begin(), ext.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
@@ -220,69 +215,15 @@ namespace Config {
                         std::replace_if(type.begin(), type.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
                         Text::trim(type);
                         if (ext.empty() || type.empty()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile/*.c_str()*/)); // NOLINT(*-exception-baseclass)
+                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                         }
                         if (ext[0] != '.') {
-                            ext = "."s;
-                            ext += ext;
+                            ext = "."s + ext;
                         }
                         Http::s_mimeMap[ext] = std::move(type);
                     }
-                    /*if (!std::filesystem::is_regular_file(Http::s_headersMapFile)) {
-                        throw Failure(std::format(Wcs::c_cantReadConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
-                    }
-                    json.clear();
-                    std::ifstream input2 { Http::s_headersMapFile };
-                    input2 >> json;
-                    if (!json.empty() && !json.is_object()) {
-                        throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
-                    }
-                    for (auto & [key1, value1] : json.items()) {
-                        if (!value1.is_object()) {
-                            throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
-                        }
-                        auto ext = Text::lowered(key1);
-                        std::replace_if(ext.begin(), ext.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
-                        Text::trim(ext);
-                        Nln::Json item(Nln::EmptyJsonObject);
-                        for (auto & [key2, value2] : value1.items()) {
-                            if (!value2.is_string()) {
-                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
-                            }
-                            auto headerName = Text::lowered(key2);
-                            std::replace_if(
-                                headerName.begin(),
-                                headerName.end(), [] (char c) { return c == 0xa || c == 0xd; },
-                                ' '
-                            );
-                            Text::trim(headerName);
-                            auto headerValue = Text::lowered(value2.get<std::string>());
-                            std::replace_if(
-                                headerValue.begin(),
-                                headerValue.end(),
-                                [] (char c) { return c == 0xa || c == 0xd; },
-                                ' '
-                            );
-                            Text::trim(headerValue);
-                            if (headerName == "+") {
-                                item[headerName] = Text::lowered(headerValue);
-                            } else {
-                                item[headerName] = headerValue;
-                            }
-                        }
-                        Http::s_headersMap[ext] = std::move(item);
-                    }
-                    for (auto & [key, value] : Http::s_headersMap.items()) {
-                        for (auto & [key2, value2] : value.items()) {
-                            if (key2 == "+" && !Http::s_headersMap.contains(value2)) {
-                                throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_headersMapFile.c_str())); // NOLINT(*-exception-baseclass)
-                            }
-                        }
-                    }*/
                 }
-                return;
-
-            // TODO: Исправить перехват исключений
+                return; /** Не удаляй, смотри дальше. **/
             } catch (const Failure & e) {
                 ntsLogWarning(e);
             } catch (const std::exception & e) {

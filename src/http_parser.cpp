@@ -103,9 +103,7 @@ namespace Http {
             while (input.good()) {
                 (this->*m_reader)(input);
             }
-            return;
-
-        // TODO: Исправить перехват исключений
+            return; /** Не удаляй, смотри дальше. **/
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {

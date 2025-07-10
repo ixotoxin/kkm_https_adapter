@@ -119,23 +119,23 @@ namespace Http {
     struct Request {
         using SequenceType = int64_t;
         using IdType = uint16_t;
-        constexpr static SequenceType s_idMask = 0x0fff;
+        constexpr static SequenceType s_idMask = 0xfff;
 
         RequestHeader m_header {};
         Response m_response {};
         std::string m_verb {};
         std::string m_path {};
         std::string m_body {};
-        Asio::IpAddress m_remote {};
+        Asio::IpAddress m_remote;
         std::vector<std::string> m_hint {};
         Method m_method { Method::NotImplemented };
-        const uint16_t m_id;
+        const IdType m_id;
 
         Request() = delete;
 
         inline explicit Request(Asio::IpAddress remote)
         : m_remote(std::move(remote)),
-          m_id(static_cast<IdType>(s_sequence.fetch_add(DateTime::windows() & s_idMask))) {};
+          m_id(static_cast<IdType>(s_sequence.fetch_add(1 + (DateTime::windows() & s_idMask)))) {};
 
         Request(const Request &) = delete;
         Request(Request &&) = delete;
@@ -147,12 +147,14 @@ namespace Http {
         [[nodiscard]]
         inline bool emptyResponse() const {
             return m_response.m_data.index() == 0
-                || (m_response.m_data.index() == 1
-                    && std::get<1>(m_response.m_data).empty()
+                || (
+                        m_response.m_data.index() == 1
+                        && std::get<1>(m_response.m_data).empty()
                    )
-                || (m_response.m_data.index() == 2
-                    && !std::get<2>(m_response.m_data)
-                    /*&& !*std::get<2>(m_response.m_data)*/
+                || (
+                        m_response.m_data.index() == 2
+                        && !std::get<2>(m_response.m_data)
+                        /*&& !*std::get<2>(m_response.m_data)*/
                    );
         }
 
@@ -173,7 +175,7 @@ namespace Http {
         }
 
     private:
-        inline static std::atomic<SequenceType> s_sequence { DateTime::windows() & s_idMask };
+        inline static std::atomic<SequenceType> s_sequence { 1 + (DateTime::windows() & s_idMask) };
     };
 
     class RequestHandler {

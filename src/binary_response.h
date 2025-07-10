@@ -44,7 +44,7 @@ namespace Http {
                         m_mimeType,
                         m_size
                     );
-                output.write(m_data.get(), m_size);
+                output.write(m_data.get(), static_cast<std::streamsize>(m_size));
             } else {
                 output
                     << std::format(

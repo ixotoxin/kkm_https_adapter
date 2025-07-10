@@ -216,6 +216,7 @@ namespace Kkm {
         auto connParams { resolveConnParams(payload) };
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
+
             {
                 Call::StatusResult result;
                 kkm.getStatus(result);
@@ -442,12 +443,15 @@ namespace Kkm {
             cacheKey.append("::::");
             cacheKey.append(idempotencyKey);
         }
-        auto cacheEntry = Cache::load(cacheKey);
-        if (cacheEntry) {
-            request.m_response.m_status = cacheEntry->m_status;
-            request.m_response.m_data = cacheEntry->m_data;
-            tsLogDebug(Wcs::c_fromCache, request.m_id);
-            return;
+
+        if (!cacheKey.empty()) {
+            auto cacheEntry = Cache::load(cacheKey);
+            if (cacheEntry) {
+                request.m_response.m_status = cacheEntry->m_status;
+                request.m_response.m_data = cacheEntry->m_data;
+                tsLogDebug(Wcs::c_fromCache, request.m_id);
+                return;
+            }
         }
 
         std::string handlerKey, serialNumber;
@@ -487,13 +491,13 @@ namespace Kkm {
         if (!cacheKey.empty()) {
             Cache::store(cacheKey, Cache::expiresAt(payload.m_expireIn), payload.m_status, response);
         }
+
         assert(request.m_response.m_status == Status::Ok);
         if (request.m_response.m_status == Status::Ok) {
             request.m_response.m_status = payload.m_status;
             request.m_response.m_data = response;
         }
 
-    // TODO: Исправить перехват исключений
     } catch (Failure & e) {
         request.fail(Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (std::exception & e) {

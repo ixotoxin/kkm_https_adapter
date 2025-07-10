@@ -237,12 +237,13 @@ namespace Text {
     template<Meta::Char T>
     [[nodiscard, maybe_unused]]
     inline T * trim(T * text) {
+        using Trait = Meta::TextTrait<T>;
         if (text && *text) {
-            while (Meta::TextTrait<T>::trimPredicate(*text)) { ++text; }
+            while (Trait::trimPredicate(*text)) { ++text; }
             if (*text) {
-                auto end = text + Meta::TextTrait<T>::length(text) - 1;
-                while (Meta::TextTrait<T>::trimPredicate(*end)) { --end; }
-                end[1] = Meta::TextTrait<T>::c_terminator;
+                auto end = text + Trait::length(text) - 1;
+                while (Trait::trimPredicate(*end)) { --end; }
+                end[1] = Trait::c_terminator;
             }
         }
         return text;
@@ -251,15 +252,17 @@ namespace Text {
     template<Meta::String T>
     [[maybe_unused]]
     inline void trim(T & text) {
-        text.erase(text.begin(), std::find_if(text.begin(), text.end(), Meta::TextTrait<T>::noTrimPredicate));
-        text.erase(std::find_if(text.rbegin(), text.rend(), Meta::TextTrait<T>::noTrimPredicate).base(), text.end());
+        using Trait = Meta::TextTrait<T>;
+        text.erase(text.begin(), std::find_if(text.begin(), text.end(), Trait::noTrimPredicate));
+        text.erase(std::find_if(text.rbegin(), text.rend(), Trait::noTrimPredicate).base(), text.end());
     }
 
     template<Meta::View T>
     [[nodiscard, maybe_unused]]
     inline Meta::TextTrait<T>::String trimmed(const T text) {
-        auto end = std::find_if(text.rbegin(), text.rend(), Meta::TextTrait<T>::noTrimPredicate).base();
-        return { std::find_if(text.begin(), end, Meta::TextTrait<T>::noTrimPredicate), end };
+        using Trait = Meta::TextTrait<T>;
+        auto end = std::find_if(text.rbegin(), text.rend(), Trait::noTrimPredicate).base();
+        return { std::find_if(text.begin(), end, Trait::noTrimPredicate), end };
     }
 
     template<Meta::Char T>
@@ -277,8 +280,9 @@ namespace Text {
     template<Meta::Char T>
     [[maybe_unused]]
     inline T * lower(T * text) {
+        using Trait = Meta::TextTrait<T>;
         if (text && *text) {
-            std::transform(text, text + Meta::TextTrait<T>::length(text), text, Meta::TextTrait<T>::toLower);
+            std::transform(text, text + Trait::length(text), text, Trait::toLower);
         }
         return text;
     }

@@ -18,7 +18,7 @@ namespace Service {
     static ::SERVICE_STATUS_HANDLE s_statusHandle { nullptr };
     static DWORD s_checkPoint { 1 };
 
-    void setServiceStatus(DWORD state, DWORD win32ExitCode = NO_ERROR) {
+    void setServiceStatus(DWORD state, DWORD win32ExitCode = NO_ERROR) noexcept {
         s_status.dwCurrentState = state;
         s_status.dwWin32ExitCode = win32ExitCode;
         s_status.dwWaitHint = 0;
@@ -26,7 +26,7 @@ namespace Service {
         ::SetServiceStatus(s_statusHandle, &s_status);
     }
 
-    void startWorker() {
+    void startWorker() noexcept {
         std::optional<DWORD> error = NO_ERROR;
 
         try {
@@ -34,8 +34,6 @@ namespace Service {
             Server::start();
             setServiceStatus(SERVICE_RUNNING);
             error = std::nullopt;
-
-        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -49,7 +47,7 @@ namespace Service {
         }
     }
 
-    void stopWorker() {
+    void stopWorker() noexcept {
         std::optional<DWORD> originalState = s_status.dwCurrentState;
 
         try {
@@ -57,8 +55,6 @@ namespace Service {
             Server::stop();
             setServiceStatus(SERVICE_STOPPED);
             originalState = std::nullopt;
-
-        // TODO: Исправить перехват исключений
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -72,18 +68,19 @@ namespace Service {
         }
     }
 
-    void WINAPI controlHandler(DWORD ctrl) {
+    void WINAPI controlHandler(DWORD ctrl) noexcept {
         if (ctrl == SERVICE_CONTROL_STOP) {
             stopWorker();
         }
     }
 
-    void WINAPI mainFunc(DWORD, PWSTR *) {
+    void WINAPI mainFunc(DWORD, PWSTR *) noexcept {
         s_statusHandle = ::RegisterServiceCtrlHandlerW(c_systemName, controlHandler);
-        if (!s_statusHandle) {
-            throw Failure(System::explainError()); // NOLINT(*-exception-baseclass)
+        if (s_statusHandle) {
+            startWorker();
+        } else {
+            tsLogError(System::explainError());
         }
-        startWorker();
     }
 
     void run() {
@@ -333,9 +330,9 @@ namespace Service {
             } while (status.dwCurrentState == SERVICE_STOP_PENDING);
         } else {
             // ISSUE: Возможно стоит реализовать остановку зависимых служб, вдруг что-нибудь захочет позависеть.
-            //  Тогда нам сюда
-            //  https://learn.microsoft.com/en-us/windows/win32/services/service-control-program-tasks
-            //  https://learn.microsoft.com/en-us/windows/win32/services/svccontrol-cpp
+            //  Тогда нам сюда:
+            //      https://learn.microsoft.com/en-us/windows/win32/services/service-control-program-tasks
+            //      https://learn.microsoft.com/en-us/windows/win32/services/svccontrol-cpp
 
             if (!::ControlService(service, SERVICE_CONTROL_STOP, (LPSERVICE_STATUS) &status)) {
                 throw Failure(System::explainError(L"ControlService(...)")); // NOLINT(*-exception-baseclass)

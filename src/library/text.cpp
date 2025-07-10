@@ -18,7 +18,8 @@ bool Meta::Wcs::noTrimPredicate(wchar_t c) {
 
 [[nodiscard, maybe_unused]]
 wchar_t Meta::Wcs::toLower(wchar_t c) {
-    return static_cast<wchar_t>(std::towlower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    return static_cast<wchar_t>(std::towlower(c));
 }
 
 [[nodiscard, maybe_unused]]
@@ -37,5 +38,6 @@ bool Meta::Mbs::noTrimPredicate(unsigned char c) {
 
 [[nodiscard, maybe_unused]]
 char Meta::Mbs::toLower(unsigned char c) {
-    return static_cast<Char>(std::tolower(c)); // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    // ISSUE: Не совсем корректный способ, но для данного проекта достаточен.
+    return static_cast<Char>(std::tolower(c));
 }
