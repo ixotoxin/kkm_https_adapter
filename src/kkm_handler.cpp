@@ -34,7 +34,7 @@ namespace Kkm {
         const std::string m_serialNumber;
         const Nln::Json m_details;
         Nln::Json m_result;
-        TimeOffsetValue m_expireIn;
+        TimeOffsetValue m_expiresAfter;
         Status m_status { Status::Ok };
         const Id m_requestId;
 
@@ -44,10 +44,10 @@ namespace Kkm {
             std::string && serialNumber,
             Nln::Json && details,
             const Id requestId,
-            const TimeOffsetValue expireIn = 0
+            const TimeOffsetValue expiresAfter = 0
         ) : m_serialNumber(std::forward<std::string>(serialNumber)),
             m_details(std::forward<Nln::Json>(details)), m_result(Nln::EmptyJsonObject),
-            m_expireIn(expireIn), m_requestId(requestId) {
+            m_expiresAfter(expiresAfter), m_requestId(requestId) {
             assert(m_details.is_object());
             assert(m_result.is_object());
         }
@@ -199,13 +199,13 @@ namespace Kkm {
         if (!s_connParamsRegistry.empty()) {
             payload.fail(Status::InternalServerError, Mbs::c_cantClearRegistry);
         }
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void status(Payload & payload) {
         MEMORY_LEAK;
         methodCall<Call::StatusResult>(&Device::getStatus, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void fullStatus(Payload & payload) {
@@ -273,52 +273,52 @@ namespace Kkm {
                 result.exportTo(payload.m_result);
             }
         }
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printDemo(Payload & payload) {
         methodCall<Call::Result>(&Device::printDemo, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printNonFiscalDocument(Payload & payload) {
         methodCall<Call::PrintDetails>(&Device::printNonFiscalDocument, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printInfo(Payload & payload) {
         methodCall<Call::Result>(&Device::printInfo, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printFnRegistrations(Payload & payload) {
         methodCall<Call::Result>(&Device::printFnRegistrations, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printOfdExchangeStatus(Payload & payload) {
         methodCall<Call::Result>(&Device::printOfdExchangeStatus, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printOfdTest(Payload & payload) {
         methodCall<Call::Result>(&Device::printOfdTest, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printCloseShiftReports(Payload & payload) {
         methodCall<Call::Result>(&Device::printCloseShiftReports, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printLastDocument(Payload & payload) {
         methodCall<Call::Result>(&Device::printLastDocument, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void cashStat(Payload & payload) {
         methodCall<Call::CashStatResult>(&Device::getCashStat, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void cashIn(Payload & payload) {
@@ -339,17 +339,17 @@ namespace Kkm {
 
     void closeShift(Payload & payload) {
         methodCall<Call::CloseDetails>(&Device::closeShift, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void reportX(Payload & payload) {
         methodCall<Call::CloseDetails>(&Device::reportX, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void resetState(Payload & payload) {
         methodCall<Call::CloseDetails>(&Device::resetState, payload);
-        payload.m_expireIn = Http::c_reportCacheLifeTime;
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     static const std::unordered_map<std::string, void (*)(Payload &)> s_handlers {
@@ -385,9 +385,9 @@ namespace Kkm {
         return true;
     }
 
-    bool HttpHandler::isCaching() const noexcept {
-        return true;
-    }
+    // bool HttpHandler::isCaching() const noexcept {
+    //     return true;
+    // }
 
     void HttpHandler::operator()(Http::Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
@@ -489,7 +489,7 @@ namespace Kkm {
 
         auto response = std::make_shared<Http::JsonResponse>(std::move(payload.m_result));
         if (!cacheKey.empty()) {
-            Cache::store(cacheKey, Cache::expiresAt(payload.m_expireIn), payload.m_status, response);
+            Cache::store(cacheKey, Cache::expiresAfter(payload.m_expiresAfter), payload.m_status, response);
         }
 
         assert(request.m_response.m_status == Status::Ok);

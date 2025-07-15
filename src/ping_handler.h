@@ -17,7 +17,7 @@ namespace Http {
         PingHandler & operator=(PingHandler &&) = default;
 
         [[nodiscard]] bool asyncReady() const noexcept override;
-        [[nodiscard]] bool isCaching() const noexcept override;
+        // [[nodiscard]] bool isCaching() const noexcept override;
         void operator()(Request &) const noexcept override;
     };
 }

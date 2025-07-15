@@ -189,7 +189,7 @@ namespace Http {
         RequestHandler & operator=(RequestHandler &&) = default;
 
         [[nodiscard]] virtual bool asyncReady() const noexcept = 0;
-        [[nodiscard]] virtual bool isCaching() const noexcept = 0;
+        // [[nodiscard]] virtual bool isCaching() const noexcept = 0;
         virtual void operator()(Request &) const noexcept = 0;
     };
 

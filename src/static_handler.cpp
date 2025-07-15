@@ -20,9 +20,9 @@ namespace Http {
         return false;
     }
 
-    bool StaticHandler::isCaching() const noexcept {
-        return true;
-    }
+    // bool StaticHandler::isCaching() const noexcept {
+    //     return true;
+    // }
 
     void StaticHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
@@ -127,7 +127,7 @@ namespace Http {
             }
         }
 
-        Cache::store(cacheKey, Cache::expiresAt(c_fileCacheLifeTime), request.m_response.m_status, response);
+        Cache::store(cacheKey, Cache::expiresAfter(c_fileCacheLifeTime), request.m_response.m_status, response);
         assert(request.m_response.m_status == Status::Ok);
         if (request.m_response.m_status == Status::Ok) {
             request.m_response.m_data = response;

@@ -11,9 +11,9 @@ namespace Http {
         return false;
     }
 
-    bool PingHandler::isCaching() const noexcept {
-        return false;
-    }
+    // bool PingHandler::isCaching() const noexcept {
+    //     return false;
+    // }
 
     void PingHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);

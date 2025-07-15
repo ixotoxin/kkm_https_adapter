@@ -27,9 +27,9 @@ namespace Http {
         return false;
     }
 
-    bool DefaultHandler::isCaching() const noexcept {
-        return false;
-    }
+    // bool DefaultHandler::isCaching() const noexcept {
+    //     return false;
+    // }
 
     void DefaultHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);

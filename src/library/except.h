@@ -65,11 +65,11 @@ namespace Basic {
 
         [[nodiscard, maybe_unused]]
         virtual std::wstring explain() const noexcept {
+            std::wstring result { what() };
             if (Log::s_appendLocation) {
-                return what() + m_location;
-            } else {
-                return what();
+                result += m_location;
             }
+            return result;
         }
     };
 
@@ -137,7 +137,7 @@ namespace Basic {
             auto message { m_variable.empty() ? what() : std::format(Wcs::c_invalidVariable, m_variable, what()) };
             if (Log::s_appendLocation) {
                 message.append(L" (в файле ");
-                Basic::append(message, m_location);
+                message += m_location;
                 message.append(L")");
             }
             return message;

@@ -22,7 +22,8 @@ namespace System {
     [[nodiscard, maybe_unused]] std::wstring errorMessage(DWORD) noexcept;
 
     [[nodiscard, maybe_unused]]
-    inline std::wstring explainError(const DWORD error = ::GetLastError()) noexcept try {
+    inline std::wstring
+    explainError(const DWORD error = ::GetLastError()) noexcept try {
         return std::format(Wcs::c_fault, error, errorMessage(error));
     } catch (...) {
         return Wcs::c_somethingWrong;
@@ -115,7 +116,7 @@ namespace Deferred {
             }
         }
 
-        void cancel() {
+        void cancel() noexcept {
             m_permitted = false;
         }
     };
@@ -132,21 +133,21 @@ namespace Deferred {
         explicit LocalFree(auto & memory)
         : m_memory(reinterpret_cast<HLOCAL &>(memory)) {}
 
-        ~LocalFree() {
+        ~LocalFree() noexcept {
             perform();
         }
 
         LocalFree & operator=(const LocalFree &) = delete;
         LocalFree & operator=(LocalFree &&) = delete;
 
-        void perform() {
+        void perform() noexcept {
             if (m_permitted && m_memory) {
                 ::LocalFree(m_memory);
                 m_memory = nullptr;
             }
         }
 
-        void cancel() {
+        void cancel() noexcept {
             m_permitted = false;
         }
     };

@@ -58,12 +58,12 @@ namespace Server {
         return
             asio::async_compose<CompletionToken, void()>(
                 [& handler, & request] (auto && self) {
-                    std::thread{
+                    std::thread(
                         [task = std::move(self), & handler, & request] () mutable {
                             handler(request);
                             task.complete();
                         }
-                    }.detach();
+                    ).detach();
                 },
                 token
             );
@@ -142,9 +142,9 @@ namespace Server {
                 if (request.m_response.m_status == Http::Status::Ok) {
                     auto handler = lookupHandler(request);
                     if (handler) {
-                        /*if (handler->isCaching()) {
-                            Http::Cache::maintain();
-                        }*/
+                        // if (handler->isCaching()) {
+                        //     Http::Cache::maintain();
+                        // }
                         if (handler->asyncReady()) {
                             co_await performAsync(*handler, request, asio::use_awaitable);
                         } else {
@@ -183,6 +183,7 @@ namespace Server {
         }
 
         --s_requestCounter;
+
         co_return;
     }
 
@@ -249,7 +250,7 @@ namespace Server {
             tsLogError(Wcs::c_somethingWrong);
         }
 
-        co_return; // ???
+        co_return;
     }
 
     inline void logError() noexcept {
@@ -274,8 +275,12 @@ namespace Server {
 
         tsLogDebug(Wcs::c_stopping);
 
-        std::thread{[] {
+        std::thread([] {
             // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
+            // ISSUE: Остановка сервера (вызов `s_ioContext->stop()`) во время начала выполнения функции `accept(...)`
+            //  приведёт к ошибке `The file handle supplied is not valid.`. В реальном бизнес-процессе возникновение
+            //  такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное
+            //  отключение или сбои в работе сети.
             s_state.store(State::Stopping);
             size_t wait = c_stopWaiting * 5;
             while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {
@@ -286,7 +291,7 @@ namespace Server {
             if (s_ioContext && !s_ioContext->stopped()) {
                 s_ioContext->stop();
             }
-        }}.detach();
+        }).detach();
     }
 
     void run() try {
@@ -312,7 +317,9 @@ namespace Server {
     }
 
     void start() {
-        std::thread{[] { run(); }}.detach();
+        std::thread([] {
+            run();
+        }).detach();
     }
 
     void stop() try {

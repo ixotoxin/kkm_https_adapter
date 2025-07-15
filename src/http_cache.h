@@ -17,7 +17,7 @@ namespace Http::Cache {
     };
 
     [[nodiscard, maybe_unused]]
-    inline DateTime::Point expiresAt(DateTime::OffsetValue seconds) {
+    inline DateTime::Point expiresAfter(DateTime::OffsetValue seconds) {
         return DateTime::Clock::now() + DateTime::Offset(seconds);
     }
 

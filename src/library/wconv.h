@@ -73,23 +73,27 @@ namespace Text {
         return false;
     }
 
-    inline std::wstring convert(const std::string_view text) noexcept try {
+    inline std::wstring convert(const std::string_view text) noexcept {
         std::wstring result {};
-        if (!convert(result, text)) {
+        try {
+            if (!convert(result, text)) {
+                result.assign(Wcs::c_fallbackErrorMessage);
+            }
+        } catch (...) {
             result.assign(Wcs::c_fallbackErrorMessage);
         }
         return result;
-    } catch (...) {
-        return Wcs::c_fallbackErrorMessage;
     }
 
-    inline std::string convert(const std::wstring_view text) noexcept try {
+    inline std::string convert(const std::wstring_view text) noexcept {
         std::string result {};
-        if (!convert(result, text)) {
+        try {
+            if (!convert(result, text)) {
+                result.assign(Mbs::c_fallbackErrorMessage);
+            }
+        } catch (...) {
             result.assign(Mbs::c_fallbackErrorMessage);
         }
         return result;
-    } catch (...) {
-        return Mbs::c_fallbackErrorMessage;
     }
 }
