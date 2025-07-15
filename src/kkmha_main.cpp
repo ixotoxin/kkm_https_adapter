@@ -106,8 +106,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     L"[CFG] kkm.cliOperator.name = \"" << Kkm::s_cliOperatorName << L"\"\n"
                     L"[CFG] kkm.cliOperator.inn = \"" << Kkm::s_cliOperatorInn << L"\"\n"
                     L"[CFG] kkm.customerAccountField = \"" << Kkm::s_customerAccountField << L"\"\n"
-                    L"[CFG] kkm.documentClosedChecking.attempts = \"" << Kkm::s_docClosedCheckingAttempts << L"\"\n"
-                    L"[CFG] kkm.documentClosedChecking.waiting = \"" << Kkm::s_docClosedCheckingWaiting << L"\"\n"
+                    L"[CFG] kkm.documentClosingTimeout = \"" << Kkm::s_documentClosingTimeout << L"\"\n"
                     L"[CFG] kkm.connParams = { ";
 
                 try {
@@ -139,32 +138,34 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             }
 
             if (command == L"install") {
-                Service::install(std::format(L"\"{}\" service", Config::s_binaryFile.c_str()));
+                Service::Control::install(std::format(L"\"{}\" service", Config::s_binaryFile.c_str()));
+                ::Sleep(Basic::c_sleep);
                 return EXIT_SUCCESS;
             }
 
             if (command == L"uninstall") {
-                Service::uninstall();
+                Service::Control::uninstall();
+                ::Sleep(Basic::c_sleep);
                 return EXIT_SUCCESS;
             }
 
             if (command == L"start") {
-                Service::start();
-                ::Sleep(500);
+                Service::Control::start();
+                ::Sleep(Basic::c_sleep);
                 return EXIT_SUCCESS;
             }
 
             if (command == L"stop") {
-                Service::stop();
-                ::Sleep(500);
+                Service::Control::stop();
+                ::Sleep(Basic::c_sleep);
                 return EXIT_SUCCESS;
             }
 
             if (command == L"restart") {
-                Service::stop();
-                ::Sleep(500);
-                Service::start();
-                ::Sleep(500);
+                Service::Control::stop();
+                ::Sleep(Basic::c_sleep);
+                Service::Control::start();
+                ::Sleep(Basic::c_sleep);
                 return EXIT_SUCCESS;
             }
 
@@ -174,11 +175,14 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             }
 
             if (command == L"service") {
-                std::atexit([] { Log::File::close(); Log::EventLog::close(); });
+                std::atexit([] {
+                    Log::File::close();
+                    Log::EventLog::close();
+                });
                 Log::Console::s_level = Log::c_levelNone;
                 Log::File::open();
                 Log::EventLog::open();
-                Service::run();
+                Service::Worker::run();
                 // Log::EventLog::close();
                 // Log::File::close();
                 return EXIT_SUCCESS;

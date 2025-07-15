@@ -20,7 +20,11 @@ namespace Server {
         using namespace Http::Mbs;
     }
 
+    using namespace std::chrono_literals;
     using Basic::Failure;
+    using Basic::c_sleepQuantum;
+
+    static_assert(c_controlTimeout >= c_sleepQuantum);
 
     enum class State { Initial, Starting, Running, Stopping };
 
@@ -267,8 +271,6 @@ namespace Server {
     }
 
     void shutdown() {
-        static_assert(c_stopWaiting > 0);
-
         if (s_state.load() != State::Running || !s_ioContext || s_ioContext->stopped()) {
             return;
         }
@@ -282,12 +284,14 @@ namespace Server {
             //  такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное
             //  отключение или сбои в работе сети.
             s_state.store(State::Stopping);
-            size_t wait = c_stopWaiting * 5;
+            size_t wait = c_controlTimeout / c_sleepQuantum;
             while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {
-                ::Sleep(200);
+                // ::Sleep(c_sleepQuantum);
+                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
                 --wait;
             }
-            ::Sleep(200);
+            // ::Sleep(c_sleepQuantum);
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
             if (s_ioContext && !s_ioContext->stopped()) {
                 s_ioContext->stop();
             }

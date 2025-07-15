@@ -39,9 +39,6 @@
             "name": "Оператор",
             "--inn": "770000000000"
         },
-        "--documentClosedChecking": {
-            "--attempts": 5,
-            "--waiting": 100
-        }
+        "--documentClosingTimeout": 5000
     }
 }

@@ -173,22 +173,9 @@ namespace Config {
                         );
                         Json::handleKey(json, "customerAccountField", Kkm::s_customerAccountField, path);
                         Json::handleKey(
-                            json, "documentClosedChecking",
-                            [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                                Json::handleKey(
-                                    json, "attempts",
-                                    Kkm::s_docClosedCheckingAttempts,
-                                    Numeric::between(Kkm::c_minClosedCheckingAttempts, Kkm::c_maxClosedCheckingAttempts),
-                                    path
-                                );
-                                Json::handleKey(
-                                    json, "waiting",
-                                    Kkm::s_docClosedCheckingWaiting,
-                                    Numeric::between(Kkm::c_minClosedCheckingWaiting, Kkm::c_maxClosedCheckingWaiting),
-                                    path
-                                );
-                                return true;
-                            },
+                            json, "documentClosingTimeout",
+                            Kkm::s_documentClosingTimeout,
+                            Numeric::between(Kkm::c_minDocumentClosingTimeout, Kkm::c_maxDocumentClosingTimeout),
                             path
                         );
                         return true;
