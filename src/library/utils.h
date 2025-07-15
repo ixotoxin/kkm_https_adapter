@@ -19,11 +19,11 @@ namespace System {
         constexpr std::wstring_view c_failed { L"{} failed with error {:#010x}: {}" };
     }
 
-    [[nodiscard, maybe_unused]] std::wstring errorMessage(DWORD) noexcept;
+    [[nodiscard, maybe_unused]] std::wstring errorMessage(::DWORD) noexcept;
 
     [[nodiscard, maybe_unused]]
     inline std::wstring
-    explainError(const DWORD error = ::GetLastError()) noexcept try {
+    explainError(const ::DWORD error = ::GetLastError()) noexcept try {
         return std::format(Wcs::c_fault, error, errorMessage(error));
     } catch (...) {
         return Wcs::c_somethingWrong;
@@ -31,7 +31,7 @@ namespace System {
 
     [[nodiscard, maybe_unused]]
     inline std::wstring
-    explainError(const std::wstring_view operation, const DWORD error = ::GetLastError()) noexcept try {
+    explainError(const std::wstring_view operation, const ::DWORD error = ::GetLastError()) noexcept try {
         return std::format(Wcs::c_failed, operation, error, errorMessage(error));
     } catch (...) {
         return Wcs::c_somethingWrong;

@@ -6,9 +6,13 @@
 #include "library/basic.h"
 
 namespace Service {
-    void run();
-    void install(const std::wstring &);
-    void uninstall();
-    void start();
-    void stop();
+    namespace Worker {
+        void run();
+    }
+    namespace Control {
+        void start();
+        void stop();
+        void install(const std::wstring &);
+        void uninstall();
+    }
 }

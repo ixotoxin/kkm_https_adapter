@@ -20,6 +20,11 @@
 #define tsLogWarning(x, ...) Log::Ts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__)
 #define tsLogError(x, ...) Log::Ts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__)
 
+#define cliMsgDebug(x) Log::Console::write(Log::Level::Debug, x)
+#define cliMsgInfo(x) Log::Console::write(Log::Level::Info, x)
+#define cliMsgWarning(x) Log::Console::write(Log::Level::Warning, x)
+#define cliMsgError(x) Log::Console::write(Log::Level::Error, x)
+
 namespace Log {
     namespace Wcs {
         constexpr const wchar_t * c_loggingError { L"Logging error" };

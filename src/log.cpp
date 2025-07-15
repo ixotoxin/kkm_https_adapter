@@ -37,7 +37,7 @@ namespace Log {
 
     namespace File {
         static std::wofstream s_file {};
-        static WORD s_currentMonth { 0 };
+        static ::WORD s_currentMonth { 0 };
 
         [[maybe_unused]]
         bool open() noexcept try {
@@ -100,11 +100,11 @@ namespace Log {
     }
 
     namespace EventLog {
-        static const std::unordered_map<Level, WORD> s_types {
-            { Level::Debug, static_cast<WORD>(EVENTLOG_INFORMATION_TYPE) },
-            { Level::Info, static_cast<WORD>(EVENTLOG_INFORMATION_TYPE) },
-            { Level::Warning, static_cast<WORD>(EVENTLOG_WARNING_TYPE) },
-            { Level::Error, static_cast<WORD>(EVENTLOG_ERROR_TYPE) }
+        static const std::unordered_map<Level, ::WORD> s_types {
+            { Level::Debug, static_cast<::WORD>(EVENTLOG_INFORMATION_TYPE) },
+            { Level::Info, static_cast<::WORD>(EVENTLOG_INFORMATION_TYPE) },
+            { Level::Warning, static_cast<::WORD>(EVENTLOG_WARNING_TYPE) },
+            { Level::Error, static_cast<::WORD>(EVENTLOG_ERROR_TYPE) }
         };
 
         static HANDLE s_sourceHandle { nullptr };

@@ -5,7 +5,7 @@
 
 namespace System {
     [[nodiscard, maybe_unused]]
-    std::wstring errorMessage(DWORD error) noexcept try {
+    std::wstring errorMessage(::DWORD error) noexcept try {
         wchar_t * text { nullptr };
         Deferred::LocalFree freeTextBuffer { text };
         auto status
@@ -14,7 +14,7 @@ namespace System {
                 nullptr,
                 error,
                 LANG_SYSTEM_DEFAULT, // MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                reinterpret_cast<LPWSTR>(&text),
+                reinterpret_cast<::LPWSTR>(&text),
                 0,
                 nullptr
             );

@@ -914,6 +914,5 @@ namespace Kkm {
     inline std::wstring s_cliOperatorName { c_defCliOperatorName };
     inline std::wstring s_cliOperatorInn { c_defCliOperatorInn };
     inline std::wstring s_customerAccountField { c_customerAccountField };
-    inline size_t s_docClosedCheckingAttempts { c_defClosedCheckingAttempts };
-    inline size_t s_docClosedCheckingWaiting { c_defClosedCheckingWaiting };
+    inline auto s_documentClosingTimeout = c_defDocumentClosingTimeout;
 }
