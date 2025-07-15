@@ -768,9 +768,9 @@ DOS-атаку на сервер. Поэтому без доработки во 
 |------------------------------------------------|---------------------------------------------------------|
 | АТОЛ Драйвер                                   | `%programfiles%\ATOL`                                   |
 | Microsoft Visual Studio 2022 Community Edition | `%programfiles%\Microsoft Visual Studio\2022\Community` |
-| Clang                                          | `C:\Devel\Platform\Clang\20.1.5-x86_64`                 |
+| Clang                                          | `C:\Devel\Platform\Clang\20.1.8-x86_64`                 |
 | CMake                                          | `C:\Devel\Platform\CMake\3.31.7-x86_64`                 |
-| Ninja                                          | `C:\Devel\Platform\Ninja\1.12.1`                        |
+| Ninja                                          | `C:\Devel\Platform\Ninja\1.13.1`                        |
 
 Пути можно изменить в файлах `config_env.cmd` и `install_deps.cmd`. CMake и Ninja можно использовать из состава MSVS.
 
