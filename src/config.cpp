@@ -98,7 +98,7 @@ namespace Config {
                                 Json::handleKey(
                                     json, "level",
                                     Log::EventLog::s_level,
-                                    Log::s_levelCastMap, Numeric::min(Log::LEVEL_INFO),
+                                    Log::s_levelCastMap, Numeric::min(Log::c_levelInfo),
                                     path
                                 );
                                 return true;

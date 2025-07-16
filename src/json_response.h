@@ -50,6 +50,7 @@ namespace Http {
         }
 
         void render(Asio::StreamBuffer & buffer, Status status) override {
+            assert(s_statusStrings.contains(status));
             assert(m_data.is_object());
             if (!m_data.contains("!success") || !m_data["!success"].is_boolean()) {
                 m_data["!success"] = status < Status::BadRequest;

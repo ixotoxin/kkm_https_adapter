@@ -6,10 +6,10 @@
 #include <filesystem>
 
 namespace Config {
+    void read(wchar_t **);
+
     inline std::filesystem::path s_binaryFile {};
     inline std::filesystem::path s_workDirectory {};
     inline std::filesystem::path s_configDirectory {};
     inline std::filesystem::path s_configFile {};
-
-    void read(wchar_t **);
 }

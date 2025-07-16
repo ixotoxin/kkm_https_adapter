@@ -355,10 +355,8 @@ namespace Kkm {
     static const std::unordered_map<std::string, void (*)(Payload &)> s_handlers {
         { "get/kkm/status", status },
         { "get/kkm/full-status", fullStatus },
-        // { "get/kkm/status/full", fullStatus },
         { "post/kkm/learn", learn },
         { "post/kkm/reset-registry", resetRegistry },
-        // { "post/kkm/registry/reset", resetRegistry },
         { "post/kkm/print-demo", printDemo },
         { "post/kkm/print-non-fiscal-doc", printNonFiscalDocument },
         { "post/kkm/print-info", printInfo },
@@ -368,11 +366,8 @@ namespace Kkm {
         { "post/kkm/print-close-shift-reports", printCloseShiftReports },
         { "post/kkm/print-last-document", printLastDocument },
         { "get/kkm/cash-stat", cashStat },
-        // { "get/kkm/cash/stat", cashStat },
         { "post/kkm/cash-in", cashIn },
-        // { "post/kkm/cash/in", cashIn },
         { "post/kkm/cash-out", cashOut },
-        // { "post/kkm/cash/out", cashOut },
         { "post/kkm/sell", sell },
         { "post/kkm/sell-return", sellReturn },
         { "post/kkm/report-x", reportX },
@@ -384,10 +379,6 @@ namespace Kkm {
     bool HttpHandler::asyncReady() const noexcept {
         return true;
     }
-
-    // bool HttpHandler::isCaching() const noexcept {
-    //     return true;
-    // }
 
     void HttpHandler::operator()(Http::Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
@@ -462,12 +453,11 @@ namespace Kkm {
         } else if (request.m_hint.size() == 3) {
             Text::joinTo(handlerKey, request.m_hint, "/");
         } else {
-            // return request.fail(Status::BadRequest, Mbs::c_badRequest);
             return request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
+
         auto handler = s_handlers.find(handlerKey);
         if (handler == s_handlers.end()) {
-            // return request.fail(Status::BadRequest, Mbs::c_unknownMethod);
             return request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
 
