@@ -124,15 +124,15 @@ namespace Service {
             ::DWORD value,
             std::wstring_view message
         ) {
-            auto checkPoint { status.dwCheckPoint };
-            auto ticks { ::GetTickCount() };
-            auto begin { ticks };
+            auto checkPoint = status.dwCheckPoint;
+            auto ticks = ::GetTickCount();
+            auto begin = ticks;
 
             do {
                 cliMsgDebug(message);
                 ::Sleep(c_sleepQuantum);
                 queryStatus(service, status);
-                auto currTicks { ::GetTickCount() };
+                auto currTicks = ::GetTickCount();
                 if (status.dwCheckPoint > checkPoint) {
                     checkPoint = status.dwCheckPoint;
                     ticks = currTicks;
@@ -175,19 +175,19 @@ namespace Service {
                 }
             };
 
-            constexpr auto scmPermission { SC_MANAGER_ALL_ACCESS };
+            constexpr auto scmPermission = SC_MANAGER_ALL_ACCESS;
             manager = ::OpenSCManagerW(nullptr, nullptr, scmPermission);
             if (!manager) {
                 throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            constexpr auto svcPermission { SERVICE_ALL_ACCESS };
+            constexpr auto svcPermission = SERVICE_ALL_ACCESS;
             service = ::OpenServiceW(manager, c_systemName, svcPermission);
             if (!service) {
                 throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            auto state { waitNewState(service, SERVICE_STOP_PENDING, Wcs::c_stopping) };
+            auto state = waitNewState(service, SERVICE_STOP_PENDING, Wcs::c_stopping);
             if (state == SERVICE_STOP_PENDING) {
                 throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
@@ -248,13 +248,13 @@ namespace Service {
                 }
             };
 
-            constexpr auto scmPermission { SC_MANAGER_ALL_ACCESS };
+            constexpr auto scmPermission = SC_MANAGER_ALL_ACCESS;
             manager = ::OpenSCManagerW(nullptr, nullptr, scmPermission);
             if (!manager) {
                 throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            constexpr auto svcPermission { SERVICE_STOP | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS };
+            constexpr auto svcPermission = SERVICE_STOP | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS;
             service = ::OpenServiceW(manager, c_systemName, svcPermission);
             if (!service) {
                 throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
@@ -278,7 +278,7 @@ namespace Service {
                 }
             };
 
-            constexpr auto scmPermission { SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE };
+            constexpr auto scmPermission = SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE;
             manager = ::OpenSCManagerW(nullptr, nullptr, scmPermission);
             if (!manager) {
                 throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
@@ -323,13 +323,13 @@ namespace Service {
                 }
             };
 
-            constexpr auto scmPermission { SC_MANAGER_CONNECT };
+            constexpr auto scmPermission = SC_MANAGER_CONNECT;
             manager = ::OpenSCManagerW(nullptr, nullptr, scmPermission);
             if (!manager) {
                 throw Failure(System::explainError(L"OpenSCManagerW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            constexpr auto svcPermission { SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE };
+            constexpr auto svcPermission = SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE;
             service = ::OpenServiceW(manager, c_systemName, svcPermission);
             if (!service) {
                 throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)

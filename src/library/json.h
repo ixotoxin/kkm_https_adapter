@@ -117,7 +117,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -167,7 +167,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -217,7 +217,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -274,7 +274,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -330,7 +330,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -388,7 +388,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -444,7 +444,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -495,7 +495,7 @@ namespace Json {
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {
@@ -548,7 +548,7 @@ namespace Json {
         const Meta::Filter<typename T::value_type> & filter,
         const std::wstring & baseJsonPath = {}
     ) {
-        auto jsonPath { baseJsonPath };
+        std::wstring jsonPath { baseJsonPath };
         Text::joinTo(jsonPath, Text::convert(key), L".");
         try {
             if (json.is_object()) {

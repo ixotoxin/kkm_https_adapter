@@ -1008,7 +1008,7 @@ namespace Kkm {
                     Json::handleKey(block, "magnified", magnified, L"document[].magnified");
                     Json::handleKey(block, "separated", separated, L"document[].separated");
                 }
-                auto actualMargin { margin && !content.empty() };
+                auto actualMargin = margin && !content.empty();
                 m_document.emplace_back(std::move(content), center, magnified, separated, actualMargin);
             }
         } else {

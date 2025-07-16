@@ -72,7 +72,7 @@ namespace Http {
         Cache::maintain();
         Cache::Key cacheKey { "static::::" };
         cacheKey.append(Text::convert(path.c_str()));
-        auto cacheEntry { Cache::load(cacheKey) };
+        auto cacheEntry = Cache::load(cacheKey);
 
         if (cacheEntry) {
             auto fileTime = std::filesystem::last_write_time(path, error);

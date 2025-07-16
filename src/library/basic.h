@@ -78,7 +78,7 @@ namespace Basic {
 #       define MEMORY_LEAK \
             do { \
                 auto _memoryLeak_ = new unsigned short[32] { 0xadde, 0xefbe }; \
-                auto _memoryLeakString_ { \
+                std::wstring _memoryLeakString_ { \
                     std::format( \
                         L"I smell {:x}{:x} {:x}{:x} (test message indicating that a leak has taken place)", \
                         _memoryLeak_[0] & 0xff, _memoryLeak_[0] >> 8, _memoryLeak_[1] & 0xff, _memoryLeak_[1] >> 8 \

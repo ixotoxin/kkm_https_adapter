@@ -82,7 +82,7 @@ namespace Kkm {
             payload.fail(Status::BadRequest, Mbs::c_badRequest);
             return nullptr;
         }
-        auto wcSerialNumber { Text::convert(payload.m_serialNumber) };
+        std::wstring wcSerialNumber { Text::convert(payload.m_serialNumber) };
         std::scoped_lock registryLock(s_registryMutex);
         if (s_connParamsRegistry.contains(wcSerialNumber)) {
             auto & params { s_connParamsRegistry.at(wcSerialNumber) };
@@ -116,7 +116,7 @@ namespace Kkm {
         Payload & payload
     ) {
         ResultType result;
-        auto connParams { resolveConnParams(payload) };
+        auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
             (kkm.*method)(result);
@@ -139,7 +139,7 @@ namespace Kkm {
         }
         DetailsType details(payload.m_details, args...);
         Call::Result result;
-        auto connParams { resolveConnParams(payload) };
+        auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
             (kkm.*method)(details, result);
@@ -213,7 +213,7 @@ namespace Kkm {
             return payload.fail(Status::BadRequest, Mbs::c_badRequest);
         }
 
-        auto connParams { resolveConnParams(payload) };
+        auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
 
