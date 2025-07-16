@@ -50,12 +50,12 @@ namespace Http::Cache {
     void maintain() {
         if (++s_counter == c_cacheCleanUpThreshold) {
             std::scoped_lock cacheLock(s_cacheMutex);
-            auto prevSize { s_cache.size() };
+            auto oldSize = s_cache.size();
             std::erase_if(
                 s_cache,
                 [] (const auto & item) { return item.second.m_expiredAt < DateTime::Clock::now(); }
             );
-            tsLogDebug(Wcs::c_cacheMaintain, prevSize, s_cache.size());
+            tsLogDebug(Wcs::c_cacheMaintain, oldSize, s_cache.size());
             s_counter = 0;
         }
     }

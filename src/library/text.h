@@ -460,7 +460,7 @@ namespace Text {
         return
             [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
             (const T & value) -> T {
-                auto filtered { subFilter(value) };
+                T filtered { subFilter(value) };
                 if (filtered.empty()) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
@@ -486,7 +486,7 @@ namespace Text {
         return
             [min, max, subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
             (const T & value) -> T {
-                auto filtered { subFilter(value) };
+                T filtered { subFilter(value) };
                 if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
@@ -710,7 +710,7 @@ namespace Text {
             return
                 [subFilter = std::forward<Filter>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
-                    auto filtered { subFilter(value) };
+                    std::wstring filtered { subFilter(value) };
                     if (filtered.empty()) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
@@ -734,7 +734,7 @@ namespace Text {
             return
                 [min, max, subFilter = std::forward<Filter>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
-                    auto filtered { subFilter(value) };
+                    std::wstring filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
@@ -811,7 +811,7 @@ namespace Text {
             return
                 [subFilter = std::forward<Filter>(subFilter0)]
                 (const std::string & value) -> std::string {
-                    auto filtered { subFilter(value) };
+                    std::string filtered { subFilter(value) };
                     if (filtered.empty()) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
@@ -835,7 +835,7 @@ namespace Text {
             return
                 [min, max, subFilter = std::forward<Filter>(subFilter0)]
                 (const std::string & value) -> std::string {
-                    auto filtered { subFilter(value) };
+                    std::string filtered { subFilter(value) };
                     if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }

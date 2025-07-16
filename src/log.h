@@ -36,7 +36,7 @@ namespace Log {
     constexpr int c_levelInfo [[maybe_unused]] { static_cast<int>(Level::Info) };
     constexpr int c_levelWarning [[maybe_unused]] { static_cast<int>(Level::Warning) };
     constexpr int c_levelError [[maybe_unused]] { static_cast<int>(Level::Error) };
-    constexpr int c_levelNone [[maybe_unused]] { static_cast<int>(Level::Error) + 1 };
+    constexpr int c_levelNone [[maybe_unused]] { c_levelError + 1 };
 
     namespace Console {
         inline int s_level { c_levelDebug };
