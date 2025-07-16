@@ -34,6 +34,7 @@ namespace Http {
         }
 
         void render(Asio::StreamBuffer & buffer, Status status) override {
+            assert(s_statusStrings.contains(status));
             std::ostream output { &buffer };
             if (m_data && m_size) {
                 output

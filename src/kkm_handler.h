@@ -17,7 +17,6 @@ namespace Kkm {
         HttpHandler & operator=(HttpHandler &&) = default;
 
         [[nodiscard]] bool asyncReady() const noexcept override;
-        // [[nodiscard]] bool isCaching() const noexcept override;
         void operator()(Http::Request &) const noexcept override;
     };
 }

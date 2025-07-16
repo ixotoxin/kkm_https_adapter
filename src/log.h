@@ -32,14 +32,14 @@ namespace Log {
 
     enum class Level : int { Debug, Info, Warning, Error };
 
-    constexpr int LEVEL_DEBUG [[maybe_unused]] { static_cast<int>(Level::Debug) };
-    constexpr int LEVEL_INFO [[maybe_unused]] { static_cast<int>(Level::Info) };
-    constexpr int LEVEL_WARNING [[maybe_unused]] { static_cast<int>(Level::Warning) };
-    constexpr int LEVEL_ERROR [[maybe_unused]] { static_cast<int>(Level::Error) };
+    constexpr int c_levelDebug [[maybe_unused]] { static_cast<int>(Level::Debug) };
+    constexpr int c_levelInfo [[maybe_unused]] { static_cast<int>(Level::Info) };
+    constexpr int c_levelWarning [[maybe_unused]] { static_cast<int>(Level::Warning) };
+    constexpr int c_levelError [[maybe_unused]] { static_cast<int>(Level::Error) };
     constexpr int c_levelNone [[maybe_unused]] { static_cast<int>(Level::Error) + 1 };
 
     namespace Console {
-        inline int s_level { LEVEL_DEBUG };
+        inline int s_level { c_levelDebug };
         inline bool s_outputTimestamp { c_outputTimestamp };
         inline bool s_outputLevel { c_outputLevel };
 
@@ -48,7 +48,7 @@ namespace Log {
     }
 
     namespace File {
-        inline int s_level { LEVEL_DEBUG };
+        inline int s_level { c_levelDebug };
         inline std::wstring s_directory { c_directory };
 
         [[maybe_unused]] bool open() noexcept;
@@ -58,7 +58,7 @@ namespace Log {
     }
 
     namespace EventLog {
-        inline int s_level { LEVEL_INFO };
+        inline int s_level { c_levelInfo };
 
         [[maybe_unused]] void open() noexcept;
         [[maybe_unused]] void close() noexcept;
@@ -82,11 +82,11 @@ namespace Log {
 
         [[maybe_unused]]
         inline void write(Level level, const std::string_view message) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                auto message2 { Text::convert(message) };
+                std::wstring message2 { Text::convert(message) };
                 if (consoleReady) {
                     Console::write(level, message2);
                 }
@@ -104,12 +104,12 @@ namespace Log {
         template<Meta::View Fmt, typename ... Args>
         [[maybe_unused]]
         inline void write(Level level, const Fmt fmt, const auto & arg1, const Args & ... args) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
                 if constexpr (Meta::isWide<Fmt>) {
-                    auto message { std::vformat(fmt, std::make_wformat_args(arg1, args...)) };
+                    std::wstring message { std::vformat(fmt, std::make_wformat_args(arg1, args...)) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -120,7 +120,7 @@ namespace Log {
                         EventLog::write(level, message);
                     }
                 } else {
-                    auto message { Text::convert(std::vformat(fmt, std::make_format_args(arg1, args...))) };
+                    std::wstring message { Text::convert(std::vformat(fmt, std::make_format_args(arg1, args...))) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -150,11 +150,11 @@ namespace Log {
 
         [[maybe_unused]]
         inline void write(Level level, const Basic::Failure & e) noexcept {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                auto message { e.explain() };
+                std::wstring message { e.explain() };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -169,11 +169,11 @@ namespace Log {
 
         [[maybe_unused]]
         inline void write(Level level, const std::exception & e) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                auto message { Text::convert(e.what()) };
+                std::wstring message { Text::convert(e.what()) };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -190,11 +190,11 @@ namespace Log {
 
         [[maybe_unused]]
         inline void write(Level level, const std::error_code & e) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                auto message { Text::convert(e.message()) };
+                std::wstring message { Text::convert(e.message()) };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -213,12 +213,12 @@ namespace Log {
         requires requires (const T & t) { { t() } -> Meta::String; }
         [[maybe_unused]]
         inline void write(Level level, const T & func) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
-            auto eventLogReady = EventLog::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
+            bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
                 if constexpr (Meta::isWide<decltype(func())>) {
-                    auto message { func() };
+                    std::wstring message { func() };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -229,7 +229,7 @@ namespace Log {
                         EventLog::write(level, message);
                     }
                 } else {
-                    auto message { Text::convert(func()) };
+                    std::wstring message { Text::convert(func()) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -254,8 +254,8 @@ namespace Log {
             size_t rowLength = 16 / sizeof(T),
             Level level = Level::Debug
         ) noexcept try {
-            auto consoleReady = Console::ready(level);
-            auto fileReady = File::ready(level);
+            bool consoleReady { Console::ready(level) };
+            bool fileReady { File::ready(level) };
             if (!consoleReady && !fileReady) {
                 return;
             }
@@ -394,18 +394,19 @@ namespace Log {
     }
 
     static const std::unordered_map<std::wstring, int> s_levelCastMap {
-        { L"dbg", LEVEL_DEBUG },
-        { L"debug", LEVEL_DEBUG },
-        { std::to_wstring(LEVEL_DEBUG), LEVEL_DEBUG },
-        { L"inf", LEVEL_INFO },
-        { L"info", LEVEL_INFO },
-        { std::to_wstring(LEVEL_INFO), LEVEL_INFO },
-        { L"wrn", LEVEL_WARNING },
-        { L"warning", LEVEL_WARNING },
-        { std::to_wstring(LEVEL_WARNING), LEVEL_WARNING },
-        { L"err", LEVEL_ERROR },
-        { L"error", LEVEL_ERROR },
-        { std::to_wstring(LEVEL_ERROR), LEVEL_ERROR },
+        { L"dbg", c_levelDebug },
+        { L"debug", c_levelDebug },
+        { std::to_wstring(c_levelDebug), c_levelDebug },
+        { L"inf", c_levelInfo },
+        { L"info", c_levelInfo },
+        { std::to_wstring(c_levelInfo), c_levelInfo },
+        { L"wrn", c_levelWarning },
+        { L"warning", c_levelWarning },
+        { std::to_wstring(c_levelWarning), c_levelWarning },
+        { L"err", c_levelError },
+        { L"error", c_levelError },
+        { std::to_wstring(c_levelError), c_levelError },
+        { L"non", c_levelNone },
         { L"none", c_levelNone },
         { std::to_wstring(c_levelNone), c_levelNone }
     };

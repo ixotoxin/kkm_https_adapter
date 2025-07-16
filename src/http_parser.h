@@ -44,6 +44,7 @@ namespace Http {
         }
 
         inline void complete() {
+            assert(s_statusStrings.contains(m_request.m_response.m_status));
             if (m_request.m_response.m_status != Status::Ok && m_request.emptyResponse()) {
                 m_request.m_response.m_data = s_statusStrings.at(m_request.m_response.m_status);
             }

@@ -81,10 +81,6 @@ namespace System {
 }
 
 namespace Deferred {
-    namespace Wcs {
-        using Basic::Wcs::c_somethingWrong;
-    }
-
     class Exec {
         using Func = std::function<void()>;
 
@@ -96,7 +92,6 @@ namespace Deferred {
         Exec(const Exec &) = delete;
         Exec(Exec &&) = delete;
 
-        [[maybe_unused]]
         explicit Exec(Func && func)
         : m_func(std::forward<Func>(func)) {}
 
@@ -109,6 +104,7 @@ namespace Deferred {
         Exec & operator=(const Exec &) = delete;
         Exec & operator=(Exec &&) = delete;
 
+        [[maybe_unused]]
         void perform(bool repeatable = false) noexcept {
             if (m_permitted) {
                 m_func();
@@ -116,6 +112,7 @@ namespace Deferred {
             }
         }
 
+        [[maybe_unused]]
         void cancel() noexcept {
             m_permitted = false;
         }
@@ -140,6 +137,7 @@ namespace Deferred {
         LocalFree & operator=(const LocalFree &) = delete;
         LocalFree & operator=(LocalFree &&) = delete;
 
+        [[maybe_unused]]
         void perform() noexcept {
             if (m_permitted && m_memory) {
                 ::LocalFree(m_memory);
@@ -147,6 +145,7 @@ namespace Deferred {
             }
         }
 
+        [[maybe_unused]]
         void cancel() noexcept {
             m_permitted = false;
         }

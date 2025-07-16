@@ -17,7 +17,6 @@ namespace Http {
         ConfigHandler & operator=(ConfigHandler &&) = default;
 
         [[nodiscard]] bool asyncReady() const noexcept override;
-        // [[nodiscard]] bool isCaching() const noexcept override;
         void operator()(Request &) const noexcept override;
     };
 }

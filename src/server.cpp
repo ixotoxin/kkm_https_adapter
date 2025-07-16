@@ -4,7 +4,6 @@
 #include "server.h"
 #include <array>
 #include "http_parser.h"
-// #include "http_cache.h"
 #include "default_handler.h"
 #include "kkm_handler.h"
 #include "static_handler.h"
@@ -76,12 +75,13 @@ namespace Server {
     asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
         {
             auto requestCounter = s_requestCounter.fetch_add(1);
-            if (requestCounter < 0) {
-                tsLogError(Wcs::c_somethingWrong);
-                ++requestCounter;
-                s_requestCounter.compare_exchange_strong(requestCounter, 0);
-                co_return;
-            }
+            assert(requestCounter >= 0);
+            // if (requestCounter < 0) {
+            //     tsLogError(Wcs::c_somethingWrong);
+            //     ++requestCounter;
+            //     s_requestCounter.compare_exchange_strong(requestCounter, 0);
+            //     co_return;
+            // }
             if (requestCounter >= s_concurrencyLimit) {
                 tsLogError(Wcs::c_maximumIsExceeded);
                 --s_requestCounter;
@@ -89,103 +89,109 @@ namespace Server {
             }
         }
 
-        Asio::Stream stream { std::forward<decltype(socket)>(socket), sslContext };
-        Http::Request request { stream.lowest_layer().remote_endpoint().address() };
-
         try {
-            { /** Приветствуем **/
-                const auto & [handshakeError] = co_await stream.async_handshake(asio::ssl::stream_base::server);
-                if (handshakeError) {
-                    request.m_response.m_status = Http::Status::BadRequest;
-                    throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
-                }
-            }
-            { /** Читаем запрос **/
-                Asio::StreamBuffer buffer {};
+            Asio::Stream stream { std::forward<decltype(socket)>(socket), sslContext };
+            Http::Request request { stream.lowest_layer().remote_endpoint().address() };
 
-                const auto & [headerReadingError, headerSize]
-                    = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
-
-                if (headerReadingError) {
-                    request.m_response.m_status = Http::Status::BadRequest;
-                    throw Failure(headerReadingError); // NOLINT(*-exception-baseclass)
-                } else {
-                    Http::Parser parser(request);
-                    parser(buffer);
-                    if (request.m_method == Http::Method::Post) {
-                        auto expecting = parser.expecting();
-                        while (expecting) {
-                            const auto & [bodyReadingError, bodyReadingSize]
-                                = co_await asio::async_read(stream, buffer, asio::transfer_at_least(expecting));
-                            if (bodyReadingError) {
-                                request.fail(Http::Status::BadRequest, bodyReadingError.message());
-                                break;
-                            }
-                            parser(buffer);
-                            expecting = parser.expecting();
-                        }
+            try {
+                { /** Приветствуем **/
+                    const auto & [handshakeError] = co_await stream.async_handshake(asio::ssl::stream_base::server);
+                    if (handshakeError) {
+                        request.m_response.m_status = Http::Status::BadRequest;
+                        throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
                     }
-                    parser.complete();
                 }
-            }
-            { /** Обрабатываем запрос **/
-                if (request.m_response.m_status == Http::Status::Ok) {
-                    tsLogInfo(
-                        [& request] {
-                            std::string message {
-                                std::format(
-                                    Mbs::c_requestedMethod,
-                                    request.m_remote.to_string(),
-                                    request.m_verb,
-                                    request.m_path
-                                )
-                            };
-                            return std::format(Mbs::c_prefixedText, request.m_id, message);
-                        }
-                    );
-                }
-                Http::authenticate(request);
-                if (request.m_response.m_status == Http::Status::Ok) {
-                    auto handler = lookupHandler(request);
-                    if (handler) {
-                        // if (handler->isCaching()) {
-                        //     Http::Cache::maintain();
-                        // }
-                        if (handler->asyncReady()) {
-                            co_await performAsync(*handler, request, asio::use_awaitable);
-                        } else {
-                            (*handler)(request);
-                        }
+                { /** Читаем запрос **/
+                    Asio::StreamBuffer buffer {};
+
+                    const auto & [headerReadingError, headerSize]
+                        = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
+
+                    if (headerReadingError) {
+                        request.m_response.m_status = Http::Status::BadRequest;
+                        throw Failure(headerReadingError); // NOLINT(*-exception-baseclass)
                     } else {
-                        request.fail(Http::Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+                        Http::Parser parser(request);
+                        parser(buffer);
+                        if (request.m_method == Http::Method::Post) {
+                            auto expecting = parser.expecting();
+                            while (expecting) {
+                                const auto & [bodyReadingError, bodyReadingSize]
+                                    = co_await asio::async_read(stream, buffer, asio::transfer_at_least(expecting));
+                                if (bodyReadingError) {
+                                    request.fail(Http::Status::BadRequest, bodyReadingError.message());
+                                    break;
+                                }
+                                parser(buffer);
+                                expecting = parser.expecting();
+                            }
+                        }
+                        parser.complete();
                     }
                 }
-            }
-            { /** Пишем ответ **/
-                Asio::StreamBuffer buffer {};
-                request.m_response.render(buffer);
-                const auto & [writingError, writingSize] = co_await asio::async_write(stream, buffer);
-                if (writingError) {
-                    request.m_response.m_status = Http::Status::InternalServerError;
-                    tsLogError(writingError);
+                { /** Обрабатываем запрос **/
+                    if (request.m_response.m_status == Http::Status::Ok) {
+                        tsLogInfo(
+                            [& request] {
+                                std::string message {
+                                    std::format(
+                                        Mbs::c_requestedMethod,
+                                        request.m_remote.to_string(),
+                                        request.m_verb,
+                                        request.m_path
+                                    )
+                                };
+                                return std::format(Mbs::c_prefixedText, request.m_id, message);
+                            }
+                        );
+                    }
+                    Http::authenticate(request);
+                    if (request.m_response.m_status == Http::Status::Ok) {
+                        auto handler = lookupHandler(request);
+                        if (handler) {
+                            if (handler->asyncReady()) {
+                                co_await performAsync(*handler, request, asio::use_awaitable);
+                            } else {
+                                (*handler)(request);
+                            }
+                        } else {
+                            request.fail(Http::Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+                        }
+                    }
                 }
+                { /** Пишем ответ **/
+                    Asio::StreamBuffer buffer {};
+                    request.m_response.render(buffer);
+                    const auto & [writingError, writingSize] = co_await asio::async_write(stream, buffer);
+                    if (writingError) {
+                        request.m_response.m_status = Http::Status::InternalServerError;
+                        tsLogError(writingError);
+                    }
+                }
+
+            } catch (const Failure & e) {
+                request.m_response.m_status = Http::Status::InternalServerError;
+                tsLogError(e);
+            } catch (const std::exception & e) {
+                request.m_response.m_status = Http::Status::InternalServerError;
+                tsLogError(e);
+            } catch (...) {
+                request.m_response.m_status = Http::Status::InternalServerError;
+                tsLogError(Wcs::c_somethingWrong);
+            }
+
+            if (request.m_response.m_status < Http::Status::BadRequest) {
+                tsLogInfo(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
+            } else {
+                tsLogError(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
             }
 
         } catch (const Failure & e) {
-            request.m_response.m_status = Http::Status::InternalServerError;
             tsLogError(e);
         } catch (const std::exception & e) {
-            request.m_response.m_status = Http::Status::InternalServerError;
             tsLogError(e);
         } catch (...) {
-            request.m_response.m_status = Http::Status::InternalServerError;
             tsLogError(Wcs::c_somethingWrong);
-        }
-
-        if (request.m_response.m_status < Http::Status::BadRequest) {
-            tsLogInfo(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
-        } else {
-            tsLogError(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
         }
 
         --s_requestCounter;
@@ -234,19 +240,18 @@ namespace Server {
             tsLogInfo(Wcs::c_started);
             s_state.store(State::Running);
 
-            while (s_state == State::Running) {
+            do {
                 auto [acceptingError, socket] = co_await acceptor.async_accept();
-                if (s_state == State::Running) {
-                    if (!acceptingError && socket.is_open()) {
-                        co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
-                    } else {
-                        tsLogError(acceptingError);
-                        tsLogError(Wcs::c_servicingFailed);
-                    }
+                if (s_state != State::Running) {
+                    break;
                 }
-            }
-
-            assert(s_state.load() == State::Stopping);
+                if (!acceptingError && socket.is_open()) {
+                    co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
+                } else {
+                    tsLogError(acceptingError);
+                    tsLogError(Wcs::c_servicingFailed);
+                }
+            } while (s_state == State::Running);
 
         } catch (const Failure & e) {
             tsLogError(e);
@@ -255,6 +260,8 @@ namespace Server {
         } catch (...) {
             tsLogError(Wcs::c_somethingWrong);
         }
+
+        assert(s_state.load() == State::Stopping);
 
         co_return;
     }
@@ -282,9 +289,9 @@ namespace Server {
         std::thread([] {
             // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
             // ISSUE: Остановка сервера (вызов `s_ioContext->stop()`) во время начала выполнения функции `accept(...)`
-            //  приведёт к ошибке `The file handle supplied is not valid.`. В реальном бизнес-процессе возникновение
-            //  такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное
-            //  отключение или сбои в работе сети.
+            //  приведёт к ошибке `The file handle supplied is not valid.`. В реальном бизнес-процессе случайное
+            //  возникновение такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное
+            //  отключение или сбой в работе сети.
             s_state.store(State::Stopping);
             size_t wait = c_controlTimeout / c_sleepQuantum;
             while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {

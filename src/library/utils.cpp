@@ -5,40 +5,44 @@
 
 namespace System {
     [[nodiscard, maybe_unused]]
-    std::wstring errorMessage(::DWORD error) noexcept try {
+    std::wstring errorMessage(::DWORD error) noexcept {
         wchar_t * text { nullptr };
         Deferred::LocalFree freeTextBuffer { text };
-        auto status
-            = ::FormatMessageW(
-                FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr,
-                error,
-                LANG_SYSTEM_DEFAULT, // MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                reinterpret_cast<::LPWSTR>(&text),
-                0,
-                nullptr
-            );
-        if (status) {
-            wchar_t * end { text + wcslen(text) };
-            if (end != text) {
-                --end;
-                while (
-                    end != text
-                    && (*end == L' ' || *end == L'\n' || *end == L'\r' || *end == L'\t' || *end == L'\v' || *end == L'\f')
-                ) {
-                    *end-- = L'\0';
-                }
-                while (--end != text) {
-                    if (*end == L'\n' || *end == L'\r' /*|| *end == L'\t' || *end == L'\v' || *end == L'\f'*/) {
-                        *end = L' ';
+        try {
+            auto status
+                = ::FormatMessageW(
+                    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    nullptr,
+                    error,
+                    LANG_SYSTEM_DEFAULT, // MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    reinterpret_cast<::LPWSTR>(&text),
+                    0,
+                    nullptr
+                );
+            if (status) {
+                wchar_t * end { text + wcslen(text) };
+                if (end != text) {
+                    --end;
+                    while (
+                        end != text
+                        && (*end == L' ' || *end == L'\n' || *end == L'\r' || *end == L'\t' || *end == L'\v' || *end == L'\f')
+                    ) {
+                        *end-- = L'\0';
+                    }
+                    while (--end != text) {
+                        if (*end == L'\n' || *end == L'\r' /*|| *end == L'\t' || *end == L'\v' || *end == L'\f'*/) {
+                            *end = L' ';
+                        }
                     }
                 }
+            } else {
+                freeTextBuffer.cancel();
+                text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
             }
-            return text;
-        } else {
-            return Wcs::c_somethingWrong;
+        } catch (...) {
+            freeTextBuffer.cancel();
+            text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
         }
-    } catch (...) {
-        return Wcs::c_somethingWrong;
+        return text;
     }
 }

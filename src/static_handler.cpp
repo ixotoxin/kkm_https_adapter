@@ -20,10 +20,6 @@ namespace Http {
         return false;
     }
 
-    // bool StaticHandler::isCaching() const noexcept {
-    //     return true;
-    // }
-
     void StaticHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
         if (request.m_response.m_status != Status::Ok) {

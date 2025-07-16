@@ -3,11 +3,12 @@
 
 #include "log.h"
 #include "library/datetime.h"
+#include <cassert>
 #include <fstream>
 #include <filesystem>
 
 namespace Log {
-    static const std::unordered_map<Level, std::wstring_view> s_levelPrefix {
+    static const std::unordered_map<Level, std::wstring_view> s_levelLabels {
         { Level::Debug, L"DBG" },
         { Level::Info, L"INF" },
         { Level::Warning, L"WRN" },
@@ -22,12 +23,13 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
+            assert(ready(level));
             std::wostream & output { level >= Level::Warning ? std::wcerr : std::wcout };
             if (s_outputTimestamp) {
                 output << DateTime::iso;
             }
             if (s_outputLevel) {
-                output << s_levelPrefix.at(level) << L": ";
+                output << s_levelLabels.at(level) << L": ";
             }
             output << message << std::endl;
         } catch (...) {
@@ -61,6 +63,7 @@ namespace Log {
                     return false;
                 }
             }
+            s_currentMonth = localTime.wMonth;
             filePath /= std::format(L"kkmha-{:04d}-{:02d}.log", localTime.wYear, localTime.wMonth);
             s_file.open(filePath, std::ios::out | std::ios::app);
             s_file.imbue(std::locale(".utf-8"));
@@ -89,11 +92,8 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
-            if (open()) {
-                s_file << DateTime::iso << s_levelPrefix.at(level) << L": " << message << std::endl;
-            } else {
-                s_file.close();
-            }
+            assert(ready(level));
+            s_file << DateTime::iso << s_levelLabels.at(level) << L": " << message << std::endl;
         } catch (...) {
             std::wclog << Wcs::c_loggingError << std::endl;
         }
@@ -122,6 +122,7 @@ namespace Log {
         void close() noexcept try {
             if (s_sourceHandle) {
                 ::DeregisterEventSource(s_sourceHandle);
+                s_sourceHandle = nullptr;
             }
         } catch (...) {
             std::wclog << Wcs::c_loggingError << std::endl;
@@ -134,6 +135,7 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring & message) noexcept try {
+            assert(ready(level));
             const wchar_t * strings[2] {
                 c_eventSource,
                 message.c_str()
@@ -156,11 +158,12 @@ namespace Log {
 
     [[nodiscard, maybe_unused]]
     std::wstring_view label(int level) {
+        assert(level >= c_levelDebug && level <= c_levelNone);
         if (level == c_levelNone) {
             return L"NONE";
         }
-        if (s_levelPrefix.contains(static_cast<Level>(level))) {
-            return s_levelPrefix.at(static_cast<Level>(level));
+        if (s_levelLabels.contains(static_cast<Level>(level))) {
+            return s_levelLabels.at(static_cast<Level>(level));
         }
         return L"[error]";
     }

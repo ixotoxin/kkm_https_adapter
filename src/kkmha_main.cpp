@@ -23,9 +23,9 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
         L"    show-config            Вывести конфигурацию\n"
         L"    install                Установить сервер как службу Windows\n"
         L"    uninstall              Удалить службу Windows\n"
-        L"    start                  Запустить службу\n"
-        L"    stop                   Остановить службу\n"
-        L"    restart                Перезапустить службу\n"
+        L"    start                  Запустить службу Windows\n"
+        L"    stop                   Остановить службу Windows\n"
+        L"    restart                Перезапустить службу Windows\n"
         L"    foreground             Запустить сервер как foreground-процесс\n"
         L"    learn _пп_ [_пп_ ...]  Добавить ККМ\n"
         L"    status _сн_            Вывести статус ККМ (п1)\n"
@@ -183,8 +183,6 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Log::File::open();
                 Log::EventLog::open();
                 Service::Worker::run();
-                // Log::EventLog::close();
-                // Log::File::close();
                 return EXIT_SUCCESS;
             }
 

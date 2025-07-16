@@ -95,6 +95,7 @@ namespace Http {
             if (m_data.index() == 2) {
                 std::get<2>(m_data)->render(buffer, m_status);
             } else {
+                assert(s_statusStrings.contains(m_status));
                 Nln::Json json({
                     { "!success", m_status < Status::BadRequest },
                     { "!message", m_data.index() == 1 ? std::get<1>(m_data) : s_statusStrings.at(m_status) }
@@ -117,10 +118,12 @@ namespace Http {
     using RequestHeader = std::unordered_map<std::string, std::string>;
 
     struct Request {
+    private:
         using SequenceType = int64_t;
         using IdType = uint16_t;
-        constexpr static SequenceType s_idMask = 0xfff;
+        constexpr static SequenceType c_idMask = 0xfff;
 
+    public:
         RequestHeader m_header {};
         Response m_response {};
         std::string m_verb {};
@@ -133,9 +136,9 @@ namespace Http {
 
         Request() = delete;
 
-        inline explicit Request(Asio::IpAddress remote)
-        : m_remote(std::move(remote)),
-          m_id(static_cast<IdType>(s_sequence.fetch_add(1 + (DateTime::windows() & s_idMask)))) {};
+        inline explicit Request(Asio::IpAddress && remote)
+        : m_remote(std::forward<Asio::IpAddress>(remote)),
+          m_id(static_cast<IdType>(s_sequence.fetch_add(1 + (DateTime::windows() & c_idMask)))) {};
 
         Request(const Request &) = delete;
         Request(Request &&) = delete;
@@ -175,7 +178,7 @@ namespace Http {
         }
 
     private:
-        inline static std::atomic<SequenceType> s_sequence { 1 + (DateTime::windows() & s_idMask) };
+        inline static std::atomic<SequenceType> s_sequence { 1 + (DateTime::windows() & c_idMask) };
     };
 
     class RequestHandler {
@@ -189,7 +192,6 @@ namespace Http {
         RequestHandler & operator=(RequestHandler &&) = default;
 
         [[nodiscard]] virtual bool asyncReady() const noexcept = 0;
-        // [[nodiscard]] virtual bool isCaching() const noexcept = 0;
         virtual void operator()(Request &) const noexcept = 0;
     };
 
