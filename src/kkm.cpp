@@ -329,7 +329,7 @@ namespace Kkm {
         /** Печать текста **/
         if (magnified) {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_FONT_DOUBLE_WIDTH, true);
-            /*m_kkm.setParam(Atol::LIBFPTR_PARAM_FONT_DOUBLE_HEIGHT, true);*/
+            // m_kkm.setParam(Atol::LIBFPTR_PARAM_FONT_DOUBLE_HEIGHT, true);
         }
         if (center) {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_ALIGNMENT, Atol::LIBFPTR_ALIGNMENT_CENTER);
@@ -354,7 +354,7 @@ namespace Kkm {
         // ISSUE: Из документации не очень понятно как работать с методом checkDocumentClosed() - описания нет,
         //  приведенный пример выглядит странно и рассчитан скорее всего на интерактивное взаимодействие с ККМ.
         //  В нашем случае интерактивность невозможна. Будем ждать чуда. Если чуда не произойдет, отменять чек.
-        size_t i;
+        decltype(s_documentClosingTimeout) i;
         for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.checkDocumentClosed() < 0 && i; --i) {
             tsLogWarning(Wcs::c_closingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
             // ::Sleep(c_sleepQuantum);

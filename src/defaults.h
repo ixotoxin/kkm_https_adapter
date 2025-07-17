@@ -27,6 +27,7 @@ namespace Service {
     constexpr const wchar_t * c_dependencies { L"\0\0" }; // Формат: "dep1\0dep2\0\0"
     constexpr const wchar_t * c_account { L"NT AUTHORITY\\LocalService" };
     constexpr const wchar_t * c_password { L"" };
+    constexpr ::DWORD c_waitHint { 25'000 }; // Миллисекунды
     constexpr ::DWORD c_controlTimeout { 30'000 }; // Миллисекунды
 }
 

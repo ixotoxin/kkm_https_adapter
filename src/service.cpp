@@ -15,29 +15,35 @@ namespace Service {
     using Basic::Failure;
     using Basic::c_sleepQuantum;
 
-    static_assert(c_controlTimeout >= c_sleepQuantum);
+    static_assert(c_waitHint >= c_sleepQuantum && c_waitHint > Server::c_controlTimeout);
+    static_assert(c_controlTimeout >= c_sleepQuantum && c_controlTimeout > Server::c_controlTimeout);
 
     namespace Worker {
         static ::SERVICE_STATUS s_status {};
         static ::SERVICE_STATUS_HANDLE s_statusHandle { nullptr };
-        static ::DWORD s_checkPoint { 1 };
+        static ::DWORD s_checkPoint { 0 };
 
         void setStatus(::DWORD state, ::DWORD win32ExitCode = NO_ERROR) noexcept {
             s_status.dwCurrentState = state;
             s_status.dwWin32ExitCode = win32ExitCode;
-            s_status.dwWaitHint = c_sleepQuantum * 2;
-            s_status.dwCheckPoint = state == SERVICE_RUNNING || state == SERVICE_STOPPED ? 0 : s_checkPoint++;
+
+            if (state == SERVICE_RUNNING || state == SERVICE_STOPPED) {
+                s_status.dwCheckPoint = 0;
+                s_status.dwWaitHint = 0;
+            } else {
+                s_status.dwCheckPoint = ++s_checkPoint;
+                s_status.dwWaitHint = c_waitHint;
+            }
+
             ::SetServiceStatus(s_statusHandle, &s_status);
         }
 
         void start() noexcept {
-            std::optional<::DWORD> error = NO_ERROR;
-
             try {
                 setStatus(SERVICE_START_PENDING);
                 Server::start();
                 setStatus(SERVICE_RUNNING);
-                error = std::nullopt;
+                return; /** Не удаляй, смотри дальше. **/
             } catch (const Failure & e) {
                 tsLogError(e);
             } catch (const std::exception & e) {
@@ -46,19 +52,17 @@ namespace Service {
                 tsLogError(Wcs::c_startingFailed);
             }
 
-            if (error.has_value()) {
-                setStatus(SERVICE_STOPPED, *error);
-            }
+            setStatus(SERVICE_STOPPED, NO_ERROR);
         }
 
         void stop() noexcept {
-            std::optional<::DWORD> originalState = s_status.dwCurrentState;
+            ::DWORD originalState { s_status.dwCurrentState };
 
             try {
                 setStatus(SERVICE_STOP_PENDING);
                 Server::stop();
                 setStatus(SERVICE_STOPPED);
-                originalState = std::nullopt;
+                return; /** Не удаляй, смотри дальше. **/
             } catch (const Failure & e) {
                 tsLogError(e);
             } catch (const std::exception & e) {
@@ -67,9 +71,7 @@ namespace Service {
                 tsLogError(Wcs::c_startingFailed);
             }
 
-            if (originalState.has_value()) {
-                setStatus(*originalState);
-            }
+            setStatus(originalState);
         }
 
         void WINAPI handler(::DWORD ctrl) noexcept {
@@ -96,7 +98,10 @@ namespace Service {
             s_status.dwCheckPoint = 0;
             s_status.dwWaitHint = 0;
 
-            ::SERVICE_TABLE_ENTRYW serviceTable[] = {{ const_cast<::LPWSTR>(c_systemName), main }, { nullptr, nullptr }};
+            ::SERVICE_TABLE_ENTRYW serviceTable[] {
+                { const_cast<::LPWSTR>(c_systemName), main },
+                { nullptr, nullptr }
+            };
 
             if (!::StartServiceCtrlDispatcherW(serviceTable)) {
                 throw Failure(System::explainError(L"StartServiceCtrlDispatcherW(...)")); // NOLINT(*-exception-baseclass)
@@ -125,8 +130,8 @@ namespace Service {
             std::wstring_view message
         ) {
             auto checkPoint = status.dwCheckPoint;
-            auto ticks = ::GetTickCount();
-            auto begin = ticks;
+            auto initialTicks = ::GetTickCount();
+            auto ticks = initialTicks;
 
             do {
                 cliMsgDebug(message);
@@ -136,7 +141,7 @@ namespace Service {
                 if (status.dwCheckPoint > checkPoint) {
                     checkPoint = status.dwCheckPoint;
                     ticks = currTicks;
-                } else if (currTicks - ticks > status.dwWaitHint || currTicks - begin > c_controlTimeout) {
+                } else if (currTicks - ticks > status.dwWaitHint || currTicks - initialTicks > c_controlTimeout) {
                     break;
                 }
             } while (status.dwCurrentState == value);
@@ -192,7 +197,8 @@ namespace Service {
                 throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
             if (state != SERVICE_STOPPED) {
-                throw Failure(Wcs::c_alreadyStarted); // NOLINT(*-exception-baseclass)
+                // throw Failure(Wcs::c_alreadyStarted); // NOLINT(*-exception-baseclass)
+                cliMsgWarning(Wcs::c_alreadyStarted);
             }
 
             if (!::StartServiceW(service, 0, nullptr)) {
@@ -207,13 +213,17 @@ namespace Service {
             cliMsgInfo(Wcs::c_started);
         }
 
-        inline void stop(::SC_HANDLE & service) {
+        inline void stop(::SC_HANDLE & service, bool logAlreadyStopped = true) {
             ::SERVICE_STATUS_PROCESS status {};
 
             queryStatus(service, status);
 
             if (status.dwCurrentState == SERVICE_STOPPED) {
-                throw Failure(Wcs::c_alreadyStopped); // NOLINT(*-exception-baseclass)
+                // throw Failure(Wcs::c_alreadyStopped); // NOLINT(*-exception-baseclass)
+                if (logAlreadyStopped) {
+                    cliMsgWarning(Wcs::c_alreadyStopped);
+                }
+                return;
             }
 
             if (status.dwCurrentState != SERVICE_STOP_PENDING) {
@@ -335,7 +345,7 @@ namespace Service {
                 throw Failure(System::explainError(L"OpenServiceW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            stop(service);
+            stop(service, false);
 
             if (!::DeleteService(service)) {
                 throw Failure(System::explainError(L"DeleteService(...)")); // NOLINT(*-exception-baseclass)

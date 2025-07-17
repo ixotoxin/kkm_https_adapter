@@ -406,6 +406,7 @@ namespace Log {
         { L"err", c_levelError },
         { L"error", c_levelError },
         { std::to_wstring(c_levelError), c_levelError },
+        { L"no", c_levelNone },
         { L"non", c_levelNone },
         { L"none", c_levelNone },
         { std::to_wstring(c_levelNone), c_levelNone }
