@@ -199,6 +199,7 @@ namespace Service {
             if (state != SERVICE_STOPPED) {
                 // throw Failure(Wcs::c_alreadyStarted); // NOLINT(*-exception-baseclass)
                 cliMsgWarning(Wcs::c_alreadyStarted);
+                return;
             }
 
             if (!::StartServiceW(service, 0, nullptr)) {
