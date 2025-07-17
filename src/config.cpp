@@ -188,7 +188,7 @@ namespace Config {
                     json.clear();
                     std::ifstream input { Http::s_mimeMapFile };
                     input >> json;
-                    if (!json.empty() && !json.is_object()) {
+                    if (json.empty() || !json.is_object()) {
                         throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                     }
                     for (auto & [key, value] : json.items()) {

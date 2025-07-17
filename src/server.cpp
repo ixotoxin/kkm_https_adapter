@@ -221,7 +221,6 @@ namespace Server {
                 ::SSL_CTX_set_min_proto_version(sslContext.native_handle(), TLS1_VERSION);
                 sslContext.clear_options(alwaysClear | noLegacyTls);
                 sslContext.set_options(alwaysSet);
-                sslContext.set_verify_mode(asio::ssl::verify_none);
             } else {
                 if (s_securityLevel >= 0) {
                     ::SSL_CTX_set_security_level(sslContext.native_handle(), s_securityLevel);
@@ -233,6 +232,7 @@ namespace Server {
             sslContext.set_password_callback([] (auto, auto) { return s_privateKeyPassword; });
             sslContext.use_certificate_chain_file(s_certificateChainFile);
             sslContext.use_private_key_file(s_privateKeyFile, Asio::SslContext::pem);
+            sslContext.set_verify_mode(asio::ssl::verify_none);
 
             auto executor = co_await asio::this_coro::executor;
             Asio::Acceptor acceptor(executor, endpoint);
@@ -246,7 +246,7 @@ namespace Server {
                     break;
                 }
                 if (!acceptingError && socket.is_open()) {
-                    co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
+                    asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                 } else {
                     tsLogError(acceptingError);
                     tsLogError(Wcs::c_servicingFailed);
@@ -288,10 +288,10 @@ namespace Server {
 
         std::thread([] {
             // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
-            // ISSUE: Остановка сервера (вызов `s_ioContext->stop()`) во время начала выполнения функции `accept(...)`
-            //  приведёт к ошибке `The file handle supplied is not valid.`. В реальном бизнес-процессе случайное
-            //  возникновение такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное
-            //  отключение или сбой в работе сети.
+            // ISSUE: Остановка сервера (вызов `s_ioContext->stop()`) во время выполнения функции `accept(...)` приведёт
+            //  к ошибке 'The file handle supplied is not valid'. В реальном бизнес-процессе 'случайное' возникновение
+            //  такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное отключение
+            //  или сбой в работе сети.
             s_state.store(State::Stopping);
             size_t wait = c_controlTimeout / c_sleepQuantum;
             while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {
@@ -317,7 +317,7 @@ namespace Server {
         {
             asio::signal_set signals(*s_ioContext, SIGINT, SIGTERM);
             signals.async_wait([] (auto, auto) { shutdown(); });
-            co_spawn(*s_ioContext, listen(), asio::detached);
+            asio::co_spawn(*s_ioContext, listen(), asio::detached);
             s_ioContext->run();
         }
 

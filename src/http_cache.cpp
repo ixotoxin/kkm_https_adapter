@@ -48,7 +48,7 @@ namespace Http::Cache {
     }
 
     void maintain() {
-        if (++s_counter == c_cacheCleanUpThreshold) {
+        if (++s_counter >= c_cacheCleanUpThreshold) {
             std::scoped_lock cacheLock(s_cacheMutex);
             auto oldSize = s_cache.size();
             std::erase_if(

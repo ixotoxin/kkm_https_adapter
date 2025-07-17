@@ -89,7 +89,8 @@ namespace Http {
     }
 
     void Parser::dummyParser(std::istream & stream) { // NOLINT(*-convert-member-functions-to-static)
-        // TODO: Оптимизировать очистку буфера.
+        // ISSUE: А надо ли очищать стрим? Разобраться.
+        // TODO: Оптимизировать очистку стрима.
         char buffer[Basic::c_defaultBufferSize];
         while (stream.good()) {
             stream.read(buffer, sizeof(buffer));
