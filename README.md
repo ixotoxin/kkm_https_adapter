@@ -40,6 +40,7 @@
     "server": {
         "ipv4Only": false,
         "port": 5757,
+        "concurrencyLimit": 10,
         "enableLegacyTls": "no",
         "securityLevel": 5,
         "certificateChainFile": "conf\\kkmha.crt",
@@ -80,6 +81,7 @@
 | `log.appendLocation`           | Включить/выключить вывод точки происхождения сообщения в исходных файлах                              |
 | `server.ipv4Only`              | Включить/выключить поддержку IPv6                                                                     |
 | `server.port`                  | Порт, который будет слушать сервер                                                                    |
+| `server.concurrencyLimit`      | Ограничение максимального количества одновременных соединений                                         |
 | `server.enableLegacyTls`       | Разрешить/запретить поддержку TLS 1.0 и TLS 1.1                                                       |
 | `server.securityLevel`         | Уровень безопасности устанавливаемый в библиотеке OpenSSL (0 - 5)                                     |
 | `server.certificateChainFile`  | Путь к файлу сертификата                                                                              |
