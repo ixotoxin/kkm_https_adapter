@@ -3,7 +3,7 @@ IF NOT "%CLANG_DIR%" == "" GOTO CLANG_DIR_IS_SET
 SET CLANG_DIR=C:\Devel\Platform\Clang\20.1.8-x86_64
 SET CMAKE_DIR=C:\Devel\Platform\CMake\3.31.7-x86_64
 SET NINJA_DIR=C:\Devel\Platform\Ninja\1.13.1
-SET PATH=%CLANG_DIR%\bin;%CMAKE_DIR%\bin;%NINJA_DIR%;%PATH%
+SET PATH=%NINJA_DIR%;%CMAKE_DIR%\bin;%CLANG_DIR%\bin;%PATH%
 :CLANG_DIR_IS_SET
-IF NOT EXIST "../__temp" MKDIR "../__temp"
-IF NOT EXIST "../_build" MKDIR "../_build"
+IF NOT EXIST "%~dp0../__temp" MKDIR "%~dp0../__temp"
+IF NOT EXIST "%~dp0../_build" MKDIR "%~dp0../_build"
