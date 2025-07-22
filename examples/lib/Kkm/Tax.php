@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 enum Tax: string
 {
     case No = 'no';
@@ -30,6 +32,6 @@ enum Tax: string
         if ($nullable && is_null($value)) {
             return null;
         }
-        throw new \Exception();
+        throw new \LogicException();
     }
 }

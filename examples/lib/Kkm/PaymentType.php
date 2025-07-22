@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 enum PaymentType: string
 {
     case Cash = 'cash';
@@ -22,6 +24,6 @@ enum PaymentType: string
         if ($nullable && is_null($value)) {
             return null;
         }
-        throw new \Exception();
+        throw new \RuntimeException();
     }
 }

@@ -44,7 +44,7 @@ $tests = [
     '', '/', '//', '///', '.', '..', '...', '/.', '././.', 'abc..def', '../abc/',
     'index.html', 'static', '.static', 'static/.', 'static/.file', 'static/file.',
     'static/qwerty', 'static/abc..def', 'static/../abc/', 'static/index.html',
-    'static/index.html', '//static///index.html', '././static/././index.html', '././static/././файл'
+    '//static///index.html', '././static/././index.html', '././static/././файл'
 ];
 
 $connParams = new ConnParams($config['goodConnParams']);

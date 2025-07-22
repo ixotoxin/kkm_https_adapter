@@ -10,8 +10,7 @@ use Kkm\{ ConnParams, Server, Utils };
 require_once('lib.php');
 $config = require('cfg.php');
 
-$connParams = new ConnParams($config['goodConnParams']);
-$server = new Server($connParams);
+$server = new Server(new ConnParams($config['goodConnParams']));
 
 $response = $server->resetRegistry()->setIdempotencyKey()->perform();
 Utils::printResponse($response);

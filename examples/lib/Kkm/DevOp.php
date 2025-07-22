@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 enum DevOp
 {
     case Status;

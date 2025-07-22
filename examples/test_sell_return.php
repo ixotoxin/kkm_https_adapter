@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-use Kkm\{ ConnParams, Device, Operations\SellReturn, Tax, PaymentType, Utils };
+use Kkm\{ ConnParams, Device, Operations, Tax, PaymentType, Utils };
 
 // define('OUT_REQUEST_BODY', true);
 require_once('lib.php');
@@ -34,7 +34,7 @@ $response
 Utils::printResponse($response);
 
 $response
-    = (new SellReturn($device))
+    = (new Operations\SellReturn($device))
     ->perform([
         'idempotencyKey' => Utils::uid(),
         'operator' => $config['operator'],

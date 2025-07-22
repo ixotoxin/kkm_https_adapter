@@ -5,15 +5,14 @@
 
 declare(strict_types=1);
 
-use Kkm\{ ConnParams, Server, SrvOp, Utils };
+use Kkm\{ ConnParams, Server, SrvOp, Operations, Utils };
 
 require_once('lib.php');
 $config = require('cfg.php');
 
-$connParams = new ConnParams($config['goodConnParams']);
-$server = new Server($connParams);
+$server = new Server(new ConnParams($config['goodConnParams']));
 
-$operation = new \Kkm\Operations\Learn($server);
+$operation = new Operations\Learn($server);
 $response = $operation->setConnParams($config['badConnString1'])->setIdempotencyKey()->perform();
 Utils::printResponse($response);
 

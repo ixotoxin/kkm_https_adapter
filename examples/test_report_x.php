@@ -5,13 +5,13 @@
 
 declare(strict_types=1);
 
-use Kkm\{ ConnParams, Device, Operations\ReportX, Utils };
+use Kkm\{ ConnParams, Device, Operations, Utils };
 
 require_once('lib.php');
 $config = require('cfg.php');
 
 $response
-    = (new ReportX(new Device(new ConnParams($config['goodConnParams']))))
+    = (new Operations\ReportX(new Device(new ConnParams($config['goodConnParams']))))
     ->setOperator($config['operator'])
     ->setIdempotencyKey()
     ->perform();

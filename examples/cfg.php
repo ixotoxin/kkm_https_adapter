@@ -4,4 +4,6 @@
 
 declare(strict_types=1);
 
-return require(getenv('KKMHA_EXAMPLES_CONFIG') ?: (__DIR__ . '/cfg_public.php'));
+defined('KKMHA_EXAMPLES') or die('Include first lib.php.');
+
+return require(getenv('KKMHA_EXAMPLES_CONFIG') ?: (__DIR__ . DIRECTORY_SEPARATOR . '/cfg_public.php'));

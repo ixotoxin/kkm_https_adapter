@@ -5,12 +5,12 @@
 
 declare(strict_types=1);
 
-use Kkm\{ Utils, ConnParams, Server, Operations\ResetRegistry };
+use Kkm\{ Utils, ConnParams, Server, Operations };
 
 require_once('lib.php');
 $config = require('cfg.php');
 
-$operation = new ResetRegistry(new Server(new ConnParams($config['goodConnParams'])));
+$operation = new Operations\ResetRegistry(new Server(new ConnParams($config['goodConnParams'])));
 
 $string1 = 'X';
 $string2 = str_repeat('Y', 50000);

@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 class ConnParams
 {
     public readonly string $host;
@@ -19,12 +21,12 @@ class ConnParams
     ) {
         if (is_array($host)) {
             $this->host = $host['host'];
-            $this->secret = $host['secret'] ?? $secret;
-            $this->serial = $host['serial'] ?? $serial;
+            $this->secret = $host['secret'] ?? '';
+            $this->serial = $host['serial'] ?? '';
         } else {
             $this->host = $host;
-            $this->secret = $secret;
-            $this->serial = $serial;
+            $this->secret = $secret ?? '';
+            $this->serial = $serial ?? '';
         }
     }
 }
