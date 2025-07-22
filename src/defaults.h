@@ -26,8 +26,8 @@ namespace Service {
     constexpr const wchar_t * c_dependencies { L"\0\0" }; // Формат: "dep1\0dep2\0\0"
     constexpr const wchar_t * c_account { L"NT AUTHORITY\\LocalService" };
     constexpr const wchar_t * c_password { L"" };
-    constexpr ::DWORD c_waitHint { 25'000 }; // Миллисекунды
-    constexpr ::DWORD c_controlTimeout { 30'000 }; // Миллисекунды
+    constexpr ::DWORD c_waitHint { 35'000 }; // Миллисекунды
+    constexpr ::DWORD c_controlTimeout { 40'000 }; // Миллисекунды
 }
 
 namespace Log {
@@ -45,11 +45,11 @@ namespace Server {
     constexpr unsigned short c_maxPort { 65'535 };
     constexpr unsigned short c_defPort { 5'757 };
     constexpr int64_t c_minConcurrencyLimit { 2 };
-    constexpr int64_t c_maxConcurrencyLimit { 100 };
-    constexpr int64_t c_defConcurrencyLimit { 2'000 };
+    constexpr int64_t c_maxConcurrencyLimit { 2'000 };
+    constexpr int64_t c_defConcurrencyLimit { 10 };
     constexpr std::string_view c_defCertificateChainFile { "conf\\kkmha.crt" };
     constexpr std::string_view c_defPrivateKeyFile { "conf\\kkmha.key" };
-    constexpr std::chrono::milliseconds::rep c_controlTimeout { 20'000 }; // Миллисекунды
+    constexpr std::chrono::milliseconds::rep c_controlTimeout { 30'000 }; // Миллисекунды
 }
 
 namespace Http {
@@ -69,14 +69,14 @@ namespace Http {
 }
 
 namespace Kkm {
-    constexpr size_t c_maxLength { 128 };
+    constexpr size_t c_maxLength { 192 };
     constexpr std::wstring_view c_connParamsSeparator { L"," };
     constexpr wchar_t c_separatorChar { L'-' };
     constexpr std::wstring_view c_defDirectory { L"conf\\kkm" };
     constexpr std::wstring_view c_defBaudRate { L"115200" };
     constexpr size_t c_minLineLength { 24 };
     constexpr size_t c_maxLineLength { c_maxLength };
-    constexpr size_t c_defLineLength { 34 };
+    constexpr size_t c_defLineLength { 42 };
     constexpr auto c_minDocumentClosingTimeout = Basic::c_sleepQuantum; // Миллисекунды
     constexpr auto c_maxDocumentClosingTimeout = Basic::c_sleep * 10; // Миллисекунды
     constexpr auto c_defDocumentClosingTimeout = Basic::c_sleep; // Миллисекунды

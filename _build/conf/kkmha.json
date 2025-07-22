@@ -17,7 +17,7 @@
     "server": {
         "ipv4Only": false,
         "port": 5757,
-        "concurrencyLimit": 100,
+        "concurrencyLimit": 10,
         "enableLegacyTls": "no",
         "securityLevel": 5,
         "certificateChainFile": "conf\\kkmha.test.ss.crt",
