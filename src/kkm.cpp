@@ -483,11 +483,22 @@ namespace Kkm {
     }
 
     bool Device::Call::Result::exportTo(Nln::Json & json) {
+        bool overrideMessage { false };
         if (
-            !json.contains("!success") || !json["!success"].is_boolean()
+            !json.contains("!success")
             || (json["!success"].get<bool>() && !m_success)
+            || !json["!success"].is_boolean()
         ) {
             json["!success"] = m_success;
+            overrideMessage = true;
+        }
+        if (
+            overrideMessage
+            || !json.contains("!message")
+            || json["!message"].get<std::string>() == "OK"
+            || json["!message"].empty()
+            || !json["!message"].is_string()
+        ) {
             json["!message"] = Text::convert(m_message);
         }
         return json["!success"].get<bool>();
@@ -503,7 +514,7 @@ namespace Kkm {
                 { "dateTime", DateTime::cast<std::string>(m_dateTime) },
                 { "documentNumber", m_documentNumber },
                 { "documentType", m_documentType },
-                { "documentTypeText", Text::convert(s_documentType.at(m_documentType)) },
+                { "documentTypeText", Text::convert(s_documentTypeLabels.at(m_documentType)) },
                 { "fiscal", m_fiscal },
                 { "fnFiscal", m_fnFiscal },
                 { "fnPresent", m_fnPresent },
@@ -523,11 +534,11 @@ namespace Kkm {
                 { "receiptPaperPresent", m_receiptPaperPresent },
                 { "receiptSum", m_receiptSum },
                 { "receiptType", m_receiptType },
-                { "receiptTypeText", Text::convert(s_receiptType.at(m_receiptType)) },
+                { "receiptTypeText", Text::convert(s_receiptTypeLabels.at(m_receiptType)) },
                 { "serialNumber", Text::convert(m_serialNumber) },
                 { "shiftNumber", m_shiftNumber },
                 { "shiftState", m_shiftState },
-                { "shiftStateText", Text::convert(s_shiftState.at(m_shiftState)) },
+                { "shiftStateText", Text::convert(s_shiftStateLabels.at(m_shiftState)) },
                 { "subMode", m_subMode }
             };
             return true;
@@ -583,7 +594,7 @@ namespace Kkm {
                 { "expiredAt", DateTime::cast<std::string>(m_expirationDateTime) },
                 { "shiftNumber", m_shiftNumber },
                 { "shiftState", m_shiftState },
-                { "shiftStateText", Text::convert(s_shiftState.at(m_shiftState)) }
+                { "shiftStateText", Text::convert(s_shiftStateLabels.at(m_shiftState)) }
             };
             return true;
         }
@@ -627,7 +638,7 @@ namespace Kkm {
         if (this->Device::Call::Result::exportTo(json) && m_success) {
             json["receiptState"] = {
                 { "receiptType", m_receiptType },
-                { "receiptTypeText", Text::convert(s_receiptType.at(m_receiptType)) },
+                { "receiptTypeText", Text::convert(s_receiptTypeLabels.at(m_receiptType)) },
                 { "receiptNumber", m_receiptNumber },
                 { "documentNumber", m_documentNumber },
                 { "sum", m_sum },
@@ -924,7 +935,11 @@ namespace Kkm {
         if (this->Device::Call::Result::exportTo(json) && m_success) {
             json["versions"] = {
                 { "boot", Text::convert(m_bootVersion) },
-                { "firmware", Text::convert(m_firmwareVersion) }
+                { "configuration", Text::convert(m_configurationVersion) },
+                { "controlUnit", Text::convert(m_controlUnitVersion) },
+                { "firmware", Text::convert(m_firmwareVersion) },
+                { "release", Text::convert(m_releaseVersion) },
+                { "templates", Text::convert(m_templatesVersion) }
             };
             return true;
         }
@@ -941,6 +956,31 @@ namespace Kkm {
             return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }
         result.m_firmwareVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
+
+        /** Запрос версии конфигурации **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_UNIT_TYPE, Atol::LIBFPTR_UT_CONFIGURATION);
+        if (m_kkm.queryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+        result.m_configurationVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
+        result.m_releaseVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_RELEASE_VERSION));
+
+        /** Запрос версии движка шаблонов **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_UNIT_TYPE, Atol::LIBFPTR_UT_TEMPLATES);
+        if (m_kkm.queryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+        result.m_templatesVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
+
+        /** Запрос версии блока управления **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_UNIT_TYPE, Atol::LIBFPTR_UT_CONTROL_UNIT);
+        if (m_kkm.queryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+        result.m_controlUnitVersion.assign(m_kkm.getParamString(Atol::LIBFPTR_PARAM_UNIT_VERSION));
 
         /** Запрос версии загрузчика **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
@@ -1388,7 +1428,7 @@ namespace Kkm {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PRICE, item.m_price);
             m_kkm.setParam(Atol::LIBFPTR_PARAM_QUANTITY, item.m_quantity);
             m_kkm.setParam(Atol::LIBFPTR_PARAM_MEASUREMENT_UNIT, static_cast<int>(item.m_unit));
-            m_kkm.setParam(Atol::LIBFPTR_PARAM_TAX_TYPE, s_tax.at(item.m_tax));
+            m_kkm.setParam(Atol::LIBFPTR_PARAM_TAX_TYPE, static_cast<int>(item.m_tax));
             if (m_kkm.registration() < 0) {
                 return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
             }
@@ -1398,7 +1438,7 @@ namespace Kkm {
 
         /** Оплата чека **/
         if (details.m_paymentSum > 0) {
-            m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, s_paymentType.at(details.m_paymentType));
+            m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, static_cast<int>(details.m_paymentType));
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_SUM, details.m_paymentSum);
             if (m_kkm.payment() < 0) {
                 return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
@@ -1410,7 +1450,7 @@ namespace Kkm {
         tsLogDebug(Wcs::c_subRegisterReceiptAndPrint, m_logPrefix, m_serialNumber);
 
         /** Закрытие чека **/
-        m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, s_paymentType.at(details.m_paymentType));
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, static_cast<int>(details.m_paymentType));
         if (m_kkm.closeReceipt() < 0) {
             return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
         }

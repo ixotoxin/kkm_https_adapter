@@ -61,7 +61,7 @@
         "cliOperator": {
             "name": "Оператор"
         },
-        "customerAccountField": "Лицевой счёт:",
+        "customerAccountField": "Лицевой счёт: ",
         "maxCashInOut": 500000,
         "maxPrice": 300000,
         "maxQuantity": 1000

@@ -28,13 +28,13 @@ namespace Http {
 
         [[maybe_unused]]
         JsonResponse(bool success, const std::string & message)
-        : ResponseData(), m_data({{ "!success", success }, { "!message", message }}) {
+        : ResponseData(), m_data({ { "!success", success }, { "!message", message } }) {
             assert(m_data.is_object());
         }
 
         [[maybe_unused]]
         JsonResponse(bool success, std::string && message)
-        : ResponseData(), m_data({{ "!success", success }, { "!message", std::forward<std::string>(message) }}) {
+        : ResponseData(), m_data({ { "!success", success }, { "!message", std::forward<std::string>(message) } }) {
             assert(m_data.is_object());
         }
 
