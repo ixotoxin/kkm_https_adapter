@@ -45,13 +45,13 @@ namespace Numeric {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> clamp(T min, T max) {
+    inline auto clamp(T min, T max) {
         return [min, max] (const T value) -> T { return std::clamp(value, min, max); };
     }
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> min(T min) {
+    inline auto min(T min) {
         return
             [min] (const T value) -> T {
                 if (value < min) {
@@ -63,7 +63,7 @@ namespace Numeric {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> max(T max) {
+    inline auto max(T max) {
         return
             [max] (const T value) -> T {
                 if (value > max) {
@@ -75,7 +75,7 @@ namespace Numeric {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> between(T min, T max) {
+    inline auto between(T min, T max) {
         return
             [min, max] (const T value) -> T {
                 if (value < min || value > max) {

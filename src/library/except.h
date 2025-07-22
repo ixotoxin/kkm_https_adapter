@@ -136,9 +136,7 @@ namespace Basic {
         std::wstring explain() const noexcept override {
             std::wstring message { m_variable.empty() ? what() : std::format(Wcs::c_invalidVariable, m_variable, what()) };
             if (Log::s_appendLocation) {
-                message.append(L" (в файле ");
                 message += m_location;
-                message.append(L")");
             }
             return message;
         }

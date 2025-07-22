@@ -157,9 +157,21 @@ namespace Config {
                         Json::handleKey(json, "directory", Kkm::s_directory, Text::Wcs::trim());
                         Json::handleKey(json, "defaultBaudRate", Kkm::s_defaultBaudRate, Kkm::s_allowedBaudRate, path);
                         Json::handleKey(
+                            json, "timeZone",
+                            Kkm::s_timeZone, Kkm::s_timeZoneMap,
+                            [] (auto value) { Kkm::s_timeZoneConfigured = true; return value; },
+                            path
+                        );
+                        Json::handleKey(
                             json, "defaultLineLength",
                             Kkm::s_defaultLineLength,
                             Numeric::between(Kkm::c_minLineLength, Kkm::c_maxLineLength),
+                            path
+                        );
+                        Json::handleKey(
+                            json, "documentClosingTimeout",
+                            Kkm::s_documentClosingTimeout,
+                            Numeric::between(Kkm::c_minDocumentClosingTimeout, Kkm::c_maxDocumentClosingTimeout),
                             path
                         );
                         Json::handleKey(
@@ -173,9 +185,15 @@ namespace Config {
                         );
                         Json::handleKey(json, "customerAccountField", Kkm::s_customerAccountField, path);
                         Json::handleKey(
-                            json, "documentClosingTimeout",
-                            Kkm::s_documentClosingTimeout,
-                            Numeric::between(Kkm::c_minDocumentClosingTimeout, Kkm::c_maxDocumentClosingTimeout),
+                            json, "maxQuantity",
+                            Kkm::s_maxQuantity,
+                            Numeric::between(Kkm::c_minMaxQuantity, Kkm::c_maxMaxQuantity),
+                            path
+                        );
+                        Json::handleKey(
+                            json, "maxPrice",
+                            Kkm::s_maxPrice,
+                            Numeric::between(Kkm::c_minMaxPrice, Kkm::c_maxMaxPrice),
                             path
                         );
                         return true;
@@ -205,7 +223,7 @@ namespace Config {
                             throw Failure(std::format(Wcs::c_cantParseConfig, Http::s_mimeMapFile)); // NOLINT(*-exception-baseclass)
                         }
                         if (ext[0] != '.') {
-                            ext = "."s + ext;
+                            ext = "."s + ext; // NOLINT(*-inefficient-string-concatenation)
                         }
                         Http::s_mimeMap[ext] = std::move(type);
                     }

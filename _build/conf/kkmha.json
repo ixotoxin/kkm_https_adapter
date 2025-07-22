@@ -39,6 +39,7 @@
             "name": "Оператор",
             "--inn": "770000000000"
         },
-        "--documentClosingTimeout": 5000
+        "timeZone": "device",
+        "documentClosingTimeout": 5000
     }
 }

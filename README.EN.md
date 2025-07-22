@@ -15,7 +15,7 @@ etc.) are performed atomically.
 ## Building
 
 For assembly, first of all, you will need:
-- ATOL KKT Driver version not lower than 10.10.6 ([Official website](http://fs.atol.ru/))
+- ATOL KKT Driver version not lower than 10.10.7 ([Official website](http://fs.atol.ru/))
 - Asio C++ Library ([Git](https://github.com/chriskohlhoff/asio), [Official website](https://think-async.com/Asio/))
 - OpenSSL ([Git](https://github.com/openssl/openssl), [Official website](https://www.openssl.org/))
 - JSON for Modern C++ ([Git](https://github.com/nlohmann/json), [Official website](https://json.nlohmann.me/))

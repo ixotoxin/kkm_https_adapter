@@ -30,13 +30,28 @@ namespace Kkm {
         Failure & operator=(Failure &&) noexcept = default;
     };
 
-    enum class ShiftState : unsigned int {
+    enum class TimeZone : int {
+        Device = Atol::LIBFPTR_TIME_ZONE_DEVICE,
+        Zone1 = Atol::LIBFPTR_TIME_ZONE_1,
+        Zone2 = Atol::LIBFPTR_TIME_ZONE_2,
+        Zone3 = Atol::LIBFPTR_TIME_ZONE_3,
+        Zone4 = Atol::LIBFPTR_TIME_ZONE_4,
+        Zone5 = Atol::LIBFPTR_TIME_ZONE_5,
+        Zone6 = Atol::LIBFPTR_TIME_ZONE_6,
+        Zone7 = Atol::LIBFPTR_TIME_ZONE_7,
+        Zone8 = Atol::LIBFPTR_TIME_ZONE_8,
+        Zone9 = Atol::LIBFPTR_TIME_ZONE_9,
+        Zone10 = Atol::LIBFPTR_TIME_ZONE_10,
+        Zone11 = Atol::LIBFPTR_TIME_ZONE_11
+    };
+
+    enum class ShiftState : int {
         Closed = Atol::LIBFPTR_SS_CLOSED,
         Opened = Atol::LIBFPTR_SS_OPENED,
         Expired = Atol::LIBFPTR_SS_EXPIRED,
     };
 
-    enum class ReceiptType : unsigned int {
+    enum class ReceiptType : int {
         Closed = Atol::LIBFPTR_RT_CLOSED,
         Sell = Atol::LIBFPTR_RT_SELL,
         SellReturn = Atol::LIBFPTR_RT_SELL_RETURN,
@@ -48,7 +63,7 @@ namespace Kkm {
         BuyReturnCorrection = Atol::LIBFPTR_RT_BUY_RETURN_CORRECTION,
     };
 
-    enum class DocumentType : unsigned int {
+    enum class DocumentType : int {
         Closed = Atol::LIBFPTR_DT_CLOSED,
         ReceiptSell = Atol::LIBFPTR_DT_RECEIPT_SELL,
         ReceiptSellReturn = Atol::LIBFPTR_DT_RECEIPT_SELL_RETURN,
@@ -269,6 +284,7 @@ namespace Kkm {
         explicit ConnParams(const Container &);
         explicit ConnParams(Container &&);
 
+        void applyCommon(Device &) const;
         void applyCom(Device &) const;
         void applyUsb(Device &) const;
         void applyTcpIp(Device &) const;
@@ -736,6 +752,58 @@ namespace Kkm {
         CloseDetails & operator=(CloseDetails &&) = default;
     };
 
+    inline const std::vector<std::wstring> s_allowedBaudRate {
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_9600),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_19200),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_38400),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_57600),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_115200),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_230400),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_460800),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_921600),
+    };
+
+    inline const std::unordered_map<std::string, TimeZone> s_timeZoneMap {
+        { "device", TimeZone::Device },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Device)), TimeZone::Device },
+        { "+2", TimeZone::Zone1 },
+        { "utc+2", TimeZone::Zone1 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone1)), TimeZone::Zone1 },
+        { "+3", TimeZone::Zone2 },
+        { "utc+3", TimeZone::Zone2 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone2)), TimeZone::Zone2 },
+        { "+4", TimeZone::Zone3 },
+        { "utc+4", TimeZone::Zone3 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone3)), TimeZone::Zone3 },
+        { "+5", TimeZone::Zone4 },
+        { "utc+5", TimeZone::Zone4 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone4)), TimeZone::Zone4 },
+        { "+6", TimeZone::Zone5 },
+        { "utc+6", TimeZone::Zone5 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone5)), TimeZone::Zone5 },
+        { "+7", TimeZone::Zone6 },
+        { "utc+7", TimeZone::Zone6 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone6)), TimeZone::Zone6 },
+        { "+8", TimeZone::Zone7 },
+        { "utc+8", TimeZone::Zone7 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone7)), TimeZone::Zone7 },
+        { "+9", TimeZone::Zone8 },
+        { "utc+9", TimeZone::Zone8 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone8)), TimeZone::Zone8 },
+        { "+10", TimeZone::Zone9 },
+        { "utc+10", TimeZone::Zone9 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone9)), TimeZone::Zone9 },
+        { "+11", TimeZone::Zone10 },
+        { "utc+11", TimeZone::Zone10 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone10)), TimeZone::Zone10 },
+        { "+12", TimeZone::Zone11 },
+        { "utc+12", TimeZone::Zone11 },
+        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone11)), TimeZone::Zone11 }
+    };
+
     inline const std::unordered_map<ShiftState, std::wstring_view> s_shiftState {
         { ShiftState::Closed, Wcs::c_closedShift },
         { ShiftState::Opened, Wcs::c_openedShift },
@@ -894,25 +962,15 @@ namespace Kkm {
         { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically },
     };
 
-    inline const std::vector<std::wstring> s_allowedBaudRate {
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_9600),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_19200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_38400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_57600),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_115200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_230400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_460800),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_921600),
-    };
-
     inline std::wstring s_directory { c_defDirectory };
     inline std::wstring s_defaultBaudRate { c_defBaudRate };
+    inline TimeZone s_timeZone { TimeZone::Device };
+    inline bool s_timeZoneConfigured { false };
     inline size_t s_defaultLineLength { c_defLineLength };
+    inline auto s_documentClosingTimeout = c_defDocumentClosingTimeout;
     inline std::wstring s_cliOperatorName { c_defCliOperatorName };
     inline std::wstring s_cliOperatorInn { c_defCliOperatorInn };
     inline std::wstring s_customerAccountField { c_customerAccountField };
-    inline auto s_documentClosingTimeout = c_defDocumentClosingTimeout;
+    inline double s_maxQuantity { c_defMaxQuantity };
+    inline double s_maxPrice { c_defMaxPrice };
 }
