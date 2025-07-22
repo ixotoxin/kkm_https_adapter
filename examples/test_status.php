@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-use Kkm\{ ConnParams, Device, DevOp, Utils };
+use Kkm\{ ConnParams, Device, DevOp, Operations, Utils };
 
 require_once('lib.php');
 $config = require('cfg.php');
@@ -16,5 +16,5 @@ Utils::printResponse($response);
 $response = (new Device(new ConnParams($config['badSerialConnParams'])))->prepare(DevOp::Status)->perform();
 Utils::printResponse($response);
 
-$response = (new \Kkm\Operations\Status(new Device(new ConnParams($config['goodConnParams']))))->perform();
+$response = (new Operations\Status(new Device(new ConnParams($config['goodConnParams']))))->perform();
 Utils::printResponse($response);

@@ -5,10 +5,7 @@
 declare(strict_types=1);
 
 spl_autoload_register(
-    function ($class)
-    {
-        $fileName = realpath(__DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $class . '.php');
-        $fileName and require_once($fileName);
-        return $fileName;
-    }
+    fn ($class) => include_once(realpath(__DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $class . '.php'))
 );
+
+defined('KKMHA_EXAMPLES') or define('KKMHA_EXAMPLES', true);

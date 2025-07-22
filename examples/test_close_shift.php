@@ -10,8 +10,7 @@ use Kkm\{ ConnParams, Device, Utils };
 require_once('lib.php');
 $config = require('cfg.php');
 
-$connParams = new ConnParams($config['goodConnParams']);
-$device = new Device($connParams);
+$device = new Device(new ConnParams($config['goodConnParams']));
 
 $response = $device->closeShift()->setIdempotencyKey()->perform();
 Utils::printResponse($response);

@@ -6,13 +6,15 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 trait SetOperatorTrait
 {
     public function setOperator(string|array $name, ?string $inn = null): static
     {
         if (is_array($name)) {
             $inn = $name['inn'] ?? null;
-            $name = $name['name'] ?? '';
+            $name = $name['name'] ?? throw \LogicException();
         }
         $name = trim($name);
         if ($name) {

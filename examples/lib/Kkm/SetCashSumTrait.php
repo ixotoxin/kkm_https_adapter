@@ -6,12 +6,14 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 trait SetCashSumTrait
 {
     public function setCashSum(int|float $sum): static
     {
         if ($sum < 0.01 || $sum > 999999.99) {
-            throw new \Exception();
+            throw new \RuntimeException();
         }
         $this->details['cashSum'] = $sum;
         return $this;

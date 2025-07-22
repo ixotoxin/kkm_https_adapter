@@ -5,16 +5,16 @@
 
 declare(strict_types=1);
 
-use Kkm\{ Utils, ConnParams, Device, Operations\Status };
+use Kkm\{ Utils, ConnParams, Device, Operations };
 
 require_once('lib.php');
 $config = require('cfg.php');
 
-$goodOperation1 = new Status(new Device(new ConnParams($config['goodConnParams'])));
-$goodOperation2 = new Status(new Device(new ConnParams($config['goodConnParams'])));
-$badOperation = new Status(new Device(new ConnParams($config['badConnParams'])));
-$badSecretOperation = new Status(new Device(new ConnParams($config['badSecretConnParams'])));
-$badSerialOperation = new Status(new Device(new ConnParams($config['badSerialConnParams'])));
+$goodOperation1 = new Operations\Status(new Device(new ConnParams($config['goodConnParams'])));
+$goodOperation2 = new Operations\Status(new Device(new ConnParams($config['goodConnParams'])));
+$badOperation = new Operations\Status(new Device(new ConnParams($config['badConnParams'])));
+$badSecretOperation = new Operations\Status(new Device(new ConnParams($config['badSecretConnParams'])));
+$badSerialOperation = new Operations\Status(new Device(new ConnParams($config['badSerialConnParams'])));
 
 $i = 9;
 while (true) {

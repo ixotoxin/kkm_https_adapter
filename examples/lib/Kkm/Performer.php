@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 abstract class Performer
 {
     const DEFAULT_JSON_ENCODE_OPTIONS =
@@ -22,6 +24,7 @@ abstract class Performer
             $method = implode('/', array_map(trim(...), $method));
         }
         $method = trim($method, '/\\');
+
         $idempotencyKey ??= Utils::uid();
 
         $curl = curl_init();
@@ -86,6 +89,7 @@ abstract class Performer
             $method = implode('/', array_map(trim(...), $method));
         }
         $method = trim($method, '/\\');
+
         if (defined('OUT_REQUEST_BODY') && OUT_REQUEST_BODY) {
             echo '--- --- --- --- --- --- --- --- ---', PHP_EOL, '<pre>', PHP_EOL, 'requestBody = ', PHP_EOL;
             var_export($details);

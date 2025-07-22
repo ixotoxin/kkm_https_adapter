@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-use Kkm\{ ConnParams, Device, Operations\Sell, Tax, PaymentType, Utils };
+use Kkm\{ ConnParams, Device, Operations, Tax, PaymentType, Utils };
 
 // define('OUT_REQUEST_BODY', true);
 require_once('lib.php');
@@ -58,7 +58,7 @@ $response
 Utils::printResponse($response);
 
 $response
-    = (new Sell($device))
+    = (new Operations\Sell($device))
     ->setIdempotencyKey()
     ->setText('Текст в чеке', true)
     ->perform([
@@ -74,7 +74,7 @@ $response
 Utils::printResponse($response);
 
 $response
-    = (new Sell($device))
+    = (new Operations\Sell($device))
     ->setIdempotencyKey()
     ->setText('Текст в чеке', true, true)
     ->perform([
@@ -90,7 +90,7 @@ $response
 Utils::printResponse($response);
 
 $response
-    = (new Sell($device))
+    = (new Operations\Sell($device))
     ->setIdempotencyKey()
     ->setText('Текст в чеке', true, false, true)
     ->perform([

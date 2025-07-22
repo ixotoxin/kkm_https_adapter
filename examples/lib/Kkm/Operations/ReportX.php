@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm\Operations;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 final class ReportX extends \Kkm\DeviceOperation implements \Kkm\PostOperation
 {
     use \Kkm\PostOperationTrait;

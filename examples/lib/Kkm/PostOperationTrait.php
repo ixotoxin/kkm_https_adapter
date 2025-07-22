@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 trait PostOperationTrait
 {
     use SetIdempotencyKeyTrait;
@@ -28,7 +30,7 @@ trait PostOperationTrait
             if (method_exists($this, $method)) {
                 $this->{$method}($value);
             } elseif (!$ignoreUnknown) {
-                throw new \Exception('Неизвестный ключ');
+                throw new \LogicException('Неизвестный ключ');
             }
         }
         return $this;
@@ -40,7 +42,7 @@ trait PostOperationTrait
             $this->setDetails($details);
         }
         if (!$this->idempotencyKey) {
-            throw new \Exception('Ключ идемпотентности некорректен');
+            throw new \RuntimeException('Ключ идемпотентности некорректен');
         }
         return $this->performer->performPostMethod($this->method(), $this->details, $this->idempotencyKey);
     }

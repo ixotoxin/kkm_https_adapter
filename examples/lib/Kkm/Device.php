@@ -6,12 +6,14 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 class Device extends Performer
 {
     public function __construct(ConnParams $connParams)
     {
         if (!$connParams->serial) {
-            throw new \Exception('Серийный номер ККМ некорректен');
+            throw new \RuntimeException('Серийный номер ККМ некорректен');
         }
         parent::__construct($connParams);
     }

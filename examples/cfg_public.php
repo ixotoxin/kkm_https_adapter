@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 return [
     'goodConnParams' => [
-        'host' => '127.11.22.33:5757',
+        'host' => '127.1.2.3:5757',
         'secret' => 'lorem.ipsum.dolor.sit.amet',
         'serial' => '11111111111111',
     ],
     'goodNoFiscConnParams' => [
-        'host' => '127.11.22.33:5757',
+        'host' => '127.1.2.3:5757',
         'secret' => 'lorem.ipsum.dolor.sit.amet',
         'serial' => '22222222222222',
     ],
@@ -31,7 +31,7 @@ return [
         'serial' => '22222222222222',
     ],
     'goodConnString' => 'com,4',
-    'badConnString1' => 'com,7',
+    'badConnString1' => 'com,77',
     'badConnString2' => 'tcpip,172.0.0.1',
     'badConnString3' => 'abra,cad,abra',
     'operator' => [

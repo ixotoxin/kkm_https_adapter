@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 trait ReceiptTrait
 {
     public function setCustomer(
@@ -46,13 +48,13 @@ trait ReceiptTrait
     {
         $length = mb_strlen($title);
         if ($length < 1 || $length > 200) {
-            throw new \Exception('Название товара/услуги некорректно');
+            throw new \RuntimeException('Название товара/услуги некорректно');
         }
         if ($price < 0.01 || $price > 999999.99) {
-            throw new \Exception('Цена некорректна');
+            throw new \RuntimeException('Цена некорректна');
         }
         if ($quantity < 0.001 || $quantity > 999999.999) {
-            throw new \Exception('Количество некорректно');
+            throw new \RuntimeException('Количество некорректно');
         }
         $item = [
             'title' => $title,

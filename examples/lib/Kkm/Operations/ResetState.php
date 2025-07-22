@@ -6,10 +6,19 @@ declare(strict_types=1);
 
 namespace Kkm\Operations;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 final class ResetState extends \Kkm\DeviceOperation implements \Kkm\PostOperation
 {
     use \Kkm\PostOperationTrait;
     use \Kkm\SetOperatorTrait;
 
     public const METHOD = 'reset-state';
+
+    public function __construct(
+        \Kkm\Device $performer,
+    ) {
+        parent::__construct($performer);
+        $this->details['closeShift'] = true;
+    }
 }

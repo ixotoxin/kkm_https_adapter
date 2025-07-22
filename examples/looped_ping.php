@@ -5,12 +5,12 @@
 
 declare(strict_types=1);
 
-use Kkm\{ Utils, ConnParams, Server, Operations\Ping };
+use Kkm\{ Utils, ConnParams, Server, Operations };
 
 require_once('lib.php');
 $config = require('cfg.php');
 
-$operation = new Ping(new Server(new ConnParams($config['goodConnParams'])));
+$operation = new Operations\Ping(new Server(new ConnParams($config['goodConnParams'])));
 
 while (true) {
     Utils::printResponseSummary($operation->perform());

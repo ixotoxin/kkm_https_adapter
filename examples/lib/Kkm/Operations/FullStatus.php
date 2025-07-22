@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace Kkm\Operations;
 
+defined('KKMHA_EXAMPLES') or die('No direct script access.');
+
 final class FullStatus extends \Kkm\DeviceOperation implements \Kkm\GetOperation
 {
     use \Kkm\GetOperationTrait;
