@@ -47,8 +47,8 @@
         "privateKeyPassword": "",
         "secret": "lorem.ipsum.dolor.sit.amet",
         "loopbackWithoutSecret": false,
-        "enableStatic": true,
-        "enableUnknownType": true,
+        "enableStatic": false,
+        "enableUnknownType": false,
         "staticDirectory": "static",
         "mimeMap": "conf\\mime.json"
     },
@@ -56,11 +56,15 @@
         "directory": "conf\\kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
+        "timeZone": "device",
+        "documentClosingTimeout": 5000,
         "cliOperator": {
             "name": "Оператор"
         },
-        "timeZone": "device",
-        "documentClosingTimeout": 5000
+        "customerAccountField": "Лицевой счёт:",
+        "maxCashInOut": 500000,
+        "maxPrice": 300000,
+        "maxQuantity": 1000
     }
 }
 ```
@@ -90,9 +94,13 @@
 | `kkm.directory`                | Путь к директории, в которой будет формироваться БД известных ККМ                                     |
 | `kkm.defaultBaudRate`          | Скорость COM-порта по-умолчанию                                                                       |
 | `kkm.defaultLineLength`        | Ширина чековой ленты по-умолчанию. Используется, если данное свойство не удается получить опросом ККМ |
-| `kkm.cliOperator.name`         | Имя оператора для консольных команд требующих логина оператора ККМ                                    |
 | `kkm.timeZone`                 | Временная зона передаваемая ОФД при регистрации чека                                                  |
 | `kkm.documentClosingTimeout`   | Таймаут проверки корректности закрытия документа                                                      |
+| `kkm.cliOperator.name`         | Имя оператора для консольных команд требующих логина оператора ККМ                                    |
+| `kkm.customerAccountField`     | Заголовок поля с номером лицевого счета клиента                                                       |
+| `kkm.maxCashInOut`             | Максимальная сумма для внесения или выплаты                                                           |
+| `kkm.maxPrice`                 | Максимальная цена товара/услуги в чеке                                                                |
+| `kkm.maxQuantity`              | Максимальное количество товара/услуги в чеке                                                          |
 
 ***Сертификат и ключ никак не проверяются***, поэтому можно использовать самоподписанный сертификат.
 <!-- Создать его можно например так:

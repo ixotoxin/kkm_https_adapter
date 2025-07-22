@@ -147,7 +147,9 @@ namespace Kkm {
         class NewConnParams;
         class KnownConnParams;
 
-        struct PrintableText {
+        class PrintableText {
+            friend class Device;
+
             std::wstring m_content {};
             int m_marginOuter { 0 };
             int m_marginInner { 1 };
@@ -155,6 +157,7 @@ namespace Kkm {
             bool m_magnified { false };
             bool m_separated { false };
 
+        public:
             PrintableText() = default;
 
             PrintableText(std::wstring && content, bool center, bool magnified, bool separated, bool margin)
@@ -688,16 +691,20 @@ namespace Kkm {
         friend class Device;
 
     public:
-        struct ItemDetails {
+        class ItemDetails {
+            friend class Device;
+
             std::wstring m_commodityName;
             double m_price;
             double m_quantity;
             MeasurementUnit m_unit;
             Tax m_tax;
 
+        public:
             ItemDetails() = delete;
             ItemDetails(const ItemDetails &) = default;
             ItemDetails(ItemDetails &&) noexcept = default;
+            ItemDetails(std::wstring_view, double, double, MeasurementUnit, Tax);
             ItemDetails(std::wstring &&, double, double, MeasurementUnit, Tax);
             ~ItemDetails() = default;
 
@@ -971,6 +978,7 @@ namespace Kkm {
     inline std::wstring s_cliOperatorName { c_defCliOperatorName };
     inline std::wstring s_cliOperatorInn { c_defCliOperatorInn };
     inline std::wstring s_customerAccountField { c_customerAccountField };
-    inline double s_maxQuantity { c_defMaxQuantity };
+    inline double s_maxCashInOut { c_defMaxCashInOut };
     inline double s_maxPrice { c_defMaxPrice };
+    inline double s_maxQuantity { c_defMaxQuantity };
 }

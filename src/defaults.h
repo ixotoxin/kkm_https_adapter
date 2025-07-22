@@ -83,12 +83,16 @@ namespace Kkm {
     constexpr std::wstring_view c_defCliOperatorName { L"Оператор" };
     constexpr std::wstring_view c_defCliOperatorInn {};
     constexpr std::wstring_view c_customerAccountField { L"Лицевой счёт (идентификатор для оплаты):" };
-    constexpr double c_minQuantity { 0.001 };
-    constexpr double c_minMaxQuantity { 1 };
-    constexpr double c_maxMaxQuantity { 1e9 };
-    constexpr double c_defMaxQuantity { 1e3 };
+    constexpr double c_minCashInOut { 0.01 };
+    constexpr double c_minMaxCashInOut { 1 };
+    constexpr double c_maxMaxCashInOut { 1e9 };
+    constexpr double c_defMaxCashInOut { 5e5 };
     constexpr double c_minPrice { 0.01 };
     constexpr double c_minMaxPrice { 1 };
     constexpr double c_maxMaxPrice { 1e9 };
     constexpr double c_defMaxPrice { 3e5 };
+    constexpr double c_minQuantity { 0.001 };
+    constexpr double c_minMaxQuantity { 1 };
+    constexpr double c_maxMaxQuantity { 1e9 };
+    constexpr double c_defMaxQuantity { 1e3 };
 }
