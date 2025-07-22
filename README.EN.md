@@ -5,7 +5,7 @@
 This is yet another HTTPS server in C++, but with ~~blackjack and hoo...~~ Asio, OpenSSL and coroutines.
 
 An implementation of a service for Windows OS that provides access to a cash register (hereinafter CR) connected to
-a computer supported by the ATOL driver. The REST JSON API over HTTPS is used to access the CR. This is not an
+a computer and supported by the ATOL driver. The REST JSON API over HTTPS is used to access the CR. This is not an
 independent product, it is a component of a distributed system. It enables software running on a remote server access
 a CR locally connected to the operator's thin client. This service is designed to be used in applications with a web
 interface and business logic implemented on a remote server. In this regard, full-fledged interactive interaction with
