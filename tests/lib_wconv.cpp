@@ -4,12 +4,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <library/wconv.h>
 
-using namespace std;
-
 namespace UnitTests {
+    using namespace std::string_view_literals;
+
     TEST_CASE("wconv", "[convert]") {
         std::wstring wcString;
         std::string mbString;
+
         REQUIRE(Text::convert(mbString, L""sv));
         REQUIRE(mbString.empty());
         REQUIRE(Text::convert(wcString, ""sv));
@@ -28,16 +29,19 @@ namespace UnitTests {
         REQUIRE(Text::convert("Test string") == L"Test string"sv);
         REQUIRE(Text::convert(L"Тестовая строка") == "Тестовая строка"sv);
         REQUIRE(Text::convert("Тестовая строка") == L"Тестовая строка"sv);
+
         std::wstring_view wcString0 {
             L"\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
             L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
             L"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
         };
+
         std::string_view mbString0 {
             "\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
             "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
         };
+
         REQUIRE(Text::convert(mbString, wcString0));
         REQUIRE(mbString0 == mbString);
         REQUIRE(Text::convert(wcString, mbString0));

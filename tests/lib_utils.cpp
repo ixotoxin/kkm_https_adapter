@@ -4,28 +4,37 @@
 #include <catch2/catch_test_macros.hpp>
 #include <library/utils.h>
 
-using namespace std;
-
 namespace UnitTests {
+    using namespace std::string_view_literals;
+
     TEST_CASE("utils", "[deferred]") {
         int var { 123 };
+
         {
             Deferred::Exec scopeGuard([&var] () { var = 456; });
             REQUIRE(var == 123);
         }
+
         REQUIRE(var == 456);
+
         char * buffer { nullptr };
+
         {
             Deferred::LocalFree scopeGuard(buffer);
+
             REQUIRE(buffer == nullptr);
+
             buffer = (char *)::LocalAlloc(LPTR, 2048);
             bool zeroed { true };
+
             for (size_t i {}; i < 2048; ++i) {
                 zeroed = zeroed && !buffer[i];
             }
+
             REQUIRE(buffer != nullptr);
             REQUIRE(zeroed);
         }
+
         REQUIRE(buffer == nullptr);
     }
 

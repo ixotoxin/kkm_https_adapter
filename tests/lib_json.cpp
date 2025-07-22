@@ -5,8 +5,6 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <library/json.h>
 
-using namespace std;
-
 // TODO: Реализовать полноценное тестирование.
 
 namespace UnitTests {
@@ -44,78 +42,98 @@ namespace UnitTests {
     }
 
     TEST_CASE("json", "[handle]") {
-        bool bool_v { false };
-        REQUIRE(
-            Json::handle(
-                bool_j,
-                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
-                    bool_v = Json::cast<bool>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE(bool_v);
+        {
+            bool bool_v { false };
 
-        int int_v { 456 };
-        REQUIRE(
-            Json::handle(
-                int_j,
-                [& int_v] (const nlohmann::json & v, const std::wstring &) {
-                    int_v = Json::cast<int>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE(int_v == -123);
+            REQUIRE(
+                Json::handle(
+                    bool_j,
+                    [& bool_v] (const nlohmann::json & v, const std::wstring &) {
+                        bool_v = Json::cast<bool>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE(bool_v);
+        }
+
+        {
+            int int_v { 456 };
+
+            REQUIRE(
+                Json::handle(
+                    int_j,
+                    [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                        int_v = Json::cast<int>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE(int_v == -123);
+        }
     }
 
     TEST_CASE("json", "[handle_key]") {
-        bool bool_v { false };
-        REQUIRE_FALSE(
-            Json::handleKey(
-                obj_j,
-                "--bool",
-                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
-                    bool_v = Json::cast<bool>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE_FALSE(bool_v);
-        REQUIRE(
-            Json::handleKey(
-                obj_j,
-                "bool",
-                [& bool_v] (const nlohmann::json & v, const std::wstring &) {
-                    bool_v = Json::cast<bool>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE(bool_v);
+        {
+            bool bool_v { false };
 
-        int int_v { 456 };
-        REQUIRE_FALSE(
-            Json::handleKey(
-                obj_j,
-                "--int",
-                [& int_v] (const nlohmann::json & v, const std::wstring &) {
-                    int_v = Json::cast<int>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE(int_v == 456);
-        REQUIRE(
-            Json::handleKey(
-                obj_j,
-                "int",
-                [& int_v] (const nlohmann::json & v, const std::wstring &) {
-                    int_v = Json::cast<int>(v);
-                    return true;
-                }
-            )
-        );
-        REQUIRE(int_v == -123);
+            REQUIRE_FALSE(
+                Json::handleKey(
+                    obj_j,
+                    "--bool",
+                    [& bool_v] (const nlohmann::json &v, const std::wstring &) {
+                        bool_v = Json::cast<bool>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE_FALSE(bool_v);
+
+            REQUIRE(
+                Json::handleKey(
+                    obj_j,
+                    "bool",
+                    [& bool_v] (const nlohmann::json & v, const std::wstring &) {
+                        bool_v = Json::cast<bool>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE(bool_v);
+        }
+
+        {
+            int int_v { 456 };
+
+            REQUIRE_FALSE(
+                Json::handleKey(
+                    obj_j,
+                    "--int",
+                    [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                        int_v = Json::cast<int>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE(int_v == 456);
+
+            REQUIRE(
+                Json::handleKey(
+                    obj_j,
+                    "int",
+                    [& int_v] (const nlohmann::json & v, const std::wstring &) {
+                        int_v = Json::cast<int>(v);
+                        return true;
+                    }
+                )
+            );
+
+            REQUIRE(int_v == -123);
+        }
     }
 }

@@ -5,8 +5,6 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <library/datetime.h>
 
-using namespace std;
-
 namespace UnitTests {
     TEST_CASE("datetime", "[cast]") {
         using Catch::Matchers::Equals;
