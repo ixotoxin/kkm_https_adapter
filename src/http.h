@@ -18,6 +18,7 @@ namespace Http {
     }
 
     namespace Mbs {
+        using Basic::Mbs::c_ok;
         using Basic::Mbs::c_somethingWrong;
 
         constexpr std::string_view c_jsonResponseHeaderTemplate {
@@ -51,7 +52,7 @@ namespace Http {
     };
 
     inline const std::unordered_map<Status, std::string> s_statusStrings {
-        { Status::Ok, "OK" },
+        { Status::Ok, Mbs::c_ok },
         { Status::MovedTemporarily, "Moved Temporarily" },
         { Status::BadRequest, "Bad Request" },
         { Status::Unauthorized, "Unauthorized" },

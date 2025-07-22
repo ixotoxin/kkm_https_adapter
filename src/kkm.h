@@ -13,6 +13,14 @@
 #include "messages.h"
 
 namespace Kkm {
+    namespace Wcs {
+        using Basic::Wcs::c_ok;
+    }
+
+    namespace Mbs {
+        using Basic::Mbs::c_ok;
+    }
+
     namespace Atol = Atol::Fptr;
 
     class Device;
@@ -338,7 +346,7 @@ namespace Kkm {
     class Device::Call::Result {
         friend class Device;
 
-        std::wstring m_message { L"Ok" };
+        std::wstring m_message { Wcs::c_ok };
         bool m_success { true };
 
     public:
