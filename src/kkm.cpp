@@ -6,6 +6,11 @@
 #include "log.h"
 
 namespace Kkm {
+    namespace Mbs {
+        using Json::Mbs::c_successKey;
+        using Json::Mbs::c_messageKey;
+    }
+
     using Basic::DataError;
     using Basic::c_sleepQuantum;
 
@@ -485,23 +490,23 @@ namespace Kkm {
     bool Device::Call::Result::exportTo(Nln::Json & json) {
         bool overrideMessage { false };
         if (
-            !json.contains("!success")
-            || !json["!success"].is_boolean()
-            || (json["!success"].get<bool>() && !m_success)
+            !json.contains(Mbs::c_successKey)
+            || !json[Mbs::c_successKey].is_boolean()
+            || (json[Mbs::c_successKey].get<bool>() && !m_success)
         ) {
-            json["!success"] = m_success;
+            json[Mbs::c_successKey] = m_success;
             overrideMessage = true;
         }
         if (
             overrideMessage
-            || !json.contains("!message")
-            || !json["!message"].is_string()
-            || json["!message"].get<std::string>() == Mbs::c_ok
-            || json["!message"].empty()
+            || !json.contains(Mbs::c_messageKey)
+            || !json[Mbs::c_messageKey].is_string()
+            || json[Mbs::c_messageKey].empty()
+            || json[Mbs::c_messageKey].get<std::string>() == Mbs::c_ok
         ) {
-            json["!message"] = Text::convert(m_message);
+            json[Mbs::c_messageKey] = Text::convert(m_message);
         }
-        return json["!success"].get<bool>();
+        return json[Mbs::c_successKey].get<bool>();
     }
 
     bool Device::Call::StatusResult::exportTo(Nln::Json & json) {

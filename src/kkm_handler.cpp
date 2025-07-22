@@ -14,6 +14,8 @@ namespace Kkm {
 
     namespace Mbs {
         using namespace Http::Mbs;
+        using Json::Mbs::c_successKey;
+        using Json::Mbs::c_messageKey;
     }
 
     namespace Cache = Http::Cache;
@@ -68,7 +70,7 @@ namespace Kkm {
             assert(static_cast<int>(status) >= 400);
             m_status = status;
             std::string message2 { message };
-            m_result["!message"] = message2;
+            m_result[Mbs::c_messageKey] = message2;
             if (Log::s_appendLocation) {
                 message2 += location;
             }

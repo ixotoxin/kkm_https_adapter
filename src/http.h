@@ -20,6 +20,8 @@ namespace Http {
     namespace Mbs {
         using Basic::Mbs::c_ok;
         using Basic::Mbs::c_somethingWrong;
+        using Json::Mbs::c_successKey;
+        using Json::Mbs::c_messageKey;
 
         constexpr std::string_view c_jsonResponseHeaderTemplate {
             "HTTP/1.1 {} {}\r\n"
@@ -98,8 +100,8 @@ namespace Http {
             } else {
                 assert(s_statusStrings.contains(m_status));
                 Nln::Json json({
-                    { "!success", m_status < Status::BadRequest },
-                    { "!message", m_data.index() == 1 ? std::get<1>(m_data) : s_statusStrings.at(m_status) }
+                    { Mbs::c_successKey, m_status < Status::BadRequest },
+                    { Mbs::c_messageKey, m_data.index() == 1 ? std::get<1>(m_data) : s_statusStrings.at(m_status) }
                 }, false, Nln::EmptyJsonObject);
                 std::string text { json.dump() };
                 std::ostream output { &buffer };
