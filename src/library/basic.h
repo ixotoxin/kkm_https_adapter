@@ -40,6 +40,7 @@ namespace Log {
 
 namespace Basic {
     namespace Wcs {
+        constexpr const wchar_t * c_ok { L"OK" };
         constexpr const wchar_t * c_somethingWrong { L"Что-то пошло не так!" };
         constexpr const wchar_t * c_fallbackErrorMessage { L"[error]" };
         constexpr std::wstring_view c_invalidValue { L"Недопустимое значение" };
@@ -48,6 +49,7 @@ namespace Basic {
     }
 
     namespace Mbs {
+        constexpr const char * c_ok { "OK" };
         constexpr const char * c_somethingWrong { "Что-то пошло не так!" };
         constexpr const char * c_fallbackErrorMessage { "[error]" };
     }

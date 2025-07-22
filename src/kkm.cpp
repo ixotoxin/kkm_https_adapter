@@ -486,8 +486,8 @@ namespace Kkm {
         bool overrideMessage { false };
         if (
             !json.contains("!success")
-            || (json["!success"].get<bool>() && !m_success)
             || !json["!success"].is_boolean()
+            || (json["!success"].get<bool>() && !m_success)
         ) {
             json["!success"] = m_success;
             overrideMessage = true;
@@ -495,9 +495,9 @@ namespace Kkm {
         if (
             overrideMessage
             || !json.contains("!message")
-            || json["!message"].get<std::string>() == "OK"
-            || json["!message"].empty()
             || !json["!message"].is_string()
+            || json["!message"].get<std::string>() == Mbs::c_ok
+            || json["!message"].empty()
         ) {
             json["!message"] = Text::convert(m_message);
         }
