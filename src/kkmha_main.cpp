@@ -192,7 +192,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                         std::wstring serialNumber;
 
                         {
-                            Kkm::Device::NewConnParams connParams { std::wstring { argv[i] }};
+                            Kkm::Device::NewConnParams connParams { std::wstring { argv[i] } };
                             Kkm::Device kkm { connParams, std::format(Basic::Wcs::c_commandPrefix, n) };
                             serialNumber.assign(kkm.serialNumber());
                             ntsLogDebug(Basic::Wcs::c_getKkmInfo, n, serialNumber);
@@ -215,8 +215,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::StatusResult result {};
                     kkm.getStatus(result);
                     result.exportTo(json);
@@ -230,8 +229,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
 
                     {
                         Kkm::Device::Call::StatusResult result;
@@ -298,8 +296,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::CashStatResult result {};
                     kkm.getCashStat(result);
                     result.exportTo(json);
@@ -313,8 +310,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printDemo(result);
                     result.exportTo(json);
@@ -328,8 +324,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printInfo(result);
                     result.exportTo(json);
@@ -343,8 +338,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printFnRegistrations(result);
                     result.exportTo(json);
@@ -358,8 +352,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printOfdExchangeStatus(result);
                     result.exportTo(json);
@@ -373,8 +366,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printOfdTest(result);
                     result.exportTo(json);
@@ -388,8 +380,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printCloseShiftReports(result);
                     result.exportTo(json);
@@ -403,8 +394,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::Result result {};
                     kkm.printLastDocument(result);
                     result.exportTo(json);
@@ -418,8 +408,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::CloseDetails details {
                         Kkm::s_cliOperatorName,
                         Kkm::s_cliOperatorInn,
@@ -439,8 +428,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::CloseDetails details {
                         Kkm::s_cliOperatorName,
                         Kkm::s_cliOperatorInn,
@@ -460,8 +448,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device::KnownConnParams connParams { argv[2] };
-                    Kkm::Device kkm { connParams };
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
                     Kkm::Device::Call::CloseDetails details {
                         Kkm::s_cliOperatorName,
                         Kkm::s_cliOperatorInn,
@@ -482,22 +469,28 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
     } catch (const Basic::Failure & e) {
         if (jsonOut) {
-            Nln::Json json {{"!success", false }, { "!message", Text::convert(e.explain()) }};
-            std::wcout << Text::convert(json.dump(4));
+            std::wcout
+                << Text::convert(
+                    Nln::Json::object({ {"!success", false }, { "!message", Text::convert(e.explain()) } }).dump(4)
+                );
         } else {
             ntsLogError(e);
         }
     } catch (const std::exception & e) {
         if (jsonOut) {
-            Nln::Json json {{"!success", false }, { "!message", e.what() }};
-            std::wcout << Text::convert(json.dump(4));
+            std::wcout
+                << Text::convert(
+                    Nln::Json::object({ {"!success", false }, { "!message", e.what() } }).dump(4)
+                );
         } else {
             ntsLogError(e);
         }
     } catch (...) {
         if (jsonOut) {
-            Nln::Json json {{"!success", false }, { "!message", Basic::Mbs::c_somethingWrong }};
-            std::wcout << Text::convert(json.dump(4));
+            std::wcout
+                << Text::convert(
+                    Nln::Json::object({ {"!success", false }, { "!message", Basic::Mbs::c_somethingWrong } }).dump(4)
+                );
         } else {
             ntsLogError(Basic::Wcs::c_somethingWrong);
         }

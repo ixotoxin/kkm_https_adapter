@@ -106,36 +106,36 @@ namespace Kkm {
         Megabyte = Atol::LIBFPTR_IU_MEGABYTE,
         Gigabyte = Atol::LIBFPTR_IU_GIGABYTE,
         Terabyte = Atol::LIBFPTR_IU_TERABYTE,
-        Other = Atol::LIBFPTR_IU_OTHER,
+        Other = Atol::LIBFPTR_IU_OTHER
     };
 
     enum class Tax : int {
-        No = -1,
-        Vat0 = 0,
-        Vat5 = 5,
-        Vat105 = 105,
-        Vat7 = 7,
-        Vat107 = 107,
-        Vat10 = 10,
-        Vat110 = 110,
-        // Vat18 = 18,
-        // Vat118 = 118,
-        Vat20 = 20,
-        Vat120 = 120,
-        // Department = -2,
+        No = Atol::LIBFPTR_TAX_NO,
+        Vat0 = Atol::LIBFPTR_TAX_VAT0,
+        Vat5 = Atol::LIBFPTR_TAX_VAT5,
+        Vat105 = Atol::LIBFPTR_TAX_VAT105,
+        Vat7 = Atol::LIBFPTR_TAX_VAT7,
+        Vat107 = Atol::LIBFPTR_TAX_VAT107,
+        Vat10 = Atol::LIBFPTR_TAX_VAT10,
+        Vat110 = Atol::LIBFPTR_TAX_VAT110,
+        // Vat18 = Atol::LIBFPTR_TAX_VAT18,
+        // Vat118 = Atol::LIBFPTR_TAX_VAT118,
+        Vat20 = Atol::LIBFPTR_TAX_VAT20,
+        Vat120 = Atol::LIBFPTR_TAX_VAT120,
+        // Department = Atol::LIBFPTR_TAX_DEPARTMENT
     };
 
     enum class PaymentType : int {
-        Cash,
-        Electronically,
-        // Prepaid,
-        // Credit,
-        // Other,
-        // Pt6,
-        // Pt7,
-        // Pt8,
-        // Pt9,
-        // Pt10,
+        Cash = Atol::LIBFPTR_PT_CASH,
+        Electronically = Atol::LIBFPTR_PT_ELECTRONICALLY,
+        // Prepaid = Atol::LIBFPTR_PT_PREPAID,
+        // Credit = Atol::LIBFPTR_PT_CREDIT,
+        // Other = Atol::LIBFPTR_PT_OTHER,
+        // Pt6 = Atol::LIBFPTR_PT_6,
+        // Pt7 = Atol::LIBFPTR_PT_7,
+        // Pt8 = Atol::LIBFPTR_PT_8,
+        // Pt9 = Atol::LIBFPTR_PT_9,
+        // Pt10 = Atol::LIBFPTR_PT_10
     };
 
     class Device {
@@ -605,7 +605,11 @@ namespace Kkm {
         friend class Device;
 
         std::wstring m_bootVersion {};
+        std::wstring m_configurationVersion {};
+        std::wstring m_controlUnitVersion {};
         std::wstring m_firmwareVersion {};
+        std::wstring m_releaseVersion {};
+        std::wstring m_templatesVersion {};
 
     public:
         VersionResult() = default;
@@ -759,7 +763,7 @@ namespace Kkm {
         CloseDetails & operator=(CloseDetails &&) = default;
     };
 
-    inline const std::vector<std::wstring> s_allowedBaudRate {
+    inline const std::array<std::wstring, 11> s_allowedBaudRate {
         std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
         std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
         std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
@@ -770,7 +774,7 @@ namespace Kkm {
         std::to_wstring(Atol::LIBFPTR_PORT_BR_115200),
         std::to_wstring(Atol::LIBFPTR_PORT_BR_230400),
         std::to_wstring(Atol::LIBFPTR_PORT_BR_460800),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_921600),
+        std::to_wstring(Atol::LIBFPTR_PORT_BR_921600)
     };
 
     inline const std::unordered_map<std::string, TimeZone> s_timeZoneMap {
@@ -811,13 +815,13 @@ namespace Kkm {
         { "tz" + std::to_string(static_cast<int>(TimeZone::Zone11)), TimeZone::Zone11 }
     };
 
-    inline const std::unordered_map<ShiftState, std::wstring_view> s_shiftState {
+    inline const std::unordered_map<ShiftState, std::wstring_view> s_shiftStateLabels {
         { ShiftState::Closed, Wcs::c_closedShift },
         { ShiftState::Opened, Wcs::c_openedShift },
         { ShiftState::Expired, Wcs::c_expiredShift },
     };
 
-    inline const std::unordered_map<ReceiptType, std::wstring_view> s_receiptType {
+    inline const std::unordered_map<ReceiptType, std::wstring_view> s_receiptTypeLabels {
         { ReceiptType::Closed, Wcs::c_closedReceipt },
         { ReceiptType::Sell, Wcs::c_sellReceipt },
         { ReceiptType::SellReturn, Wcs::c_sellReturnReceipt },
@@ -829,7 +833,7 @@ namespace Kkm {
         { ReceiptType::BuyReturnCorrection, Wcs::c_buyReturnCorrectionReceipt },
     };
 
-    inline const std::unordered_map<DocumentType, std::wstring_view> s_documentType {
+    inline const std::unordered_map<DocumentType, std::wstring_view> s_documentTypeLabels {
         { DocumentType::Closed, Wcs::c_closedDocument },
         { DocumentType::ReceiptSell, Wcs::c_sellReceipt },
         { DocumentType::ReceiptSellReturn, Wcs::c_sellReturnReceipt },
@@ -904,22 +908,6 @@ namespace Kkm {
         { std::to_string(static_cast<int>(MeasurementUnit::Other)), MeasurementUnit::Other },
     };
 
-    inline const std::unordered_map<Tax, decltype(Atol::LIBFPTR_TAX_NO)> s_tax {
-        { Tax::No, Atol::LIBFPTR_TAX_NO },
-        { Tax::Vat0, Atol::LIBFPTR_TAX_VAT0 },
-        { Tax::Vat5, Atol::LIBFPTR_TAX_VAT5 },
-        { Tax::Vat105, Atol::LIBFPTR_TAX_VAT105 },
-        { Tax::Vat7, Atol::LIBFPTR_TAX_VAT7 },
-        { Tax::Vat107, Atol::LIBFPTR_TAX_VAT107 },
-        { Tax::Vat10, Atol::LIBFPTR_TAX_VAT10 },
-        { Tax::Vat110, Atol::LIBFPTR_TAX_VAT110 },
-        // { Tax::Vat18, Atol::LIBFPTR_TAX_VAT18 },
-        // { Tax::Vat118, Atol::LIBFPTR_TAX_VAT118 },
-        { Tax::Vat20, Atol::LIBFPTR_TAX_VAT20 },
-        { Tax::Vat120, Atol::LIBFPTR_TAX_VAT120 },
-        // { Tax::Department, Atol::LIBFPTR_TAX_DEPARTMENT },
-    };
-
     inline const std::unordered_map<std::string, Tax> s_taxCastMap {
         { "no", Tax::No },
         { std::to_string(static_cast<int>(Tax::No)), Tax::No },
@@ -937,43 +925,24 @@ namespace Kkm {
         { std::to_string(static_cast<int>(Tax::Vat10)), Tax::Vat10 },
         { "vat110", Tax::Vat110 },
         { std::to_string(static_cast<int>(Tax::Vat110)), Tax::Vat110 },
-        // { "vat18", Tax::Vat18 },
-        // { std::to_string(static_cast<int>(Tax::Vat18)), Tax::Vat18 },
-        // { "vat118", Tax::Vat118 },
-        // { std::to_string(static_cast<int>(Tax::Vat118)), Tax::Vat118 },
         { "vat20", Tax::Vat20 },
         { std::to_string(static_cast<int>(Tax::Vat20)), Tax::Vat20 },
         { "vat120", Tax::Vat120 },
-        { std::to_string(static_cast<int>(Tax::Vat120)), Tax::Vat120 },
-        // { "department", Tax::Department },
-        // { std::to_string(static_cast<int>(Tax::Department)), Tax::Department },
-    };
-
-    inline const std::unordered_map<PaymentType, decltype(Atol::LIBFPTR_PT_CASH)> s_paymentType {
-        { PaymentType::Cash, Atol::LIBFPTR_PT_CASH },
-        { PaymentType::Electronically, Atol::LIBFPTR_PT_ELECTRONICALLY },
-        // { PaymentType::Prepaid, Atol::LIBFPTR_PT_PREPAID },
-        // { PaymentType::Credit, Atol::LIBFPTR_PT_CREDIT },
-        // { PaymentType::Other, Atol::LIBFPTR_PT_OTHER },
-        // { PaymentType::Pt6, Atol::LIBFPTR_PT_6 },
-        // { PaymentType::Pt7, Atol::LIBFPTR_PT_7 },
-        // { PaymentType::Pt8, Atol::LIBFPTR_PT_8 },
-        // { PaymentType::Pt9, Atol::LIBFPTR_PT_9 },
-        // { PaymentType::Pt10, Atol::LIBFPTR_PT_10 },
+        { std::to_string(static_cast<int>(Tax::Vat120)), Tax::Vat120 }
     };
 
     inline const std::unordered_map<std::string, PaymentType> s_paymentTypeCastMap {
         { "cash", PaymentType::Cash },
         { std::to_string(static_cast<int>(PaymentType::Cash)), PaymentType::Cash },
         { "electronically", PaymentType::Electronically },
-        { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically },
+        { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically }
     };
 
     inline std::wstring s_directory { c_defDirectory };
     inline std::wstring s_defaultBaudRate { c_defBaudRate };
+    inline size_t s_defaultLineLength { c_defLineLength };
     inline TimeZone s_timeZone { TimeZone::Device };
     inline bool s_timeZoneConfigured { false };
-    inline size_t s_defaultLineLength { c_defLineLength };
     inline auto s_documentClosingTimeout = c_defDocumentClosingTimeout;
     inline std::wstring s_cliOperatorName { c_defCliOperatorName };
     inline std::wstring s_cliOperatorInn { c_defCliOperatorInn };
