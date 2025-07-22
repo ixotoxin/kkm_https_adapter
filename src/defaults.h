@@ -10,7 +10,6 @@ namespace Basic {
     constexpr size_t c_defaultBufferSize { 2'048 };
     constexpr std::chrono::milliseconds::rep c_sleep { 1000 }; // Миллисекунды
     constexpr std::chrono::milliseconds::rep c_sleepQuantum { 200 }; // Миллисекунды
-    // constexpr auto c_quantsPerSecond = c_sleep / c_sleepQuantum;
 }
 
 namespace Config {
@@ -78,14 +77,18 @@ namespace Kkm {
     constexpr size_t c_minLineLength { 24 };
     constexpr size_t c_maxLineLength { c_maxLength };
     constexpr size_t c_defLineLength { 34 };
-    constexpr std::wstring_view c_defCliOperatorName { L"Оператор" };
-    constexpr std::wstring_view c_defCliOperatorInn {};
-    constexpr double c_minQuantity { 0.001 };
-    constexpr double c_maxQuantity { 999'999.999 };
-    constexpr double c_minPrice { 0.01 };
-    constexpr double c_maxPrice { 99'999'999.99 };
-    constexpr std::wstring_view c_customerAccountField { L"Лицевой счёт (идентификатор для оплаты):" };
     constexpr auto c_minDocumentClosingTimeout = Basic::c_sleepQuantum; // Миллисекунды
     constexpr auto c_maxDocumentClosingTimeout = Basic::c_sleep * 10; // Миллисекунды
     constexpr auto c_defDocumentClosingTimeout = Basic::c_sleep; // Миллисекунды
+    constexpr std::wstring_view c_defCliOperatorName { L"Оператор" };
+    constexpr std::wstring_view c_defCliOperatorInn {};
+    constexpr std::wstring_view c_customerAccountField { L"Лицевой счёт (идентификатор для оплаты):" };
+    constexpr double c_minQuantity { 0.001 };
+    constexpr double c_minMaxQuantity { 1 };
+    constexpr double c_maxMaxQuantity { 1e9 };
+    constexpr double c_defMaxQuantity { 1e3 };
+    constexpr double c_minPrice { 0.01 };
+    constexpr double c_minMaxPrice { 1 };
+    constexpr double c_maxMaxPrice { 1e9 };
+    constexpr double c_defMaxPrice { 3e5 };
 }

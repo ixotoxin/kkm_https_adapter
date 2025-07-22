@@ -41,8 +41,8 @@ namespace Meta {
         = std::ranges::range<T>
           && requires (T t, typename T::value_type u) { t.emplace_back(u); t.push_back(u); };
 
-    template<typename T>
-    using Filter = std::function<T(std::conditional_t<std::is_fundamental_v<T>, const T, const T &>)>;
+    template<typename T, typename U>
+    concept Filter = std::is_invocable_r_v<U, T, std::conditional_t<std::is_scalar_v<U>, const U, const U &>>;
 
     template<typename T, typename U, typename V>
     concept EnumCastStrictMap

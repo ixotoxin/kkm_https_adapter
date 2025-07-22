@@ -4,6 +4,7 @@
 #pragma once
 
 #include "basic.h"
+#include <cassert>
 #include <algorithm>
 #include <unordered_set>
 #include "meta.h"
@@ -412,15 +413,15 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> trim() {
+    inline auto trim() {
         return [] (const T & value) -> T { return Text::trimmed(value); };
     }
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> trim(Meta::Filter<T> && subFilter0) {
+    inline auto trim(Meta::Filter<T> auto && subFilter0) {
         return
-            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
             (const T & value) -> T {
                 return Text::trimmed(subFilter(value));
             };
@@ -428,15 +429,15 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> lower() {
+    inline auto lower() {
         return [] (const T & value) -> T { return Text::lowered(value); };
     }
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> lower(Meta::Filter<T> && subFilter0) {
+    inline auto lower(Meta::Filter<T> auto && subFilter0) {
         return
-            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
             (const T & value) -> T {
                 return Text::lowered(subFilter(value));
             };
@@ -444,7 +445,7 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> noEmpty() {
+    inline auto noEmpty() {
         return
             [] (const T & value) -> T {
                 if (value.empty()) {
@@ -456,9 +457,9 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> noEmpty(Meta::Filter<T> && subFilter0) {
+    inline auto noEmpty(Meta::Filter<T> auto && subFilter0) {
         return
-            [subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
             (const T & value) -> T {
                 T filtered { subFilter(value) };
                 if (filtered.empty()) {
@@ -470,10 +471,11 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> sizeBetween(size_t min, size_t max) {
+    inline auto length(size_t min, size_t max) {
+        assert(max > min);
         return
             [min, max] (const T & value) -> T {
-                if ((min && value.length() < min) || (max && value.length() > max)) {
+                if (value.length() < min || value.length() > max) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return value;
@@ -482,12 +484,41 @@ namespace Text {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline Meta::Filter<T> sizeBetween(size_t min, size_t max, Meta::Filter<T> && subFilter0) {
+    inline auto maxLength(size_t max) {
+        assert(max > 0);
         return
-            [min, max, subFilter = std::forward<Meta::Filter<T>>(subFilter0)]
+            [max] (const T & value) -> T {
+                if (value.length() > max) {
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                }
+                return value;
+            };
+    }
+
+    template<Meta::String T>
+    [[nodiscard, maybe_unused]]
+    inline auto length(size_t min, size_t max, Meta::Filter<T> auto && subFilter0) {
+        assert(max > min);
+        return
+            [min, max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
             (const T & value) -> T {
                 T filtered { subFilter(value) };
-                if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
+                if (filtered.length() < min || filtered.length() > max) {
+                    throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                }
+                return filtered;
+            };
+    }
+
+    template<Meta::String T>
+    [[nodiscard, maybe_unused]]
+    inline auto maxLength(size_t max, Meta::Filter<T> auto && subFilter0) {
+        assert(max > 0);
+        return
+            [max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            (const T & value) -> T {
+                T filtered { subFilter(value) };
+                if (filtered.length() > max) {
                     throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
@@ -664,38 +695,36 @@ namespace Text {
     }
 
     namespace Wcs {
-        using Filter = Meta::Filter<std::wstring>;
-
         [[nodiscard, maybe_unused]]
-        inline Filter trim() {
+        inline auto trim() {
             return [] (const std::wstring & value) -> std::wstring { return Text::trimmed(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter trim(Filter && subFilter0) {
+        inline auto trim(Meta::Filter<std::wstring> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
                     return Text::trimmed(subFilter(value));
                 };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter lower() {
+        inline auto lower() {
             return [] (const std::wstring & value) -> std::wstring { return Text::lowered(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter lower(Filter && subFilter0) {
+        inline auto lower(Meta::Filter<std::wstring> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
                     return Text::lowered(subFilter(value));
                 };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter noEmpty() {
+        inline auto noEmpty() {
             return
                 [] (const std::wstring & value) -> std::wstring {
                     if (value.empty()) {
@@ -706,9 +735,9 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter noEmpty(Filter && subFilter0) {
+        inline auto noEmpty(Meta::Filter<std::wstring> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
                     std::wstring filtered { subFilter(value) };
                     if (filtered.empty()) {
@@ -719,10 +748,11 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter sizeBetween(size_t min, size_t max) {
+        inline auto length(size_t min, size_t max) {
+            assert(max > min);
             return
                 [min, max] (const std::wstring & value) -> std::wstring {
-                    if ((min && value.length() < min) || (max && value.length() > max)) {
+                    if (value.length() < min || value.length() > max) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
@@ -730,12 +760,39 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter sizeBetween(size_t min, size_t max, Filter && subFilter0) {
+        inline auto maxLength(size_t max) {
+            assert(max > 0);
             return
-                [min, max, subFilter = std::forward<Filter>(subFilter0)]
+                [max] (const std::wstring & value) -> std::wstring {
+                    if (value.length() > max) {
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                    }
+                    return value;
+                };
+        }
+
+        [[nodiscard, maybe_unused]]
+        inline auto length(size_t min, size_t max, Meta::Filter<std::wstring> auto && subFilter0) {
+            assert(max > min);
+            return
+                [min, max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::wstring & value) -> std::wstring {
                     std::wstring filtered { subFilter(value) };
-                    if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
+                    if (filtered.length() < min || filtered.length() > max) {
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                    }
+                    return filtered;
+                };
+        }
+
+        [[nodiscard, maybe_unused]]
+        inline auto maxLength(size_t max, Meta::Filter<std::wstring> auto && subFilter0) {
+            assert(max > 0);
+            return
+                [max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+                (const std::wstring & value) -> std::wstring {
+                    std::wstring filtered { subFilter(value) };
+                    if (filtered.length() > max) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;
@@ -765,38 +822,36 @@ namespace Text {
     }
 
     namespace Mbs {
-        using Filter = Meta::Filter<std::string>;
-
         [[nodiscard, maybe_unused]]
-        inline Filter trim() {
+        inline auto trim() {
             return [] (const std::string & value) -> std::string { return Text::trimmed(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter trim(Filter && subFilter0) {
+        inline auto trim(Meta::Filter<std::string> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::string & value) -> std::string {
                     return Text::trimmed(subFilter(value));
                 };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter lower() {
+        inline auto lower() {
             return [] (const std::string & value) -> std::string { return Text::lowered(value); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter lower(Filter && subFilter0) {
+        inline auto lower(Meta::Filter<std::string> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::string & value) -> std::string {
                     return Text::lowered(subFilter(value));
                 };
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter noEmpty() {
+        inline auto noEmpty() {
             return
                 [] (const std::string & value) -> std::string {
                     if (value.empty()) {
@@ -807,9 +862,9 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter noEmpty(Filter && subFilter0) {
+        inline auto noEmpty(Meta::Filter<std::string> auto && subFilter0) {
             return
-                [subFilter = std::forward<Filter>(subFilter0)]
+                [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::string & value) -> std::string {
                     std::string filtered { subFilter(value) };
                     if (filtered.empty()) {
@@ -820,10 +875,11 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter sizeBetween(size_t min, size_t max) {
+        inline auto length(size_t min, size_t max) {
+            assert(max > min);
             return
                 [min, max] (const std::string & value) -> std::string {
-                    if ((min && value.length() < min) || (max && value.length() > max)) {
+                    if (value.length() < min || value.length() > max) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return value;
@@ -831,12 +887,39 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline Filter sizeBetween(size_t min, size_t max, Filter && subFilter0) {
+        inline auto maxLength(size_t max) {
+            assert(max > 0);
             return
-                [min, max, subFilter = std::forward<Filter>(subFilter0)]
+                [max] (const std::string & value) -> std::string {
+                    if (value.length() > max) {
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                    }
+                    return value;
+                };
+        }
+
+        [[nodiscard, maybe_unused]]
+        inline auto length(size_t min, size_t max, Meta::Filter<std::string> auto && subFilter0) {
+            assert(max > min);
+            return
+                [min, max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
                 (const std::string & value) -> std::string {
                     std::string filtered { subFilter(value) };
-                    if ((min && filtered.length() < min) || (max && filtered.length() > max)) {
+                    if (filtered.length() < min || filtered.length() > max) {
+                        throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                    }
+                    return filtered;
+                };
+        }
+
+        [[nodiscard, maybe_unused]]
+        inline auto maxLength(size_t max, Meta::Filter<std::string> auto && subFilter0) {
+            assert(max > 0);
+            return
+                [max, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+                (const std::string & value) -> std::string {
+                    std::string filtered { subFilter(value) };
+                    if (filtered.length() > max) {
                         throw DataError(Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
                     }
                     return filtered;

@@ -42,6 +42,18 @@ namespace Kkm {
         }
     }
 
+    void Device::ConnParams::applyCommon(Device & kkm) const { // NOLINT(*-convert-member-functions-to-static)
+        kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
+        if (s_timeZoneConfigured) {
+            kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_TIME_ZONE, std::to_wstring(static_cast<int>(s_timeZone)));
+        }
+        kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_OFD_CHANNEL, std::to_wstring(Atol::LIBFPTR_OFD_CHANNEL_AUTO));
+        // ISSUE: Из документации не ясно, что передавать в качестве значения параметра.
+        //  Но нам этот параметр не очень нужен, потому как при формировании чека единицы у нас
+        //  всегда передаются и проблем с ФФД 1.2+ не должно возникнуть.
+        // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_AUTO_MEASUREMENT_UNIT, ???);
+    }
+
     void Device::ConnParams::applyCom(Device & kkm) const {
         if (m_params.size() < 2) {
             throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
@@ -56,15 +68,10 @@ namespace Kkm {
         } else {
             throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         }
-        kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_COM));
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_COM_FILE, port);
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_BAUDRATE, baudRate);
-        kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_OFD_CHANNEL, std::to_wstring(Atol::LIBFPTR_OFD_CHANNEL_AUTO));
-        // ISSUE: Из документации не ясно, что передавать в качестве значения параметра.
-        //  Но нам этот параметр не очень нужен, потому как при формировании чека единицы у нас
-        //  всегда передаются и проблем с ФФД 1.2+ не должно возникнуть.
-        // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_AUTO_MEASUREMENT_UNIT, std::to_wstring(Atol::LIBFPTR_IU_PIECE));
+        applyCommon(kkm);
         if (kkm.m_kkm.applySingleSettings() < 0) {
             throw Failure(kkm); // NOLINT(*-exception-baseclass)
         }
@@ -75,7 +82,6 @@ namespace Kkm {
         // if (m_params.size() < 2) {
         //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
-        // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_USB));
         // ...
         throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
@@ -86,7 +92,6 @@ namespace Kkm {
         // if (m_params.size() < 2) {
         //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
-        // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_TCPIP));
         // ...
         throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
@@ -97,7 +102,6 @@ namespace Kkm {
         // if (m_params.size() < 2) {
         //     throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
         // }
-        // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         // kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_PORT, std::to_wstring(Atol::LIBFPTR_PORT_BLUETOOTH));
         // ...
         throw Failure(Wcs::c_notImplemented); // NOLINT(*-exception-baseclass)
@@ -114,7 +118,7 @@ namespace Kkm {
 
     void Device::NewConnParams::save(const std::wstring & serialNumber) {
         if (serialNumber.empty()) {
-            throw Failure(std::format(Wcs::c_cantSave, L"???")); // NOLINT(*-exception-baseclass)
+            throw Failure(std::format(Wcs::c_cantSave, L"-")); // NOLINT(*-exception-baseclass)
         }
         std::filesystem::path filePath { s_directory };
         if (!std::filesystem::is_directory(filePath)) {
@@ -1117,7 +1121,7 @@ namespace Kkm {
                     = Json::handleKey(
                         json, "name",
                         this->m_operatorName,
-                        Text::sizeBetween<NameType>(0, c_maxLength, Text::trim<NameType>()),
+                        Text::maxLength<NameType>(c_maxLength, Text::trim<NameType>()),
                         path
                     );
                 if (!success) {
@@ -1243,13 +1247,13 @@ namespace Kkm {
                 double price;
                 double quantity;
                 std::wstring title;
-                if (!Json::handleKey(item, "title", title)) {
+                if (!Json::handleKey(item, "title", title, Text::Wcs::noEmpty(Text::Wcs::trim()))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title")); // NOLINT(*-exception-baseclass)
                 }
-                if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, c_maxPrice))) {
+                if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, s_maxPrice))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].price")); // NOLINT(*-exception-baseclass)
                 }
-                if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, c_maxQuantity))) {
+                if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, s_maxQuantity))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].quantity")); // NOLINT(*-exception-baseclass)
                 }
                 Json::handleKey(item, "unit", unit, s_measurementUnitMap);

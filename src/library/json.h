@@ -192,7 +192,7 @@ namespace Json {
     inline bool handle(
         const Nln::Json & json,
         T & variable,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & jsonPath = {}
     ) try {
         if (json.is_null()) {
@@ -213,7 +213,7 @@ namespace Json {
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
@@ -300,7 +300,7 @@ namespace Json {
         const Nln::Json & json,
         T & variable,
         const Meta::EnumCastMap<T> auto & castMap,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & jsonPath = {}
     ) try {
         if (json.is_null()) {
@@ -326,7 +326,7 @@ namespace Json {
         const std::string_view key,
         T & variable,
         const Meta::EnumCastMap<T> auto & castMap,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
@@ -414,7 +414,7 @@ namespace Json {
         const Nln::Json & json,
         T & variable,
         const Meta::EnumDomain<T> auto & domain,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & jsonPath = {}
     ) try {
         if (json.is_null()) {
@@ -440,7 +440,7 @@ namespace Json {
         const std::string_view key,
         T & variable,
         const Meta::EnumDomain<T> auto & domain,
-        const Meta::Filter<T> & filter,
+        const Meta::Filter<T> auto & filter,
         const std::wstring & baseJsonPath = {}
     ) {
         assert(json.is_object());
@@ -520,7 +520,7 @@ namespace Json {
     inline bool handle(
         const Nln::Json & json,
         T & variable,
-        const Meta::Filter<typename T::value_type> & filter,
+        const Meta::Filter<typename T::value_type> auto & filter,
         const std::wstring & jsonPath = {}
     ) try {
         if (json.is_array()) {
@@ -545,7 +545,7 @@ namespace Json {
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
-        const Meta::Filter<typename T::value_type> & filter,
+        const Meta::Filter<typename T::value_type> auto & filter,
         const std::wstring & baseJsonPath = {}
     ) {
         std::wstring jsonPath { baseJsonPath };
