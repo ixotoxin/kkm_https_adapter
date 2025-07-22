@@ -26,20 +26,22 @@
         "secret": "lorem.ipsum.dolor.sit.amet",
         "loopbackWithoutSecret": false,
         "enableStatic": false,
-        "enableUnknownType": true,
+        "enableUnknownType": false,
         "staticDirectory": "static",
-        "mimeMap": "conf\\mime.json",
-        "--headersMap": "conf\\headers.json"
+        "mimeMap": "conf\\mime.json"
     },
     "kkm": {
         "directory": "conf\\kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
+        "timeZone": "device",
+        "documentClosingTimeout": 5000,
         "cliOperator": {
             "name": "Оператор",
             "--inn": "770000000000"
         },
-        "timeZone": "device",
-        "documentClosingTimeout": 5000
+        "maxCashInOut": 500000,
+        "maxPrice": 300000,
+        "maxQuantity": 1000
     }
 }

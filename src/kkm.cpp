@@ -6,6 +6,7 @@
 #include "log.h"
 
 namespace Kkm {
+    using Basic::DataError;
     using Basic::c_sleepQuantum;
 
     Failure::Failure(const std::wstring_view message, std::source_location && location)
@@ -1141,7 +1142,7 @@ namespace Kkm {
 
     Device::Call::CashDetails::CashDetails(const Nln::Json & details)
     : OperatorDetails(details) {
-        if (!Json::handleKey(details, "cashSum", m_cashSum)) {
+        if (!Json::handleKey(details, "cashSum", m_cashSum, Numeric::between(c_minCashInOut, s_maxCashInOut))) {
             throw Failure(std::format(Wcs::c_requiresProperty, L"cashSum")); // NOLINT(*-exception-baseclass)
         }
     }
@@ -1177,13 +1178,41 @@ namespace Kkm {
     }
 
     Device::Call::ReceiptDetails::ItemDetails::ItemDetails(
+        const std::wstring_view commodityName,
+        const double price,
+        const double quantity,
+        const MeasurementUnit unit,
+        const Tax tax
+    ) : m_commodityName(commodityName), m_price(price), m_quantity(quantity), m_unit(unit), m_tax(tax) {
+        if (m_commodityName.empty()) {
+            throw DataError(Wcs::c_invalidData, L"commodityName"); // NOLINT(*-exception-baseclass)
+        }
+        if (m_price < c_minMaxPrice || m_price > s_maxPrice) {
+            throw DataError(Wcs::c_invalidData, L"price"); // NOLINT(*-exception-baseclass)
+        }
+        if (m_quantity < c_minQuantity || m_quantity > s_maxQuantity) {
+            throw DataError(Wcs::c_invalidData, L"quantity"); // NOLINT(*-exception-baseclass)
+        }
+    }
+
+    Device::Call::ReceiptDetails::ItemDetails::ItemDetails(
         std::wstring && commodityName,
         const double price,
         const double quantity,
         const MeasurementUnit unit,
         const Tax tax
-    ) : m_commodityName(std::forward<std::wstring>(commodityName)), m_price(price), m_quantity(quantity),
-        m_unit(unit/*MeasurementUnit::Piece*/), m_tax(tax) {}
+    ) : m_commodityName(std::forward<std::wstring>(commodityName)),
+        m_price(price), m_quantity(quantity), m_unit(unit), m_tax(tax) {
+        if (m_commodityName.empty()) {
+            throw DataError(Wcs::c_invalidData, L"commodityName"); // NOLINT(*-exception-baseclass)
+        }
+        if (m_price < c_minMaxPrice || m_price > s_maxPrice) {
+            throw DataError(Wcs::c_invalidData, L"price"); // NOLINT(*-exception-baseclass)
+        }
+        if (m_quantity < c_minQuantity || m_quantity > s_maxQuantity) {
+            throw DataError(Wcs::c_invalidData, L"quantity"); // NOLINT(*-exception-baseclass)
+        }
+    }
 
     Device::Call::ReceiptDetails::ReceiptDetails(const Nln::Json & details)
     : OperatorDetails(details) {
@@ -1242,21 +1271,21 @@ namespace Kkm {
         bool hasDefaultTax = Json::handleKey(details, "tax", defaultTax, s_taxCastMap);
         if (details.contains("items") && details["items"].is_array()) {
             for (auto & item : details["items"].get<std::vector<Nln::Json>>()) {
-                Tax tax;
-                MeasurementUnit unit { MeasurementUnit::Piece };
-                double price;
-                double quantity;
                 std::wstring title;
                 if (!Json::handleKey(item, "title", title, Text::Wcs::noEmpty(Text::Wcs::trim()))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title")); // NOLINT(*-exception-baseclass)
                 }
+                double price;
                 if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, s_maxPrice))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].price")); // NOLINT(*-exception-baseclass)
                 }
+                double quantity;
                 if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, s_maxQuantity))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].quantity")); // NOLINT(*-exception-baseclass)
                 }
+                MeasurementUnit unit { MeasurementUnit::Piece };
                 Json::handleKey(item, "unit", unit, s_measurementUnitMap);
+                Tax tax;
                 if (!Json::handleKey(item, "tax", tax, s_taxCastMap)) {
                     if (hasDefaultTax) {
                         tax = defaultTax;

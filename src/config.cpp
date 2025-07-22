@@ -185,15 +185,21 @@ namespace Config {
                         );
                         Json::handleKey(json, "customerAccountField", Kkm::s_customerAccountField, path);
                         Json::handleKey(
-                            json, "maxQuantity",
-                            Kkm::s_maxQuantity,
-                            Numeric::between(Kkm::c_minMaxQuantity, Kkm::c_maxMaxQuantity),
+                            json, "maxCashInOut",
+                            Kkm::s_maxCashInOut,
+                            Numeric::between(Kkm::c_minMaxCashInOut, Kkm::c_maxMaxCashInOut),
                             path
                         );
                         Json::handleKey(
                             json, "maxPrice",
                             Kkm::s_maxPrice,
                             Numeric::between(Kkm::c_minMaxPrice, Kkm::c_maxMaxPrice),
+                            path
+                        );
+                        Json::handleKey(
+                            json, "maxQuantity",
+                            Kkm::s_maxQuantity,
+                            Numeric::between(Kkm::c_minMaxQuantity, Kkm::c_maxMaxQuantity),
                             path
                         );
                         return true;
