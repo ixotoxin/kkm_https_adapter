@@ -20,6 +20,11 @@ namespace Json {
         using Basic::Wcs::c_rangeError;
     }
 
+    namespace Mbs {
+        constexpr const char * c_successKey { "!success" };
+        constexpr const char * c_messageKey { "!message" };
+    }
+
     using Basic::Failure;
     using Basic::DataError;
     using Handler = std::function<bool(const Nln::Json &, const std::wstring &)>;

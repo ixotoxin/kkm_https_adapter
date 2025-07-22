@@ -14,6 +14,11 @@
 #include "service.h"
 #include "config.h"
 
+namespace Mbs {
+    using Json::Mbs::c_successKey;
+    using Json::Mbs::c_messageKey;
+}
+
 void usage(std::wostream & stream, const std::filesystem::path & path) {
     stream <<
         L"\n"
@@ -471,7 +476,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ {"!success", false }, { "!message", Text::convert(e.explain()) } }).dump(4)
+                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, Text::convert(e.explain()) } }).dump(4)
                 );
         } else {
             ntsLogError(e);
@@ -480,7 +485,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ {"!success", false }, { "!message", e.what() } }).dump(4)
+                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, e.what() } }).dump(4)
                 );
         } else {
             ntsLogError(e);
@@ -489,7 +494,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ {"!success", false }, { "!message", Basic::Mbs::c_somethingWrong } }).dump(4)
+                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, Basic::Mbs::c_somethingWrong } }).dump(4)
                 );
         } else {
             ntsLogError(Basic::Wcs::c_somethingWrong);
