@@ -5,8 +5,6 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <library/numeric.h>
 
-using namespace std;
-
 namespace UnitTests {
     TEST_CASE("numeric", "[cast]") {
         using Catch::Matchers::Equals;
@@ -55,6 +53,7 @@ namespace UnitTests {
             Equals("0.5") || Equals("0.50") || Equals("0.500") || Equals("0.5000")
             || Equals("0.50000") || Equals("0.500000") || Equals("0.5000000")
         );
+
         REQUIRE_THAT(
             Numeric::cast<std::string>(-.5),
             Equals("-0.5") || Equals("-0.50") || Equals("-0.500") || Equals("-0.5000")
