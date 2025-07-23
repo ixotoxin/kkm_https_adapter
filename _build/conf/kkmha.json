@@ -27,8 +27,8 @@
         "loopbackWithoutSecret": false,
         "enableStatic": false,
         "enableUnknownType": false,
-        "staticDirectory": "static",
-        "mimeMap": "conf\\mime.json"
+        "mimeMap": "conf\\mime.json",
+        "staticDirectory": "static"
     },
     "kkm": {
         "dbDirectory": "conf\\kkm",

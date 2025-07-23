@@ -46,6 +46,7 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
         L"    restart                Перезапустить службу Windows\n"
         L"    foreground             Запустить сервер как foreground-процесс\n"
         L"    learn _пп_ [_пп_ ...]  Добавить ККМ\n"
+        L"    base-status _сн_       Вывести базовый статус ККМ (п1)\n"
         L"    status _сн_            Вывести статус ККМ (п1)\n"
         L"    full-status _сн_       Вывести полный статус ККМ (п1)\n"
         L"    cash-stat _сн_         Вывести информации о наличных (п1)\n"
@@ -244,14 +245,73 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             jsonOut = true;
             Log::Console::s_level = Log::c_levelNone;
 
+            if (command == L"base-status" && argc == 3) {
+                Nln::Json json(Nln::EmptyJsonObject);
+
+                {
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
+                    Kkm::Device::Call::StatusResult result {};
+                    kkm.getStatus(result);
+                    result.exportTo(json);
+                }
+
+                std::wcout << Text::convert(json.dump(4));
+                return EXIT_SUCCESS;
+            }
+
             if (command == L"status" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
 
                 {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::StatusResult result {};
-                    kkm.getStatus(result);
-                    result.exportTo(json);
+                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
+
+                    {
+                        Kkm::Device::Call::StatusResult result {};
+                        kkm.getStatus(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::ShiftStateResult result;
+                        kkm.getShiftState(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::ReceiptStateResult result;
+                        kkm.getReceiptState(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::CashStatResult result;
+                        kkm.getCashStat(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::FndtOfdExchangeStatusResult result;
+                        kkm.getFndtOfdExchangeStatus(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::FndtLastReceiptResult result;
+                        kkm.getFndtLastReceipt(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::FndtLastDocumentResult result;
+                        kkm.getFndtLastDocument(result);
+                        result.exportTo(json);
+                    }
+
+                    {
+                        Kkm::Device::Call::FndtErrorsResult result;
+                        kkm.getFndtErrors(result);
+                        result.exportTo(json);
+                    }
                 }
 
                 std::wcout << Text::convert(json.dump(4));
@@ -269,51 +329,61 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                         kkm.getStatus(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::ShiftStateResult result;
                         kkm.getShiftState(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::ReceiptStateResult result;
                         kkm.getReceiptState(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::CashStatResult result;
                         kkm.getCashStat(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtOfdExchangeStatusResult result;
                         kkm.getFndtOfdExchangeStatus(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtFnInfoResult result;
                         kkm.getFndtFnInfo(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtLastRegistrationResult result;
                         kkm.getFndtLastRegistration(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtLastReceiptResult result;
                         kkm.getFndtLastReceipt(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtLastDocumentResult result;
                         kkm.getFndtLastDocument(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::FndtErrorsResult result;
                         kkm.getFndtErrors(result);
                         result.exportTo(json);
                     }
+
                     {
                         Kkm::Device::Call::VersionResult result;
                         kkm.getVersion(result);
@@ -445,8 +515,8 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     Kkm::Device::Call::CloseDetails details {
                         Kkm::s_cliOperatorName,
                         Kkm::s_cliOperatorInn,
-                        true,
-                        true
+                        false,
+                        false
                     };
                     Kkm::Device::Call::Result result {};
                     kkm.reportX(details, result);
@@ -466,7 +536,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                         Kkm::s_cliOperatorName,
                         Kkm::s_cliOperatorInn,
                         true,
-                        true
+                        false
                     };
                     Kkm::Device::Call::Result result {};
                     kkm.closeShift(details, result);

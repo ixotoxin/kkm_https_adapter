@@ -204,13 +204,14 @@ namespace Kkm {
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
-    void status(Payload & payload) {
+    void baseStatus(Payload & payload) {
         MEMORY_LEAK;
         methodCall<Call::StatusResult>(&Device::getStatus, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
-    void fullStatus(Payload & payload) {
+    void status(Payload & payload) {
+        MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Status::BadRequest, Mbs::c_badRequest);
         }
@@ -224,51 +225,122 @@ namespace Kkm {
                 kkm.getStatus(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::ShiftStateResult result;
                 kkm.getShiftState(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::ReceiptStateResult result;
                 kkm.getReceiptState(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::CashStatResult result;
                 kkm.getCashStat(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::FndtOfdExchangeStatusResult result;
                 kkm.getFndtOfdExchangeStatus(result);
                 result.exportTo(payload.m_result);
             }
-            {
-                Call::FndtFnInfoResult result;
-                kkm.getFndtFnInfo(result);
-                result.exportTo(payload.m_result);
-            }
-            {
-                Call::FndtLastRegistrationResult result;
-                kkm.getFndtLastRegistration(result);
-                result.exportTo(payload.m_result);
-            }
+
             {
                 Call::FndtLastReceiptResult result;
                 kkm.getFndtLastReceipt(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::FndtLastDocumentResult result;
                 kkm.getFndtLastDocument(result);
                 result.exportTo(payload.m_result);
             }
+
             {
                 Call::FndtErrorsResult result;
                 kkm.getFndtErrors(result);
                 result.exportTo(payload.m_result);
             }
+        }
+        payload.m_expiresAfter = Http::c_reportCacheLifeTime;
+    }
+
+    void fullStatus(Payload & payload) {
+        MEMORY_LEAK;
+        if (payload.m_serialNumber.empty()) {
+            return payload.fail(Status::BadRequest, Mbs::c_badRequest);
+        }
+
+        auto connParams = resolveConnParams(payload);
+        if (connParams) {
+            Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
+
+            {
+                Call::StatusResult result;
+                kkm.getStatus(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::ShiftStateResult result;
+                kkm.getShiftState(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::ReceiptStateResult result;
+                kkm.getReceiptState(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::CashStatResult result;
+                kkm.getCashStat(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtOfdExchangeStatusResult result;
+                kkm.getFndtOfdExchangeStatus(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtFnInfoResult result;
+                kkm.getFndtFnInfo(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtLastRegistrationResult result;
+                kkm.getFndtLastRegistration(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtLastReceiptResult result;
+                kkm.getFndtLastReceipt(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtLastDocumentResult result;
+                kkm.getFndtLastDocument(result);
+                result.exportTo(payload.m_result);
+            }
+
+            {
+                Call::FndtErrorsResult result;
+                kkm.getFndtErrors(result);
+                result.exportTo(payload.m_result);
+            }
+
             {
                 Call::VersionResult result;
                 kkm.getVersion(result);
@@ -355,6 +427,7 @@ namespace Kkm {
     }
 
     static const std::unordered_map<std::string, void (*)(Payload &)> s_handlers {
+        { "get/kkm/base-status", baseStatus },
         { "get/kkm/status", status },
         { "get/kkm/full-status", fullStatus },
         { "post/kkm/learn", learn },
