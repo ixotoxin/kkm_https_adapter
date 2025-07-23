@@ -946,7 +946,7 @@ namespace Kkm {
         { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically }
     };
 
-    inline std::wstring s_directory { c_defDirectory };
+    inline std::wstring s_dbDirectory { c_defDbDirectory };
     inline std::wstring s_defaultBaudRate { c_defBaudRate };
     inline size_t s_defaultLineLength { c_defLineLength };
     inline TimeZone s_timeZone { TimeZone::Device };

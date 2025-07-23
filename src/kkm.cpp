@@ -126,7 +126,7 @@ namespace Kkm {
         if (serialNumber.empty()) {
             throw Failure(std::format(Wcs::c_cantSave, L"-")); // NOLINT(*-exception-baseclass)
         }
-        std::filesystem::path filePath { s_directory };
+        std::filesystem::path filePath { s_dbDirectory };
         if (!std::filesystem::is_directory(filePath)) {
             std::filesystem::create_directories(filePath);
             if (!std::filesystem::is_directory(filePath)) {
@@ -154,7 +154,7 @@ namespace Kkm {
 
     Device::KnownConnParams::KnownConnParams(const wchar_t * serialNumber)
     : KnownConnParams(std::wstring(serialNumber)) {
-        std::filesystem::path filePath { s_directory };
+        std::filesystem::path filePath { s_dbDirectory };
         filePath /= m_serialNumber + L".json";
         if (!std::filesystem::is_regular_file(filePath)) {
             throw Failure(std::format(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
@@ -363,7 +363,7 @@ namespace Kkm {
         assert(s_documentClosingTimeout >= c_sleepQuantum);
         // ISSUE: Из документации не очень понятно как работать с методом checkDocumentClosed() - описания нет,
         //  приведенный пример выглядит странно и рассчитан скорее всего на интерактивное взаимодействие с ККМ.
-        //  В нашем случае интерактивность невозможна. Будем ждать чуда. Если чуда не произойдет, отменять чек.
+        //  В нашем случае интерактивность невозможна. Будем ждать чуда. Если чуда не произойдет, отменяем чек.
         decltype(s_documentClosingTimeout) i;
         for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.checkDocumentClosed() < 0 && i; --i) {
             tsLogWarning(Wcs::c_closingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(kkm_https_adapter VERSION 1.3.0 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.3.1 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -18,6 +18,8 @@ option(WITH_MEMORY_LEAKS "Build with memory leaks (Debug only)" OFF)
 
 #set(VCPKG_TRACE_FIND_PACKAGE ON)
 #MESSAGE(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+
+string(TIMESTAMP KKMHA_BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 
 set(KKMHA_DEPS_VCPKG "${CMAKE_SOURCE_DIR}/deps/vcpkg_installed/x64-windows")
 set(KKMHA_DEPS_FPTR10_INCL "${CMAKE_SOURCE_DIR}/deps/fptr10")

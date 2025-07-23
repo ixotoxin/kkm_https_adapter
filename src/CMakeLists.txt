@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
+configure_file(kkmha_config.h.in kkmha_config.h)
+
 add_executable(
     kkmha
     kkmha_main.cpp
@@ -13,6 +15,7 @@ target_compile_definitions(
         WIN32_LEAN_AND_MEAN ASIO_STANDALONE ASIO_NO_WIN32_LEAN_AND_MEAN ASIO_NO_NOMINMAX
         ASIO_HAS_THREADS ASIO_HAS_STD_COROUTINE ASIO_HAS_CO_AWAIT
 )
+target_include_directories(kkmha PUBLIC "${PROJECT_BINARY_DIR}/src")
 target_include_directories(kkmha PRIVATE ${KKMHA_DEPS_FPTR10_INCL})
 target_link_libraries(kkmha PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(kkmha PRIVATE asio::asio)

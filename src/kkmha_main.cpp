@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
+#include <kkmha_config.h>
 #include "library/basic.h"
 #include <fcntl.h>
 #include <io.h>
@@ -19,9 +20,21 @@ namespace Mbs {
     using Json::Mbs::c_messageKey;
 }
 
+std::wstring logLevelLabel(int level) {
+    assert(level >= Log::c_levelDebug && level <= Log::c_levelNone);
+    if (level == Log::c_levelNone) {
+        return L"none";
+    }
+    if (Log::s_levelLabels.contains(static_cast<Log::Level>(level))) {
+        return Text::lowered(Log::s_levelLabels.at(static_cast<Log::Level>(level)));
+    }
+    return L"[error]";
+}
+
 void usage(std::wostream & stream, const std::filesystem::path & path) {
     stream <<
         L"\n"
+        L"Версия: " << Basic::Wcs::c_version << L"\n"
         L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
         L"Команды:\n"
         L"    help                   Вывести справку\n"
@@ -77,45 +90,60 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             Config::read(envp);
 
             if (command == L"show-config") {
+                std::wstring securityLevel;
+                if (Server::s_enableLegacyTls) {
+                    securityLevel.assign(L"0");
+                } else if (Server::s_securityLevel >= 0) {
+                    securityLevel.assign(std::to_wstring(Server::s_securityLevel));
+                } else {
+                    securityLevel.assign(L"default");
+                }
                 std::wcout << L"\n"
+                    L"[BLD] main.version = \"" << Basic::Wcs::c_version << L"\"\n"
+                    L"[BLD] main.buildTimestamp = \"" << Basic::Wcs::c_buildTimestamp << L"\"\n"
                     L"[RTM] main.binaryFile = \"" << Config::s_binaryFile.c_str() << L"\"\n"
                     L"[RTM] main.workDirectory = \"" << Config::s_workDirectory.c_str() << L"\"\n"
                     L"[RTM] main.configDirectory = \"" << Config::s_configDirectory.c_str() << L"\"\n"
                     L"[RTM] main.configFile = \"" << Config::s_configFile.c_str() << L"\"\n"
-                    L"[CFG] log.console.level = \"" << Log::label(Log::Console::s_level) << L"\"\n"
+                    L"[CFG] log.console.level = " << logLevelLabel(Log::Console::s_level) << L"\n"
                     L"[CFG] log.console.outputTimestamp = " << Text::Wcs::yesNo(Log::Console::s_outputTimestamp) << L"\n"
                     L"[CFG] log.console.outputLevel = " << Text::Wcs::yesNo(Log::Console::s_outputLevel) << L"\n"
-                    L"[CFG] log.file.level = \"" << Log::label(Log::File::s_level) << L"\"\n"
+                    L"[CFG] log.file.level = " << logLevelLabel(Log::File::s_level) << L"\n"
                     L"[CFG] log.file.directory = \"" << Log::File::s_directory << L"\"\n"
-                    L"[CFG] log.eventLog.level = \"" << Log::label(Log::EventLog::s_level) << L"\"\n"
+                    L"[CFG] log.eventLog.level = " << logLevelLabel(Log::EventLog::s_level) << L"\n"
                     L"[DEF] log.eventLog.source = \"" << Log::c_eventSource << L"\"\n"
                     L"[CFG] log.appendLocation = " << Text::Wcs::yesNo(Log::s_appendLocation) << L"\n"
                     L"[DEF] service.systemName = \"" << Service::c_systemName << L"\"\n"
                     L"[DEF] service.displayName = \"" << Service::c_displayName << L"\"\n"
                     L"[CFG] server.ipv4Only = " << Text::Wcs::yesNo(Server::s_ipv4Only) << L"\n"
                     L"[CFG] server.port = " << Server::s_port << L"\n"
+                    L"[CFG] server.concurrencyLimit = " << Server::s_concurrencyLimit << L"\n"
                     L"[CFG] server.enableLegacyTls = " << Text::Wcs::yesNo(Server::s_enableLegacyTls) << L"\n"
-                    L"[CFG] server.securityLevel = " << Server::s_securityLevel << L"\n"
+                    L"[CFG] server.securityLevel = " << securityLevel << L"\n"
                     L"[CFG] server.certificateChainFile = \"" << Text::convert(Server::s_certificateChainFile) << L"\"\n"
                     L"[CFG] server.privateKeyFile = \"" << Text::convert(Server::s_privateKeyFile) << L"\"\n"
                     L"[CFG] server.privateKeyPassword = \"" << Text::convert(Server::s_privateKeyPassword) << L"\"\n"
                     L"[CFG] server.secret = \"" << Text::convert(Http::s_secret) << L"\"\n"
                     L"[CFG] server.loopbackWithoutSecret = " << Text::Wcs::yesNo(Http::s_loopbackWithoutSecret) << L"\n"
                     L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(Http::s_enableStatic) << L"\n"
-                    L"[CFG] server.staticDirectory = \"" << Http::s_staticDirectory << L"\"\n"
-                    L"[CFG] server.mimeMapFile = \"" << Http::s_mimeMapFile << L"\"\n"
                     L"[CFG] server.enableUnknownType = " << Text::Wcs::yesNo(Http::s_enableUnknownType) << L"\n"
-                    L"[CFG] kkm.directory = " << Kkm::s_directory << L"\n"
+                    L"[CFG] server.mimeMapFile = \"" << Http::s_mimeMapFile << L"\"\n"
+                    L"[CFG] server.staticDirectory = \"" << Http::s_staticDirectory << L"\"\n"
+                    L"[CFG] kkm.dbDirectory = \"" << Kkm::s_dbDirectory << L"\"\n"
                     L"[CFG] kkm.defaultBaudRate = " << Kkm::s_defaultBaudRate << L"\n"
                     L"[CFG] kkm.defaultLineLength = " << Kkm::s_defaultLineLength << L"\n"
+                    L"[CFG] kkm.timeZone = tz" << static_cast<int>(Kkm::s_timeZone) << L"\n"
+                    L"[CFG] kkm.documentClosingTimeout = " << Kkm::s_documentClosingTimeout << L"\n"
                     L"[CFG] kkm.cliOperator.name = \"" << Kkm::s_cliOperatorName << L"\"\n"
                     L"[CFG] kkm.cliOperator.inn = \"" << Kkm::s_cliOperatorInn << L"\"\n"
                     L"[CFG] kkm.customerAccountField = \"" << Kkm::s_customerAccountField << L"\"\n"
-                    L"[CFG] kkm.documentClosingTimeout = \"" << Kkm::s_documentClosingTimeout << L"\"\n"
+                    L"[CFG] kkm.maxCashInOut = " << Kkm::s_maxCashInOut << L"\n"
+                    L"[CFG] kkm.maxPrice = " << Kkm::s_maxPrice << L"\n"
+                    L"[CFG] kkm.maxQuantity = " << Kkm::s_maxQuantity << L"\n"
                     L"[CFG] kkm.connParams = { ";
 
                 try {
-                    std::filesystem::path directory { Kkm::s_directory };
+                    std::filesystem::path directory { Kkm::s_dbDirectory };
                     bool nonFirst = false;
                     for (auto const & entry: std::filesystem::directory_iterator { directory }) {
                         if (entry.is_regular_file()) {

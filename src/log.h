@@ -393,7 +393,14 @@ namespace Log {
         }
     }
 
-    static const std::unordered_map<std::wstring, int> s_levelCastMap {
+    inline const std::unordered_map<Level, std::wstring_view> s_levelLabels {
+        { Level::Debug, L"DBG" },
+        { Level::Info, L"INF" },
+        { Level::Warning, L"WRN" },
+        { Level::Error, L"ERR" }
+    };
+
+    inline const std::unordered_map<std::wstring, int> s_levelCastMap {
         { L"dbg", c_levelDebug },
         { L"debug", c_levelDebug },
         { std::to_wstring(c_levelDebug), c_levelDebug },
@@ -412,5 +419,5 @@ namespace Log {
         { std::to_wstring(c_levelNone), c_levelNone }
     };
 
-    [[nodiscard, maybe_unused]] std::wstring_view label(int);
+    // [[nodiscard, maybe_unused]] std::wstring_view label(int);
 }

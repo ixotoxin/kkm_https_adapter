@@ -31,7 +31,7 @@
         "mimeMap": "conf\\mime.json"
     },
     "kkm": {
-        "directory": "conf\\kkm",
+        "dbDirectory": "conf\\kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
         "timeZone": "device",

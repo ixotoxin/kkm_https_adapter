@@ -50,11 +50,11 @@
         "loopbackWithoutSecret": false,
         "enableStatic": false,
         "enableUnknownType": false,
-        "staticDirectory": "static",
-        "mimeMap": "conf\\mime.json"
+        "mimeMap": "conf\\mime.json",
+        "staticDirectory": "static"
     },
     "kkm": {
-        "directory": "conf\\kkm",
+        "dbDirectory": "conf\\kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
         "timeZone": "device",
@@ -93,7 +93,7 @@
 | `server.enableUnknownType`     | Разрешить/запретить отдавать файлы с расширениями не представленными в файле `mime.json`              |
 | `server.staticDirectory`       | Путь к директории, содержимое которой будет отдаваться для запросов `/static/{file-path}`             |
 | `server.mimeMap`               | Путь к файлу с описанием типа содержимого                                                             |
-| `kkm.directory`                | Путь к директории, в которой будет формироваться БД известных ККМ                                     |
+| `kkm.dbDirectory`              | Путь к директории, в которой будет формироваться БД известных ККМ                                     |
 | `kkm.defaultBaudRate`          | Скорость COM-порта по-умолчанию                                                                       |
 | `kkm.defaultLineLength`        | Ширина чековой ленты по-умолчанию. Используется, если данное свойство не удается получить опросом ККМ |
 | `kkm.timeZone`                 | Временная зона передаваемая ОФД при регистрации чека                                                  |

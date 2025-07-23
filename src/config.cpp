@@ -154,7 +154,7 @@ namespace Config {
                 Json::handleKey(
                     json, "kkm",
                     [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                        Json::handleKey(json, "directory", Kkm::s_directory, Text::Wcs::trim());
+                        Json::handleKey(json, "dbDirectory", Kkm::s_dbDirectory, Text::Wcs::trim());
                         Json::handleKey(json, "defaultBaudRate", Kkm::s_defaultBaudRate, Kkm::s_allowedBaudRate, path);
                         Json::handleKey(
                             json, "timeZone",

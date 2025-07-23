@@ -8,13 +8,6 @@
 #include <filesystem>
 
 namespace Log {
-    static const std::unordered_map<Level, std::wstring_view> s_levelLabels {
-        { Level::Debug, L"DBG" },
-        { Level::Info, L"INF" },
-        { Level::Warning, L"WRN" },
-        { Level::Error, L"ERR" }
-    };
-
     namespace Console {
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
@@ -154,17 +147,5 @@ namespace Log {
         } catch (...) {
             std::wclog << Wcs::c_loggingError << std::endl;
         }
-    }
-
-    [[nodiscard, maybe_unused]]
-    std::wstring_view label(int level) {
-        assert(level >= c_levelDebug && level <= c_levelNone);
-        if (level == c_levelNone) {
-            return L"NONE";
-        }
-        if (s_levelLabels.contains(static_cast<Level>(level))) {
-            return s_levelLabels.at(static_cast<Level>(level));
-        }
-        return L"[error]";
     }
 }
