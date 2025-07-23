@@ -72,7 +72,7 @@ namespace Kkm {
     constexpr size_t c_maxLength { 192 };
     constexpr std::wstring_view c_connParamsSeparator { L"," };
     constexpr wchar_t c_separatorChar { L'-' };
-    constexpr std::wstring_view c_defDirectory { L"conf\\kkm" };
+    constexpr std::wstring_view c_defDbDirectory { L"conf\\kkm" };
     constexpr std::wstring_view c_defBaudRate { L"115200" };
     constexpr size_t c_minLineLength { 24 };
     constexpr size_t c_maxLineLength { c_maxLength };

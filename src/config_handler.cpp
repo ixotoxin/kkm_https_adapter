@@ -25,7 +25,7 @@ namespace Http {
                 { "inn", Text::convert(Kkm::s_cliOperatorInn) }
             };
             std::vector<std::string> serials {};
-            for (auto const & entry: std::filesystem::directory_iterator { Kkm::s_directory }) {
+            for (auto const & entry: std::filesystem::directory_iterator { Kkm::s_dbDirectory }) {
                 if (entry.is_regular_file()) {
                     if (Text::lowered(entry.path().extension().c_str()) != L".json") {
                         continue;
