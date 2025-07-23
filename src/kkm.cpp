@@ -752,7 +752,8 @@ namespace Kkm {
                 { "firstUnsentNumber", m_firstUnsentNumber },
                 { "ofdMessageRead", m_ofdMessageRead },
                 { "firstUnsentDateTime", DateTime::cast<std::string>(m_firstUnsentDateTime) },
-                { "okpDateTime", DateTime::cast<std::string>(m_okpDateTime) }
+                { "okpDateTime", DateTime::cast<std::string>(m_okpDateTime) },
+                { "lastSentDateTime", DateTime::cast<std::string>(m_lastSentDateTime) }
             };
             return true;
         }
@@ -773,6 +774,13 @@ namespace Kkm {
         result.m_ofdMessageRead = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_OFD_MESSAGE_READ);
         result.m_firstUnsentDateTime = m_kkm.getParamDateTime(Atol::LIBFPTR_PARAM_DATE_TIME);
         result.m_okpDateTime = m_kkm.getParamDateTime(Atol::LIBFPTR_PARAM_LAST_SUCCESSFUL_OKP);
+
+        /** Запрос даты и времени последней успешной отправки документа в ОФД **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_LAST_SENT_OFD_DOCUMENT_DATE_TIME);
+        if (m_kkm.queryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+        result.m_lastSentDateTime = m_kkm.getParamDateTime(Atol::LIBFPTR_PARAM_DATE_TIME);
     }
 
     bool Device::Call::FndtFnInfoResult::exportTo(Nln::Json & json) {

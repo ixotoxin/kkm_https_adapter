@@ -480,6 +480,7 @@ namespace Kkm {
 
         std::tm m_firstUnsentDateTime {};
         std::tm m_okpDateTime {};
+        std::tm m_lastSentDateTime {};
         unsigned int m_exchangeStatus {};
         unsigned int m_firstUnsentNumber {};
         unsigned int m_unsentCount {};
