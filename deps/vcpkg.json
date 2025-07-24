@@ -1,6 +1,6 @@
 {
     "name": "kkm-https-adapter",
-    "version": "1.3.0",
+    "version": "1.3.7",
     "dependencies": [
         { "name": "asio", "features": [ "openssl" ] },
         { "name": "openssl", "features": [ "tools", "ssl3", "weak-ssl-ciphers" ] },

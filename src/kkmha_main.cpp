@@ -247,322 +247,147 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
             if (command == L"base-status" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
-                    Kkm::Device::Call::StatusResult result {};
-                    kkm.getStatus(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::getStatus, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"status" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
-
-                    {
-                        Kkm::Device::Call::StatusResult result {};
-                        kkm.getStatus(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::ShiftStateResult result;
-                        kkm.getShiftState(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::ReceiptStateResult result;
-                        kkm.getReceiptState(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::CashStatResult result;
-                        kkm.getCashStat(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtOfdExchangeStatusResult result;
-                        kkm.getFndtOfdExchangeStatus(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtLastReceiptResult result;
-                        kkm.getFndtLastReceipt(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtLastDocumentResult result;
-                        kkm.getFndtLastDocument(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtErrorsResult result;
-                        kkm.getFndtErrors(result);
-                        result.exportTo(json);
-                    }
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] }};
+                Kkm::collectDataFromMethods(
+                    json, kkm,
+                    &Kkm::Device::getStatus,
+                    &Kkm::Device::getShiftState,
+                    &Kkm::Device::getReceiptState,
+                    &Kkm::Device::getCashStat,
+                    &Kkm::Device::getFndtOfdExchangeStatus,
+                    &Kkm::Device::getFndtLastReceipt,
+                    &Kkm::Device::getFndtLastDocument,
+                    &Kkm::Device::getFndtErrors
+                );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"full-status" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-
-                    {
-                        Kkm::Device::Call::StatusResult result;
-                        kkm.getStatus(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::ShiftStateResult result;
-                        kkm.getShiftState(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::ReceiptStateResult result;
-                        kkm.getReceiptState(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::CashStatResult result;
-                        kkm.getCashStat(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtOfdExchangeStatusResult result;
-                        kkm.getFndtOfdExchangeStatus(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtFnInfoResult result;
-                        kkm.getFndtFnInfo(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtLastRegistrationResult result;
-                        kkm.getFndtLastRegistration(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtLastReceiptResult result;
-                        kkm.getFndtLastReceipt(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtLastDocumentResult result;
-                        kkm.getFndtLastDocument(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::FndtErrorsResult result;
-                        kkm.getFndtErrors(result);
-                        result.exportTo(json);
-                    }
-
-                    {
-                        Kkm::Device::Call::VersionResult result;
-                        kkm.getVersion(result);
-                        result.exportTo(json);
-                    }
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::collectDataFromMethods(
+                    json, kkm,
+                    &Kkm::Device::getStatus,
+                    &Kkm::Device::getShiftState,
+                    &Kkm::Device::getReceiptState,
+                    &Kkm::Device::getCashStat,
+                    &Kkm::Device::getFndtOfdExchangeStatus,
+                    &Kkm::Device::getFndtFnInfo,
+                    &Kkm::Device::getFndtLastRegistration,
+                    &Kkm::Device::getFndtLastReceipt,
+                    &Kkm::Device::getFndtLastDocument,
+                    &Kkm::Device::getFndtErrors,
+                    &Kkm::Device::getVersion
+                );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"cash-stat" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::CashStatResult result {};
-                    kkm.getCashStat(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::getCashStat, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"demo-print" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printDemo(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printDemo, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"info" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printInfo(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printInfo, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"fn-regs" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printFnRegistrations(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printFnRegistrations, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"ofd-status" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printOfdExchangeStatus(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printOfdExchangeStatus, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"ofd-test" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printOfdTest(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printOfdTest, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"shift-reports" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printCloseShiftReports(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printCloseShiftReports, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"last-document" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::Result result {};
-                    kkm.printLastDocument(result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callUndetailedMethod(kkm, &Kkm::Device::printLastDocument, json);
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"report-x" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::CloseDetails details {
-                        Kkm::s_cliOperatorName,
-                        Kkm::s_cliOperatorInn,
-                        false,
-                        false
-                    };
-                    Kkm::Device::Call::Result result {};
-                    kkm.reportX(details, result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callDetailedMethod(
+                    kkm, &Kkm::Device::reportX,
+                    { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, false, false },
+                    json
+                );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"close-shift" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::CloseDetails details {
-                        Kkm::s_cliOperatorName,
-                        Kkm::s_cliOperatorInn,
-                        true,
-                        false
-                    };
-                    Kkm::Device::Call::Result result {};
-                    kkm.closeShift(details, result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callDetailedMethod(
+                    kkm, &Kkm::Device::closeShift,
+                    { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, true, false },
+                    json
+                );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }
 
             if (command == L"reset-state" && argc == 3) {
                 Nln::Json json(Nln::EmptyJsonObject);
-
-                {
-                    Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
-                    Kkm::Device::Call::CloseDetails details {
-                        Kkm::s_cliOperatorName,
-                        Kkm::s_cliOperatorInn,
-                        true,
-                        true
-                    };
-                    Kkm::Device::Call::Result result {};
-                    kkm.resetState(details, result);
-                    result.exportTo(json);
-                }
-
+                Kkm::Device kkm { Kkm::Device::KnownConnParams { argv[2] } };
+                Kkm::callDetailedMethod(
+                    kkm, &Kkm::Device::resetState,
+                    { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, true, true },
+                    json
+                );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;
             }

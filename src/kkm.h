@@ -772,6 +772,38 @@ namespace Kkm {
         CloseDetails & operator=(CloseDetails &&) = default;
     };
 
+    template<std::derived_from<Device::Call::Result> ResultType>
+    using UndetailedMethod = void (Device::*)(ResultType &);
+
+    template<class ResultType>
+    inline void callUndetailedMethod(Device & kkm, UndetailedMethod<ResultType> method, Nln::Json & result) {
+        assert(result.is_object());
+        ResultType data {};
+        (kkm.*method)(data);
+        data.exportTo(result);
+    }
+
+    template<typename ... METHODS>
+    inline void collectDataFromMethods(Nln::Json & result, Device & kkm, METHODS ... method) {
+        (callUndetailedMethod(kkm, method, result), ...);
+    }
+
+    template<std::derived_from<Device::Call::Result> ResultType, std::derived_from<Device::Call::Details> DetailsType>
+    using DetailedMethod = void (Device::*)(const DetailsType &, ResultType &);
+
+    template<class ResultType, class DetailsType>
+    inline void callDetailedMethod(
+        Device & kkm,
+        DetailedMethod<ResultType, DetailsType> method,
+        const DetailsType & details,
+        Nln::Json & result
+    ) {
+        assert(result.is_object());
+        ResultType data {};
+        (kkm.*method)(details, data);
+        data.exportTo(result);
+    }
+
     inline const std::array<std::wstring, 11> s_allowedBaudRate {
         std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
         std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),

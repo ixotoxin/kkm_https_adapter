@@ -108,42 +108,36 @@ namespace Kkm {
         return nullptr;
     }
 
-    template<std::derived_from<Call::Result> ResultType>
-    using InfoMethod = void (Device::*)(ResultType &);
-
     template<class ResultType>
     [[maybe_unused]]
-    inline void methodCall(
-        InfoMethod<ResultType> method,
+    inline void callMethod(
+        UndetailedMethod<ResultType> method,
         Payload & payload
     ) {
-        ResultType result;
         auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
+            ResultType result {};
             (kkm.*method)(result);
             result.exportTo(payload.m_result);
         }
     }
 
-    template<std::derived_from<Call::Result> ResultType, std::derived_from<Call::Details> DetailsType>
-    using ActionMethod = void (Device::*)(const DetailsType &, ResultType &);
-
     template<class ResultType, class DetailsType, typename ... AdditionalDetailsArgs>
     [[maybe_unused]]
-    inline void methodCall(
-        ActionMethod<ResultType, DetailsType> method,
+    inline void callMethod(
+        DetailedMethod<ResultType, DetailsType> method,
         Payload & payload,
         AdditionalDetailsArgs ... args
     ) {
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Status::BadRequest, Mbs::c_badRequest);
         }
-        DetailsType details(payload.m_details, args...);
-        Call::Result result;
         auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
+            DetailsType details { payload.m_details, args... };
+            Call::Result result {};
             (kkm.*method)(details, result);
             result.exportTo(payload.m_result);
         }
@@ -151,12 +145,12 @@ namespace Kkm {
 
     template<std::derived_from<Call::Details> DetailsType, typename ... AdditionalDetailsArgs>
     [[maybe_unused]]
-    inline void methodCall(
-        ActionMethod<Call::Result, DetailsType> method,
+    inline void callMethod(
+        DetailedMethod<Call::Result, DetailsType> method,
         Payload & payload,
         AdditionalDetailsArgs ... args
     ) {
-        methodCall<Call::Result, DetailsType, AdditionalDetailsArgs...>(method, payload, args...);
+        callMethod<Call::Result, DetailsType, AdditionalDetailsArgs...>(method, payload, args...);
     }
 
     void learn(Payload & payload) {
@@ -206,7 +200,7 @@ namespace Kkm {
 
     void baseStatus(Payload & payload) {
         MEMORY_LEAK;
-        methodCall<Call::StatusResult>(&Device::getStatus, payload);
+        callMethod<Call::StatusResult>(&Device::getStatus, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
@@ -219,54 +213,17 @@ namespace Kkm {
         auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
-
-            {
-                Call::StatusResult result;
-                kkm.getStatus(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::ShiftStateResult result;
-                kkm.getShiftState(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::ReceiptStateResult result;
-                kkm.getReceiptState(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::CashStatResult result;
-                kkm.getCashStat(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtOfdExchangeStatusResult result;
-                kkm.getFndtOfdExchangeStatus(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtLastReceiptResult result;
-                kkm.getFndtLastReceipt(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtLastDocumentResult result;
-                kkm.getFndtLastDocument(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtErrorsResult result;
-                kkm.getFndtErrors(result);
-                result.exportTo(payload.m_result);
-            }
+            collectDataFromMethods(
+                payload.m_result, kkm,
+                &Device::getStatus,
+                &Device::getShiftState,
+                &Device::getReceiptState,
+                &Device::getCashStat,
+                &Device::getFndtOfdExchangeStatus,
+                &Device::getFndtLastReceipt,
+                &Device::getFndtLastDocument,
+                &Device::getFndtErrors
+            );
         }
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
@@ -280,149 +237,97 @@ namespace Kkm {
         auto connParams = resolveConnParams(payload);
         if (connParams) {
             Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
-
-            {
-                Call::StatusResult result;
-                kkm.getStatus(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::ShiftStateResult result;
-                kkm.getShiftState(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::ReceiptStateResult result;
-                kkm.getReceiptState(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::CashStatResult result;
-                kkm.getCashStat(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtOfdExchangeStatusResult result;
-                kkm.getFndtOfdExchangeStatus(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtFnInfoResult result;
-                kkm.getFndtFnInfo(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtLastRegistrationResult result;
-                kkm.getFndtLastRegistration(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtLastReceiptResult result;
-                kkm.getFndtLastReceipt(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtLastDocumentResult result;
-                kkm.getFndtLastDocument(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::FndtErrorsResult result;
-                kkm.getFndtErrors(result);
-                result.exportTo(payload.m_result);
-            }
-
-            {
-                Call::VersionResult result;
-                kkm.getVersion(result);
-                result.exportTo(payload.m_result);
-            }
+            collectDataFromMethods(
+                payload.m_result, kkm,
+                &Device::getStatus,
+                &Device::getShiftState,
+                &Device::getReceiptState,
+                &Device::getCashStat,
+                &Device::getFndtOfdExchangeStatus,
+                &Device::getFndtFnInfo,
+                &Device::getFndtLastRegistration,
+                &Device::getFndtLastReceipt,
+                &Device::getFndtLastDocument,
+                &Device::getFndtErrors,
+                &Device::getVersion
+            );
         }
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printDemo(Payload & payload) {
-        methodCall<Call::Result>(&Device::printDemo, payload);
+        callMethod<Call::Result>(&Device::printDemo, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printNonFiscalDocument(Payload & payload) {
-        methodCall<Call::PrintDetails>(&Device::printNonFiscalDocument, payload);
+        callMethod<Call::PrintDetails>(&Device::printNonFiscalDocument, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printInfo(Payload & payload) {
-        methodCall<Call::Result>(&Device::printInfo, payload);
+        callMethod<Call::Result>(&Device::printInfo, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printFnRegistrations(Payload & payload) {
-        methodCall<Call::Result>(&Device::printFnRegistrations, payload);
+        callMethod<Call::Result>(&Device::printFnRegistrations, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printOfdExchangeStatus(Payload & payload) {
-        methodCall<Call::Result>(&Device::printOfdExchangeStatus, payload);
+        callMethod<Call::Result>(&Device::printOfdExchangeStatus, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printOfdTest(Payload & payload) {
-        methodCall<Call::Result>(&Device::printOfdTest, payload);
+        callMethod<Call::Result>(&Device::printOfdTest, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printCloseShiftReports(Payload & payload) {
-        methodCall<Call::Result>(&Device::printCloseShiftReports, payload);
+        callMethod<Call::Result>(&Device::printCloseShiftReports, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void printLastDocument(Payload & payload) {
-        methodCall<Call::Result>(&Device::printLastDocument, payload);
+        callMethod<Call::Result>(&Device::printLastDocument, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void cashStat(Payload & payload) {
-        methodCall<Call::CashStatResult>(&Device::getCashStat, payload);
+        callMethod<Call::CashStatResult>(&Device::getCashStat, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void cashIn(Payload & payload) {
-        methodCall<Call::CashDetails>(&Device::registerCashIn, payload);
+        callMethod<Call::CashDetails>(&Device::registerCashIn, payload);
     }
 
     void cashOut(Payload & payload) {
-        methodCall<Call::CashDetails>(&Device::registerCashOut, payload);
+        callMethod<Call::CashDetails>(&Device::registerCashOut, payload);
     }
 
     void sell(Payload & payload) {
-        methodCall<Call::ReceiptDetails>(&Device::registerSell, payload);
+        callMethod<Call::ReceiptDetails>(&Device::registerSell, payload);
     }
 
     void sellReturn(Payload & payload) {
-        methodCall<Call::ReceiptDetails>(&Device::registerSellReturn, payload);
+        callMethod<Call::ReceiptDetails>(&Device::registerSellReturn, payload);
     }
 
     void closeShift(Payload & payload) {
-        methodCall<Call::CloseDetails>(&Device::closeShift, payload);
+        callMethod<Call::CloseDetails>(&Device::closeShift, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void reportX(Payload & payload) {
-        methodCall<Call::CloseDetails>(&Device::reportX, payload);
+        callMethod<Call::CloseDetails>(&Device::reportX, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void resetState(Payload & payload) {
-        methodCall<Call::CloseDetails>(&Device::resetState, payload);
+        callMethod<Call::CloseDetails>(&Device::resetState, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
