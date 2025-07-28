@@ -15,8 +15,10 @@ namespace Service {
     using Basic::Failure;
     using Basic::c_sleepQuantum;
 
-    static_assert(c_waitHint >= c_sleepQuantum && c_waitHint > Server::c_controlTimeout);
-    static_assert(c_controlTimeout >= c_sleepQuantum && c_controlTimeout > Server::c_controlTimeout);
+    static_assert(c_waitHint >= c_sleepQuantum);
+    static_assert(c_waitHint > Server::c_controlTimeout);
+    static_assert(c_controlTimeout >= c_sleepQuantum);
+    static_assert(c_controlTimeout > Server::c_controlTimeout);
 
     namespace Worker {
         static ::SERVICE_STATUS s_status {};
