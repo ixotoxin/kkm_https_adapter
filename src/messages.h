@@ -61,9 +61,10 @@ namespace Server::Wcs {
     constexpr S c_stoppingFailed { L"Не удалось остановить сервер" };
     constexpr S c_stopped { L"Сервер остановлен" };
     constexpr S c_servicingFailed { L"Сбой сервера" };
+    constexpr S c_socketOpeningError { L"Ошибка открытия сокета" };
+    constexpr S c_maximumIsExceeded { L"Превышено количество одновременных запросов" };
     constexpr S c_processingSuccess { L"Запрос успешно обработан" };
     constexpr S c_processingFailed { L"Не удалось обработать запрос" };
-    constexpr S c_maximumIsExceeded { L"Превышено количество одновременных запросов" };
 }
 
 namespace Http {

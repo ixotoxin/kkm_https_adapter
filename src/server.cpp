@@ -3,6 +3,7 @@
 
 #include "server.h"
 #include <array>
+#include <latch>
 #include "http_parser.h"
 #include "default_handler.h"
 #include "kkm_handler.h"
@@ -21,14 +22,48 @@ namespace Server {
 
     using namespace std::chrono_literals;
     using Basic::Failure;
+    using Basic::c_sleep;
     using Basic::c_sleepQuantum;
 
+    static_assert(std::is_integral_v<decltype(c_sleepQuantum)>);
+    static_assert(std::is_integral_v<decltype(c_controlTimeout)>);
     static_assert(c_controlTimeout >= c_sleepQuantum);
 
-    enum class State { Initial, Starting, Running, Stopping };
+    enum class State { Initial, Starting, Running, Shutdown, Stopping };
+
+    struct RequestCounter {
+        RequestCounter() {
+            assert(s_counter >= 0);
+            ++s_counter;
+        }
+
+        ~RequestCounter() {
+            --s_counter;
+            assert(s_counter >= 0);
+        }
+
+        RequestCounter(const RequestCounter &) = delete;
+        RequestCounter(RequestCounter &&) = default;
+
+        RequestCounter & operator=(const RequestCounter &) = delete;
+        RequestCounter & operator=(RequestCounter &&) = delete;
+
+        [[nodiscard]] bool invalid() { // NOLINT(*-convert-member-functions-to-static)
+            assert(s_counter >= 0);
+            return s_counter > s_concurrencyLimit;
+        }
+
+        [[nodiscard]] static int64_t value() {
+            assert(s_counter >= 0);
+            return s_counter;
+        }
+
+    private:
+        inline static std::atomic<int64_t> s_counter { 0 };
+    };
 
     static std::atomic<State> s_state { State::Initial };
-    static std::atomic<int64_t> s_requestCounter { 0 };
+    static std::latch s_shutdownSync { 2 };
     static std::shared_ptr<Asio::IoContext> s_ioContext { nullptr };
 
     static const std::array<std::shared_ptr<Http::RequestHandler>, 5> s_handlers {
@@ -72,21 +107,14 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
-        {
-            auto requestCounter = s_requestCounter.fetch_add(1);
-            assert(requestCounter >= 0);
-            // if (requestCounter < 0) {
-            //     tsLogError(Wcs::c_somethingWrong);
-            //     ++requestCounter;
-            //     s_requestCounter.compare_exchange_strong(requestCounter, 0);
-            //     co_return;
-            // }
-            if (requestCounter >= s_concurrencyLimit) {
-                tsLogError(Wcs::c_maximumIsExceeded);
-                --s_requestCounter;
-                co_return;
-            }
+    asio::awaitable<void> accept(
+        std::shared_ptr<RequestCounter> counter,
+        auto && socket,
+        Asio::SslContext & sslContext
+    ) {
+        if (counter->invalid()) {
+            tsLogError(Wcs::c_maximumIsExceeded);
+            co_return;
         }
 
         try {
@@ -95,7 +123,8 @@ namespace Server {
 
             try {
                 { /** Приветствуем **/
-                    const auto & [handshakeError] = co_await stream.async_handshake(asio::ssl::stream_base::server);
+                    const auto & [handshakeError]
+                        = co_await stream.async_handshake(asio::ssl::stream_base::server);
                     if (handshakeError) {
                         request.m_response.m_status = Http::Status::BadRequest;
                         throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
@@ -106,7 +135,6 @@ namespace Server {
 
                     const auto & [headerReadingError, headerSize]
                         = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
-
                     if (headerReadingError) {
                         request.m_response.m_status = Http::Status::BadRequest;
                         throw Failure(headerReadingError); // NOLINT(*-exception-baseclass)
@@ -194,8 +222,6 @@ namespace Server {
             tsLogError(Wcs::c_somethingWrong);
         }
 
-        --s_requestCounter;
-
         co_return;
     }
 
@@ -239,20 +265,27 @@ namespace Server {
 
             tsLogInfo(Wcs::c_started);
             s_state.store(State::Running);
+            decltype(s_state)::value_type state;
 
             do {
                 auto [acceptingError, socket] = co_await acceptor.async_accept();
-                if (s_state != State::Running) {
-                    break;
-                }
-                if (!acceptingError && socket.is_open()) {
-                    asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
-                } else {
+                if (acceptingError) {
                     tsLogError(acceptingError);
                     tsLogError(Wcs::c_servicingFailed);
+                } else if (!socket.is_open()) {
+                    tsLogError(Wcs::c_socketOpeningError);
+                    tsLogError(Wcs::c_servicingFailed);
+                } else if (s_state.load() == State::Running) {
+                    asio::co_spawn(
+                        executor,
+                        accept(std::make_shared<RequestCounter>(), std::move(socket), sslContext),
+                        asio::detached
+                    );
+                // } else {
+                //     tsLogDebug(Wcs::c_stopping);
                 }
-            } while (s_state == State::Running);
-
+                state = s_state.load();
+            } while (state == State::Running || state == State::Shutdown);
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -260,8 +293,6 @@ namespace Server {
         } catch (...) {
             tsLogError(Wcs::c_somethingWrong);
         }
-
-        assert(s_state.load() == State::Stopping);
 
         co_return;
     }
@@ -279,64 +310,75 @@ namespace Server {
         }
     }
 
-    void shutdown() {
-        if (s_state.load() != State::Running || !s_ioContext || s_ioContext->stopped()) {
-            return;
-        }
-
-        tsLogDebug(Wcs::c_stopping);
-
-        std::thread([] {
-            // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
-            // ISSUE: Остановка сервера (вызов `s_ioContext->stop()`) во время выполнения функции `accept(...)` приведёт
-            //  к ошибке 'The file handle supplied is not valid'. В реальном бизнес-процессе 'случайное' возникновение
-            //  такой ситуации маловероятно и менее критично, чем закончившаяся чековая лента, неожиданное отключение
-            //  или сбой в работе сети.
-            s_state.store(State::Stopping);
-            size_t wait = c_controlTimeout / c_sleepQuantum;
-            while (wait && s_requestCounter.load() > 0 && s_ioContext && !s_ioContext->stopped()) {
-                // ::Sleep(c_sleepQuantum);
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
-                --wait;
-            }
-            // ::Sleep(c_sleepQuantum);
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
-            if (s_ioContext && !s_ioContext->stopped()) {
-                s_ioContext->stop();
-            }
-        }).detach();
-    }
-
-    void run() try {
+    void run() {
         assert(s_state.load() == State::Initial);
 
         tsLogDebug(Wcs::c_starting);
         s_state.store(State::Starting);
-        s_ioContext = std::make_shared<Asio::IoContext>(1);
 
-        {
-            asio::signal_set signals(*s_ioContext, SIGINT, SIGTERM);
-            signals.async_wait([] (auto, auto) { shutdown(); });
-            asio::co_spawn(*s_ioContext, listen(), asio::detached);
-            s_ioContext->run();
+        try {
+            s_ioContext = std::make_shared<Asio::IoContext>(1);
+
+            {
+                asio::signal_set signals(*s_ioContext, SIGINT, SIGTERM);
+                signals.async_wait([](auto, auto) { std::thread(stop).detach(); });
+                asio::co_spawn(*s_ioContext, listen(), asio::detached);
+                s_ioContext->run();
+            }
+
+            tsLogInfo(Wcs::c_stopped);
+            s_shutdownSync.arrive_and_wait();
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+        } catch (...) {
+            logError();
+            s_state.store(State::Stopping);
+            throw;
         }
+    }
 
-        s_ioContext.reset();
-        tsLogInfo(Wcs::c_stopped);
-
+    void start() try {
+        std::thread(run).detach();
     } catch (...) {
         logError();
         throw;
     }
 
-    void start() {
-        std::thread([] {
-            run();
-        }).detach();
-    }
-
     void stop() try {
-        shutdown();
+        // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
+        //
+        // Смена состояния на `State::Shutdown` в то время, когда выполняются ранее запущенные вызовы `accept(...)`,
+        // позволит принимать соединения, но новые вызовы `accept(...)` производиться не будут и сокеты будут
+        // немедленно уничтожаться, что будет приводить к ошибкам на стороне клиента о разрыве соединения,
+        // типа 'Recv failure: Connection was reset'.
+        //
+        // После истечения времени c_controlTimeout произойдет принудительная остановка сервера (вызов
+        // `s_ioContext->stop()`) и операции с сокетами в выполняющихся вызовах `accept(...)` будут завершаться
+        // ошибкой 'The file handle supplied is not valid'.
+        //
+        // В реальном бизнес-процессе 'случайное' возникновение таких ситуаций маловероятно и менее критично,
+        // чем закончившаяся чековая лента, неожиданное отключение или сбой в работе сети.
+        //
+        if (s_state.load() != State::Running || !s_ioContext || s_ioContext->stopped()) {
+            return;
+        }
+
+        tsLogDebug(Wcs::c_stopping);
+        s_state.store(State::Shutdown);
+        auto wait = c_controlTimeout / c_sleepQuantum;
+        while (wait > 0 && RequestCounter::value()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+            --wait;
+        }
+
+        s_state.store(State::Stopping);
+        if (!s_ioContext->stopped()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep));
+            s_ioContext->stop();
+        }
+        s_ioContext.reset();
+
+        s_shutdownSync.arrive_and_wait();
+        std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
     } catch (...) {
         logError();
         throw;
