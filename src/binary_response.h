@@ -3,6 +3,7 @@
 
 #pragma once
 
+// #include "library/meta.h"
 #include "http.h"
 
 namespace Http {
@@ -16,14 +17,33 @@ namespace Http {
         };
     }
 
+    using Shared = std::shared_ptr<char[]>;
+    using Weak = std::weak_ptr<char[]>;
+    using Regular = std::add_pointer_t<char>;
+
+    template <typename T>
+    concept CustomPointer = std::is_same_v<T, Regular> || std::is_same_v<T, Shared> || std::is_same_v<T, Weak>;
+
+    template<CustomPointer> struct isSmartPointer : std::false_type {};
+    template<> struct isSmartPointer<Shared> : std::true_type {};
+    template<> struct isSmartPointer<Weak> : std::true_type {};
+
+    template<CustomPointer T>
+    inline constexpr bool isSmart = isSmartPointer<T>::value;
+
+    template<CustomPointer T>
     struct BinaryResponse : public ResponseData {
         std::string m_mimeType {};
-        std::shared_ptr<char[]> m_data { nullptr };
+        T m_data { nullptr };
         size_t m_size { 0 };
 
         BinaryResponse() = default;
         BinaryResponse(const BinaryResponse &) = delete;
         BinaryResponse(BinaryResponse &&) = delete;
+
+        BinaryResponse(T data, size_t size, std::string_view mimeType) // NOLINT(*-unnecessary-value-param)
+        : m_mimeType { mimeType }, m_data { data }, m_size { size } {}
+
         ~BinaryResponse() override = default;
 
         BinaryResponse & operator=(const BinaryResponse &) = delete;
@@ -45,7 +65,11 @@ namespace Http {
                         m_mimeType,
                         m_size
                     );
-                output.write(m_data.get(), static_cast<std::streamsize>(m_size));
+                if constexpr (isSmart<T>) {
+                    output.write(m_data.get(), static_cast<std::streamsize>(m_size));
+                } else {
+                    output.write(m_data, static_cast<std::streamsize>(m_size));
+                }
             } else {
                 output
                     << std::format(

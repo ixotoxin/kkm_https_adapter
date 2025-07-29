@@ -3,6 +3,8 @@
 
 #include "default_handler.h"
 #include "solid_response.h"
+#include "binary_response.h"
+#include "favicon.h"
 #include "static_handler.h"
 
 namespace Http {
@@ -38,6 +40,13 @@ namespace Http {
                 request.m_response.m_status = Status::MovedTemporarily;
                 request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStatic);
                 tsLogDebug(Wcs::c_redirectToStatic, request.m_id);
+            } else if (request.m_hint.size() == 2 && request.m_hint[1] == "favicon.ico") {
+                request.m_response.m_data
+                    = std::make_shared<BinaryResponse<Regular>>(
+                        reinterpret_cast<char *>(&c_favIconData[0]),
+                        c_favIconLength,
+                        c_favIconMime
+                    );
             } else {
                 request.fail(Status::NotFound, Mbs::c_notFound);
             }

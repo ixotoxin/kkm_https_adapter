@@ -58,6 +58,7 @@ namespace Http {
     constexpr bool c_loopbackWithoutSecret { true };
     constexpr bool c_enableStatic { false };
     constexpr std::wstring_view c_staticDirectory { L"static" };
+    constexpr std::string_view c_indexFile { "index.html" };
     constexpr std::wstring_view c_mimeMapFile { L"conf\\mime.json" };
     constexpr bool c_enableUnknownType { false };
     constexpr std::string_view c_defMimeType { "application/octet-stream" };

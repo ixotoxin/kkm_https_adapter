@@ -26,9 +26,10 @@
         "secret": "lorem.ipsum.dolor.sit.amet",
         "loopbackWithoutSecret": false,
         "enableStatic": false,
-        "enableUnknownType": false,
+        "staticDirectory": "static",
+        "indexFile": "index.html",
         "mimeMap": "conf\\mime.json",
-        "staticDirectory": "static"
+        "enableUnknownType": false
     },
     "kkm": {
         "dbDirectory": "conf\\kkm",

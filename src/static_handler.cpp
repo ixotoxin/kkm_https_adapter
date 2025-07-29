@@ -5,16 +5,60 @@
 #include "library/utils.h"
 #include <fstream>
 #include "messages.h"
+#include "solid_response.h"
 #include "binary_response.h"
 #include "http_cache.h"
 
 namespace Http {
     namespace Wcs {
-        constexpr std::wstring_view c_indexFile { L"index.html" };
+        using Basic::Wcs::c_invalidValue;
     }
 
-    using namespace std::string_literals;
+    namespace Mbs {
+        constexpr std::string_view c_redirect {
+            "HTTP/1.1 302 Moved Temporarily\r\n"
+            "Connection: close\r\n"
+            "Location: {}\r\n"
+            "Pragma: no-cache\r\n"
+            "Cache-Control: no-cache, private\r\n"
+            "Content-Length: 0\r\n"
+            "\r\n"
+        };
+    }
+
+    // using namespace std::string_literals;
+    using namespace std::string_view_literals;
     using Basic::Failure;
+    using Basic::DataError;
+
+    std::string filterFileName(const std::string & fileName) {
+        std::string result { /*Text::trimmed(*/fileName/*)*/ };
+        if (
+            result.find_first_of(
+                "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
+                "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
+                "<>:\"/\\|?*"sv
+            ) != std::string_view::npos
+            || result.empty()
+            || result.starts_with("."sv)
+            || result.ends_with("."sv)
+            || result.starts_with(" "sv)
+            || result.ends_with(" "sv)
+        ) {
+            throw DataError(Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+        }
+        return result;
+    }
+
+    void redirectToIndex(Request & request) {
+        std::string newPath { request.m_path };
+        if (newPath.find_last_of("/"sv) != newPath.size() - 1) {
+            newPath.append("/"sv);
+        }
+        newPath.append(s_indexFile);
+        request.m_response.m_status = Status::MovedTemporarily;
+        request.m_response.m_data = std::make_shared<SolidResponse>(std::format(Mbs::c_redirect, newPath));
+    }
 
     bool StaticHandler::asyncReady() const noexcept {
         return false;
@@ -44,13 +88,13 @@ namespace Http {
                 pos = requestedPath.find_first_not_of(L'/', pos);
             }
             if (pos == std::string::npos) {
-                path2.assign(Wcs::c_indexFile);
+                return redirectToIndex(request);
             } else {
                 path2.assign(requestedPath, pos);
             }
             path /= path2;
             if (std::filesystem::is_directory(path)) {
-                path /= Wcs::c_indexFile;
+                return redirectToIndex(request);
             }
             if (!std::filesystem::is_regular_file(path)) {
                 return request.fail(Status::NotFound, Mbs::c_notFound);
@@ -87,11 +131,9 @@ namespace Http {
             }
         }
 
-        // std::streamsize fileSize {};
         size_t fileSize {};
 
         {
-            // fileSize = static_cast<std::streamsize>(std::filesystem::file_size(path, error));
             fileSize = std::filesystem::file_size(path, error);
             if (error) {
                 return request.fail(Status::NotFound, error.message());
@@ -101,7 +143,7 @@ namespace Http {
             }
         }
 
-        auto response = std::make_shared<BinaryResponse>();
+        auto response = std::make_shared<BinaryResponse<Shared>>();
         response->m_size = fileSize;
 
         {

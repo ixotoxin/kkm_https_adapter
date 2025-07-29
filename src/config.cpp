@@ -145,6 +145,7 @@ namespace Config {
                         Json::handleKey(json, "enableStatic", Http::s_enableStatic, path);
                         if (Http::s_enableStatic) {
                             Json::handleKey(json, "staticDirectory", Http::s_staticDirectory, path);
+                            Json::handleKey(json, "indexFile", Http::s_indexFile, Http::filterFileName, path);
                             Json::handleKey(json, "mimeMap", Http::s_mimeMapFile, Text::Wcs::noEmpty(), path);
                             Json::handleKey(json, "enableUnknownType", Http::s_enableUnknownType, path);
                         }

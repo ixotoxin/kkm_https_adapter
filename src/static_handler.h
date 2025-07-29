@@ -7,6 +7,8 @@
 #include "defaults.h"
 
 namespace Http {
+    std::string filterFileName(const std::string &);
+
     class StaticHandler : public Http::RequestHandler {
     public:
         StaticHandler() = default;
@@ -23,6 +25,7 @@ namespace Http {
 
     inline bool s_enableStatic { c_enableStatic };
     inline std::wstring s_staticDirectory { c_staticDirectory };
+    inline std::string s_indexFile { c_indexFile };
     inline std::wstring s_mimeMapFile { c_mimeMapFile };
     inline Nln::Json s_mimeMap(Nln::EmptyJsonObject);
     inline bool s_enableUnknownType { c_enableUnknownType };

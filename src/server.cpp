@@ -9,6 +9,8 @@
 #include "static_handler.h"
 #include "config_handler.h"
 #include "ping_handler.h"
+#include "counter.h"
+#include "hitman.h"
 
 namespace Server {
     namespace Wcs {
@@ -30,40 +32,8 @@ namespace Server {
 
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 
-    struct RequestCounter {
-        RequestCounter() {
-            assert(s_counter >= 0);
-            ++s_counter;
-        }
-
-        ~RequestCounter() {
-            --s_counter;
-            assert(s_counter >= 0);
-        }
-
-        RequestCounter(const RequestCounter &) = delete;
-        RequestCounter(RequestCounter &&) = default;
-
-        RequestCounter & operator=(const RequestCounter &) = delete;
-        RequestCounter & operator=(RequestCounter &&) = delete;
-
-        [[nodiscard]] bool invalid() { // NOLINT(*-convert-member-functions-to-static)
-            assert(s_counter >= 0);
-            return s_counter > s_concurrencyLimit;
-        }
-
-        [[nodiscard]] static int64_t value() {
-            assert(s_counter >= 0);
-            return s_counter;
-        }
-
-    private:
-        inline static std::atomic<int64_t> s_counter { 0 };
-    };
-
     static std::atomic<State> s_state { State::Initial };
     static std::latch s_shutdownSync { 2 };
-    static std::shared_ptr<Asio::IoContext> s_ioContext { nullptr };
     static Http::DefaultHandler s_defaultHandler {};
     static Kkm::HttpHandler s_kkmHandler {};
     static Http::StaticHandler s_staticHandler {};
@@ -103,11 +73,7 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(
-        std::shared_ptr<RequestCounter> counter,
-        auto && socket,
-        Asio::SslContext & sslContext
-    ) {
+    asio::awaitable<void> accept(std::shared_ptr<Counter> counter, auto && socket, Asio::SslContext & sslContext) {
         if (counter->invalid()) {
             tsLogError(Wcs::c_maximumIsExceeded);
             co_return;
@@ -126,6 +92,7 @@ namespace Server {
                         throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
                     }
                 }
+
                 { /** Читаем запрос **/
                     Asio::StreamBuffer buffer {};
 
@@ -153,6 +120,7 @@ namespace Server {
                         parser.complete();
                     }
                 }
+
                 { /** Обрабатываем запрос **/
                     if (request.m_response.m_status == Http::Status::Ok) {
                         tsLogInfo(
@@ -179,6 +147,7 @@ namespace Server {
                         }
                     }
                 }
+
                 { /** Пишем ответ **/
                     Asio::StreamBuffer buffer {};
                     request.m_response.render(buffer);
@@ -257,7 +226,6 @@ namespace Server {
 
             tsLogInfo(Wcs::c_started);
             s_state.store(State::Running);
-            decltype(s_state)::value_type state;
 
             do {
                 auto [acceptingError, socket] = co_await acceptor.async_accept();
@@ -267,15 +235,22 @@ namespace Server {
                 } else if (!socket.is_open()) {
                     tsLogError(Wcs::c_socketOpeningError);
                     tsLogError(Wcs::c_servicingFailed);
-                } else if (s_state.load() == State::Running) {
+                } else {
                     asio::co_spawn(
                         executor,
-                        accept(std::make_shared<RequestCounter>(), std::move(socket), sslContext),
+                        accept(std::make_shared<Counter>(), std::move(socket), sslContext),
                         asio::detached
                     );
                 }
-                state = s_state.load();
-            } while (state == State::Running || state == State::Shutdown);
+            } while (s_state.load() == State::Running);
+
+            if (s_state.load() == State::Shutdown) {
+                Asio::Timer timer(executor);
+                while (s_state.load() == State::Shutdown && Hitman::awaiting()) {
+                    timer.expires_after(std::chrono::milliseconds(c_sleepQuantum));
+                    co_await timer.async_wait(asio::use_awaitable);
+                }
+            }
         } catch (const Failure & e) {
             tsLogError(e);
         } catch (const std::exception & e) {
@@ -307,20 +282,22 @@ namespace Server {
         s_state.store(State::Starting);
 
         try {
-            s_ioContext = std::make_shared<Asio::IoContext>(1);
-
             {
-                asio::signal_set signals(*s_ioContext, SIGINT, SIGTERM);
-                signals.async_wait([](auto, auto) { std::thread(stop).detach(); });
-                asio::co_spawn(*s_ioContext, listen(), asio::detached);
-                s_ioContext->run();
+                Asio::IoContext ioContext(1);
+                Asio::SignalSet signals(ioContext, SIGINT, SIGTERM);
+                signals.async_wait([] (auto, auto) { std::thread(stop).detach(); });
+                Hitman::placeOrder([&ioContext] { ioContext.stop(); }, c_controlTimeout / c_sleepQuantum);
+                asio::co_spawn(ioContext, listen(), asio::detached);
+                ioContext.run();
+                Hitman::cancelOrder();
             }
 
             tsLogInfo(Wcs::c_stopped);
             s_shutdownSync.arrive_and_wait();
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
         } catch (...) {
             logError();
+            Hitman::cancelOrder();
+            s_shutdownSync.count_down();
             s_state.store(State::Stopping);
             throw;
         }
@@ -334,42 +311,27 @@ namespace Server {
     }
 
     void stop() try {
-        // ISSUE: Не gracefully, но для взаимодействия с нашим ресурсом приемлемо.
-        //
-        // Смена состояния на `State::Shutdown` в то время, когда выполняются ранее запущенные вызовы `accept(...)`,
-        // позволит принимать соединения, но новые вызовы `accept(...)` производиться не будут и сокеты будут
-        // немедленно уничтожаться, что будет приводить к ошибкам на стороне клиента о разрыве соединения,
-        // типа 'Recv failure: Connection was reset'.
-        //
-        // После истечения времени c_controlTimeout произойдет принудительная остановка сервера (вызов
-        // `s_ioContext->stop()`) и операции с сокетами в выполняющихся вызовах `accept(...)` будут завершаться
-        // ошибкой 'The file handle supplied is not valid'.
-        //
-        // В реальном бизнес-процессе 'случайное' возникновение таких ситуаций маловероятно и менее критично,
-        // чем закончившаяся чековая лента, неожиданное отключение или сбой в работе сети.
-        //
-        if (s_state.load() != State::Running || !s_ioContext || s_ioContext->stopped()) {
+        if (s_state.load() != State::Running) {
             return;
         }
 
         tsLogDebug(Wcs::c_stopping);
+
         s_state.store(State::Shutdown);
-        auto wait = c_controlTimeout / c_sleepQuantum;
-        while (wait > 0 && RequestCounter::value()) {
+        while (Hitman::awaiting() && Counter::value()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
-            --wait;
+            Hitman::countDown();
         }
 
         s_state.store(State::Stopping);
-        if (!s_ioContext->stopped()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep / 2));
-            s_ioContext->stop();
+        Hitman::lastChance(c_sleep / c_sleepQuantum);
+        while (Hitman::awaiting()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+            Hitman::countDown();
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep / 2));
-        s_ioContext.reset();
 
+        Hitman::completeOrder();
         s_shutdownSync.arrive_and_wait();
-        std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
     } catch (...) {
         logError();
         throw;

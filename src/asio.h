@@ -8,8 +8,10 @@
 
 namespace Asio {
     using Error = asio::error_code;
+    using Timer = asio::steady_timer;
     using IpAddress = asio::ip::address;
     using IoContext = asio::io_context;
+    using SignalSet = asio::signal_set;
     using StreamBuffer = asio::streambuf;
     using SslContext = asio::ssl::context;
     using DefaultToken = asio::as_tuple_t<asio::use_awaitable_t<>>;
