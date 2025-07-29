@@ -33,10 +33,16 @@ namespace Http {
             return;
         }
 
-        if (s_enableStatic && request.m_hint.size() < 2) {
-            request.m_response.m_status = Status::MovedTemporarily;
-            request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStatic);
-            tsLogDebug(Wcs::c_redirectToStatic, request.m_id);
+        if (request.m_method == Method::Get) {
+            if (s_enableStatic && request.m_hint.size() < 2) {
+                request.m_response.m_status = Status::MovedTemporarily;
+                request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStatic);
+                tsLogDebug(Wcs::c_redirectToStatic, request.m_id);
+            } else {
+                request.fail(Status::NotFound, Mbs::c_notFound);
+            }
+        } else if (request.m_method == Method::Post) {
+            request.fail(Status::NotFound, Mbs::c_notFound);
         } else {
             request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }

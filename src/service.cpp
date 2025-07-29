@@ -199,7 +199,6 @@ namespace Service {
                 throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
             if (state != SERVICE_STOPPED) {
-                // throw Failure(Wcs::c_alreadyStarted); // NOLINT(*-exception-baseclass)
                 cliMsgWarning(Wcs::c_alreadyStarted);
                 return;
             }
@@ -222,7 +221,6 @@ namespace Service {
             queryStatus(service, status);
 
             if (status.dwCurrentState == SERVICE_STOPPED) {
-                // throw Failure(Wcs::c_alreadyStopped); // NOLINT(*-exception-baseclass)
                 if (logAlreadyStopped) {
                     cliMsgWarning(Wcs::c_alreadyStopped);
                 }

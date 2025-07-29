@@ -418,6 +418,4 @@ namespace Log {
         { L"none", c_levelNone },
         { std::to_wstring(c_levelNone), c_levelNone }
     };
-
-    // [[nodiscard, maybe_unused]] std::wstring_view label(int);
 }

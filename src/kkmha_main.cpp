@@ -97,9 +97,10 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 } else if (Server::s_securityLevel >= 0) {
                     securityLevel.assign(std::to_wstring(Server::s_securityLevel));
                 } else {
-                    securityLevel.assign(L"default");
+                    securityLevel.assign(L"<openssl-default>");
                 }
-                std::wcout << L"\n"
+                std::wcout
+                    << L"\n"
                     L"[BLD] main.version = \"" << Basic::Wcs::c_version << L"\"\n"
                     L"[BLD] main.buildTimestamp = \"" << Basic::Wcs::c_buildTimestamp << L"\"\n"
                     L"[RTM] main.binaryFile = \"" << Config::s_binaryFile.c_str() << L"\"\n"
@@ -127,9 +128,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     L"[CFG] server.secret = \"" << Text::convert(Http::s_secret) << L"\"\n"
                     L"[CFG] server.loopbackWithoutSecret = " << Text::Wcs::yesNo(Http::s_loopbackWithoutSecret) << L"\n"
                     L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(Http::s_enableStatic) << L"\n"
-                    L"[CFG] server.enableUnknownType = " << Text::Wcs::yesNo(Http::s_enableUnknownType) << L"\n"
-                    L"[CFG] server.mimeMapFile = \"" << Http::s_mimeMapFile << L"\"\n"
                     L"[CFG] server.staticDirectory = \"" << Http::s_staticDirectory << L"\"\n"
+                    L"[CFG] server.mimeMapFile = \"" << Http::s_mimeMapFile << L"\"\n"
+                    L"[CFG] server.enableUnknownType = " << Text::Wcs::yesNo(Http::s_enableUnknownType) << L"\n"
                     L"[CFG] kkm.dbDirectory = \"" << Kkm::s_dbDirectory << L"\"\n"
                     L"[CFG] kkm.defaultBaudRate = " << Kkm::s_defaultBaudRate << L"\n"
                     L"[CFG] kkm.defaultLineLength = " << Kkm::s_defaultLineLength << L"\n"
@@ -141,7 +142,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     L"[CFG] kkm.maxCashInOut = " << Kkm::s_maxCashInOut << L"\n"
                     L"[CFG] kkm.maxPrice = " << Kkm::s_maxPrice << L"\n"
                     L"[CFG] kkm.maxQuantity = " << Kkm::s_maxQuantity << L"\n"
-                    L"[CFG] kkm.connParams = { ";
+                    L"[LRN] kkm.connParams = { ";
 
                 try {
                     std::filesystem::path directory { Kkm::s_dbDirectory };
@@ -167,7 +168,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     }
                 } catch (...) {}
 
-                std::wcout << L" }" << std::endl;
+                std::wcout << L" }\n" << std::endl;
                 return EXIT_SUCCESS;
             }
 
@@ -399,7 +400,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, Text::convert(e.explain()) } }).dump(4)
+                    Nln::Json::object(
+                        { { Mbs::c_successKey, false }, { Mbs::c_messageKey, Text::convert(e.explain()) } }
+                    ).dump(4)
                 );
         } else {
             ntsLogError(e);
@@ -408,7 +411,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, e.what() } }).dump(4)
+                    Nln::Json::object(
+                        { { Mbs::c_successKey, false }, { Mbs::c_messageKey, e.what() } }
+                    ).dump(4)
                 );
         } else {
             ntsLogError(e);
@@ -417,7 +422,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         if (jsonOut) {
             std::wcout
                 << Text::convert(
-                    Nln::Json::object({ { Mbs::c_successKey, false }, { Mbs::c_messageKey, Basic::Mbs::c_somethingWrong } }).dump(4)
+                    Nln::Json::object(
+                        { { Mbs::c_successKey, false }, { Mbs::c_messageKey, Basic::Mbs::c_somethingWrong } }
+                    ).dump(4)
                 );
         } else {
             ntsLogError(Basic::Wcs::c_somethingWrong);

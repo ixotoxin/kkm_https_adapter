@@ -51,9 +51,6 @@ namespace Service::Wcs {
 namespace Server::Wcs {
     using S = std::wstring_view;
 
-    // constexpr S c_osslProviderNotLoaded { L"Не загружен {}-провайдер библиотеки OpenSSL" };
-    // constexpr S c_osslInitializationFailed { L"Не удалось инициализировать библиотеку OpenSSL" };
-
     constexpr S c_starting { L"Запуск сервера..." };
     constexpr S c_startingFailed { L"Не удалось запустить сервер" };
     constexpr S c_started { L"Сервер запущен" };
@@ -130,10 +127,10 @@ namespace Kkm {
         constexpr S c_connParamsSaved { L"Запрос [{:04x}]: Параметры подключения ККМ [{}] успешно сохранены" };
 
         constexpr S c_saved { L"ККМ [{}]: Параметры подключения успешно сохранены" };
-        constexpr S c_cantSave { L"ККМ [{}]: Не удалось сохранить параметры подключения" };
+        constexpr S c_savingError { L"ККМ [{}]: Не удалось сохранить параметры подключения" };
         constexpr S c_loaded { L"ККМ [{}]: Параметры подключения успешно загружены" };
-        constexpr S c_loadingError { L"ККМ [{}]: Не удалось загрузить параметры подключения" }; // c_cantLoad
-        constexpr S c_cancelingError { L"{}ККМ [{}]: Ошибка отмены чека: {}" }; // c_cantCancel
+        constexpr S c_loadingError { L"ККМ [{}]: Не удалось загрузить параметры подключения" };
+        constexpr S c_cancelingError { L"{}ККМ [{}]: Ошибка отмены чека: {}" };
         constexpr S c_closingError { L"{}ККМ [{}]: Ошибка закрытия документа: {}" };
         constexpr S c_printingError { L"{}ККМ [{}]: Ошибка печати документа: {}" };
         constexpr S c_checkingError { L"Не удалось проверить закрытие документа" };

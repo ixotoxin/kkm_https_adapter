@@ -124,13 +124,13 @@ namespace Kkm {
 
     void Device::NewConnParams::save(const std::wstring & serialNumber) {
         if (serialNumber.empty()) {
-            throw Failure(std::format(Wcs::c_cantSave, L"-")); // NOLINT(*-exception-baseclass)
+            throw Failure(std::format(Wcs::c_savingError, L"-")); // NOLINT(*-exception-baseclass)
         }
         std::filesystem::path filePath { s_dbDirectory };
         if (!std::filesystem::is_directory(filePath)) {
             std::filesystem::create_directories(filePath);
             if (!std::filesystem::is_directory(filePath)) {
-                throw Failure(std::format(Wcs::c_cantSave, serialNumber)); // NOLINT(*-exception-baseclass)
+                throw Failure(std::format(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
             }
         }
         filePath /= serialNumber + L".json";
@@ -139,7 +139,7 @@ namespace Kkm {
         file << json.dump();
         file.close();
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_cantSave, serialNumber)); // NOLINT(*-exception-baseclass)
+            throw Failure(std::format(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -367,7 +367,6 @@ namespace Kkm {
         decltype(s_documentClosingTimeout) i;
         for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.checkDocumentClosed() < 0 && i; --i) {
             tsLogWarning(Wcs::c_closingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
-            // ::Sleep(c_sleepQuantum);
             std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
         }
         if (!i || !m_kkm.getParamBool(Atol::LIBFPTR_PARAM_DOCUMENT_CLOSED)) {
@@ -379,7 +378,6 @@ namespace Kkm {
         if (!m_kkm.getParamBool(Atol::LIBFPTR_PARAM_DOCUMENT_PRINTED)) {
             for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.continuePrint() < 0 && i; --i) {
                 tsLogWarning(Wcs::c_printingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
-                // ::Sleep(c_sleepQuantum);
                 std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
             }
             if (!i) {

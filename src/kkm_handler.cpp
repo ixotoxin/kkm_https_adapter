@@ -402,7 +402,7 @@ namespace Kkm {
                 }
             }
         } else if (request.m_method != Method::Get) {
-            return request.fail(Status::MethodNotAllowed, Mbs::c_badRequest);
+            return request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
         }
 
         Cache::maintain();
@@ -433,12 +433,12 @@ namespace Kkm {
         } else if (request.m_hint.size() == 3) {
             Text::joinTo(handlerKey, request.m_hint, "/");
         } else {
-            return request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+            return request.fail(Status::NotFound, Mbs::c_notFound);
         }
 
         auto handler = s_handlers.find(handlerKey);
         if (handler == s_handlers.end()) {
-            return request.fail(Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+            return request.fail(Status::NotFound, Mbs::c_notFound);
         }
 
         Nln::Json details(Nln::EmptyJsonObject);

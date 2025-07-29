@@ -2,7 +2,6 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "server.h"
-#include <array>
 #include <latch>
 #include "http_parser.h"
 #include "default_handler.h"
@@ -65,30 +64,27 @@ namespace Server {
     static std::atomic<State> s_state { State::Initial };
     static std::latch s_shutdownSync { 2 };
     static std::shared_ptr<Asio::IoContext> s_ioContext { nullptr };
-
-    static const std::array<std::shared_ptr<Http::RequestHandler>, 5> s_handlers {
-        std::make_shared<Http::DefaultHandler>(),
-        std::make_shared<Kkm::HttpHandler>(),
-        std::make_shared<Http::StaticHandler>(),
-        std::make_shared<Http::ConfigHandler>(),
-        std::make_shared<Http::PingHandler>()
-    };
+    static Http::DefaultHandler s_defaultHandler {};
+    static Kkm::HttpHandler s_kkmHandler {};
+    static Http::StaticHandler s_staticHandler {};
+    static Http::ConfigHandler s_configHandler {};
+    static Http::PingHandler s_pingHandler {};
 
     [[nodiscard]]
-    inline std::shared_ptr<Http::RequestHandler> lookupHandler(const Http::Request & request) {
+    inline Http::RequestHandler & lookupHandler(const Http::Request & request) {
         // ISSUE: При большем количестве обработчиков стоит оптимизировать.
         if (request.m_hint.size() >= 2) {
             if (request.m_hint[1] == "kkm") {
-                return s_handlers[1];
+                return s_kkmHandler;
             } else if (request.m_hint[1] == "static") {
-                return s_handlers[2];
+                return s_staticHandler;
             } else if (request.m_hint[1] == "config") {
-                return s_handlers[3];
+                return s_configHandler;
             } else if (request.m_hint[1] == "ping") {
-                return s_handlers[4];
+                return s_pingHandler;
             }
         }
-        return s_handlers[0];
+        return s_defaultHandler;
     }
 
     template<typename CompletionToken>
@@ -175,15 +171,11 @@ namespace Server {
                     }
                     Http::authenticate(request);
                     if (request.m_response.m_status == Http::Status::Ok) {
-                        auto handler = lookupHandler(request);
-                        if (handler) {
-                            if (handler->asyncReady()) {
-                                co_await performAsync(*handler, request, asio::use_awaitable);
-                            } else {
-                                (*handler)(request);
-                            }
+                        Http::RequestHandler & handler = lookupHandler(request);
+                        if (handler.asyncReady()) {
+                            co_await performAsync(handler, request, asio::use_awaitable);
                         } else {
-                            request.fail(Http::Status::MethodNotAllowed, Mbs::c_methodNotAllowed);
+                            (handler)(request);
                         }
                     }
                 }
@@ -281,8 +273,6 @@ namespace Server {
                         accept(std::make_shared<RequestCounter>(), std::move(socket), sslContext),
                         asio::detached
                     );
-                // } else {
-                //     tsLogDebug(Wcs::c_stopping);
                 }
                 state = s_state.load();
             } while (state == State::Running || state == State::Shutdown);
@@ -372,9 +362,10 @@ namespace Server {
 
         s_state.store(State::Stopping);
         if (!s_ioContext->stopped()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep));
+            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep / 2));
             s_ioContext->stop();
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(c_sleep / 2));
         s_ioContext.reset();
 
         s_shutdownSync.arrive_and_wait();
