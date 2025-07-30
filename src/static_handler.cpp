@@ -15,7 +15,7 @@ namespace Http {
     }
 
     namespace Mbs {
-        constexpr std::string_view c_redirect {
+        constexpr std::string_view c_redirectResponseTemplate {
             "HTTP/1.1 302 Moved Temporarily\r\n"
             "Connection: close\r\n"
             "Location: {}\r\n"
@@ -26,7 +26,6 @@ namespace Http {
         };
     }
 
-    // using namespace std::string_literals;
     using namespace std::string_view_literals;
     using Basic::Failure;
     using Basic::DataError;
@@ -57,7 +56,8 @@ namespace Http {
         }
         newPath.append(s_indexFile);
         request.m_response.m_status = Status::MovedTemporarily;
-        request.m_response.m_data = std::make_shared<SolidResponse>(std::format(Mbs::c_redirect, newPath));
+        request.m_response.m_data
+            = std::make_shared<SolidResponse>(std::format(Mbs::c_redirectResponseTemplate, newPath));
     }
 
     bool StaticHandler::asyncReady() const noexcept {

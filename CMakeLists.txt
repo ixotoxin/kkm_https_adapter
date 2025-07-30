@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(kkm_https_adapter VERSION 1.4.0 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.4.1 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 

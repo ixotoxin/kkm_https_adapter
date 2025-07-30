@@ -4,6 +4,7 @@
 #include "http_cache.h"
 #include <mutex>
 #include <unordered_map>
+#include "messages.h"
 #include "log.h"
 
 namespace Http::Cache {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "http.h"
+#include "http_res_data.h"
 
 namespace Http {
     struct JsonResponse : public ResponseData {
@@ -62,10 +62,10 @@ namespace Http {
             std::ostream output { &buffer };
             output
                 << std::format(
-                    Mbs::c_jsonResponseHeaderTemplate,
+                    Mbs::c_responseHeaderTemplate,
                     static_cast<int>(status),
                     s_statusStrings.at(status),
-                    Mbs::c_jsonType,
+                    Mbs::c_jsonMimeType,
                     text.size()
                 )
                 << text;

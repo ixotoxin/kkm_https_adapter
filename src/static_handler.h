@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include "http.h"
-#include "defaults.h"
+#include "http_req_handler.h"
 
 namespace Http {
     std::string filterFileName(const std::string &);

@@ -4,13 +4,14 @@
 #include "server.h"
 #include <latch>
 #include "http_parser.h"
+#include "http_request.h"
 #include "default_handler.h"
 #include "kkm_handler.h"
 #include "static_handler.h"
 #include "config_handler.h"
 #include "ping_handler.h"
-#include "counter.h"
-#include "hitman.h"
+#include "server_counter.h"
+#include "server_hitman.h"
 
 namespace Server {
     namespace Wcs {
@@ -137,7 +138,7 @@ namespace Server {
                             }
                         );
                     }
-                    Http::authenticate(request);
+                    request.authenticate();
                     if (request.m_response.m_status == Http::Status::Ok) {
                         Http::RequestHandler & handler = lookupHandler(request);
                         if (handler.asyncReady()) {
@@ -297,8 +298,8 @@ namespace Server {
         } catch (...) {
             logError();
             Hitman::cancelOrder();
-            s_shutdownSync.count_down();
             s_state.store(State::Stopping);
+            s_shutdownSync.count_down();
             throw;
         }
     }

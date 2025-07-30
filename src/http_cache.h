@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "http.h"
+#include "http_res_data.h"
 #include <optional>
 
 namespace Http::Cache {

@@ -9,7 +9,7 @@
 
 namespace Http {
     namespace Mbs {
-        constexpr std::string_view c_redirectToStatic {
+        constexpr std::string_view c_redirectToStaticResponse {
             "HTTP/1.1 302 Moved Temporarily\r\n"
             "Connection: close\r\n"
             "Location: /static/index.html\r\n"
@@ -38,7 +38,7 @@ namespace Http {
         if (request.m_method == Method::Get) {
             if (s_enableStatic && request.m_hint.size() < 2) {
                 request.m_response.m_status = Status::MovedTemporarily;
-                request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStatic);
+                request.m_response.m_data = std::make_shared<SolidResponse>(Mbs::c_redirectToStaticResponse);
                 tsLogDebug(Wcs::c_redirectToStatic, request.m_id);
             } else if (request.m_hint.size() == 2 && request.m_hint[1] == "favicon.ico") {
                 request.m_response.m_data
