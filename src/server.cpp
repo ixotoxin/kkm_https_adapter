@@ -34,6 +34,7 @@ namespace Server {
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 
     static std::atomic<State> s_state { State::Initial };
+    static Hitman s_hitman {};
     static std::latch s_shutdownSync { 2 };
     static Http::DefaultHandler s_defaultHandler {};
     static Kkm::HttpHandler s_kkmHandler {};
@@ -247,7 +248,7 @@ namespace Server {
 
             if (s_state.load() == State::Shutdown) {
                 Asio::Timer timer(executor);
-                while (s_state.load() == State::Shutdown && Hitman::awaiting()) {
+                while (s_state.load() == State::Shutdown) {
                     timer.expires_after(std::chrono::milliseconds(c_sleepQuantum));
                     co_await timer.async_wait(asio::use_awaitable);
                 }
@@ -287,17 +288,17 @@ namespace Server {
                 Asio::IoContext ioContext(1);
                 Asio::SignalSet signals(ioContext, SIGINT, SIGTERM);
                 signals.async_wait([] (auto, auto) { std::thread(stop).detach(); });
-                Hitman::placeOrder([&ioContext] { ioContext.stop(); }, c_controlTimeout / c_sleepQuantum);
+                s_hitman.placeOrder([&ioContext] { ioContext.stop(); });
                 asio::co_spawn(ioContext, listen(), asio::detached);
                 ioContext.run();
-                Hitman::cancelOrder();
+                s_hitman.cancelOrder();
             }
 
             tsLogInfo(Wcs::c_stopped);
             s_shutdownSync.arrive_and_wait();
         } catch (...) {
             logError();
-            Hitman::cancelOrder();
+            s_hitman.cancelOrder();
             s_state.store(State::Stopping);
             s_shutdownSync.count_down();
             throw;
@@ -319,19 +320,11 @@ namespace Server {
         tsLogDebug(Wcs::c_stopping);
 
         s_state.store(State::Shutdown);
-        while (Hitman::awaiting() && Counter::value()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
-            Hitman::countDown();
-        }
-
+        s_hitman.await(c_controlTimeout, [] { return Counter::value() > 0; });
         s_state.store(State::Stopping);
-        Hitman::lastChance(c_sleep / c_sleepQuantum);
-        while (Hitman::awaiting()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
-            Hitman::countDown();
-        }
+        s_hitman.await(c_sleep);
+        s_hitman.completeOrder();
 
-        Hitman::completeOrder();
         s_shutdownSync.arrive_and_wait();
     } catch (...) {
         logError();

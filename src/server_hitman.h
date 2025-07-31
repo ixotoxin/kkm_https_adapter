@@ -7,66 +7,120 @@
 #include <functional>
 #include <mutex>
 
-namespace Server::Hitman {
-    std::mutex s_mutex {};
-    std::function<void()> s_gun { [] {} };
-    int64_t s_counter { 0 };
+namespace Server {
+    using Basic::c_sleepQuantum;
 
-    template<typename T, std::integral U>
-    requires std::is_convertible_v<T, std::function<void()>>
-    void placeOrder(T && gun, U counter) {
-        assert(counter > 0);
-        std::scoped_lock lock { s_mutex };
-        s_gun = gun;
-        s_counter = static_cast<int64_t>(counter);
-    }
+    class Hitman {
+        std::mutex m_mutex {};
+        std::function<void()> m_gun { [] {} };
+        std::atomic<int64_t> m_counter { -1 };
 
-    [[maybe_unused]]
-    void lastChance(std::integral auto counter) {
-        assert(counter > 0);
-        std::scoped_lock lock { s_mutex };
-        if (s_counter >= 0) {
-            s_counter = static_cast<int64_t>(counter);
+    public:
+        Hitman() = default;
+        Hitman(const Hitman &) = delete;
+        Hitman(Hitman &&) = delete;
+
+        template<typename T>
+        requires std::is_convertible_v<T, std::function<void()>>
+        [[maybe_unused]]
+        explicit Hitman(T && gun)
+        : m_gun { gun }, m_counter { 0 } {}
+
+        template<typename T, std::integral U>
+        requires std::is_convertible_v<T, std::function<void()>>
+        [[maybe_unused]]
+        Hitman(T && gun, U waitingTime)
+        : m_gun { gun }, m_counter { static_cast<int64_t>(waitingTime / c_sleepQuantum) } {
+            assert(waitingTime >= 0);
         }
-    }
 
-    [[maybe_unused]]
-    void cancelOrder() {
-        std::scoped_lock lock { s_mutex };
-        s_gun = [] {};
-        s_counter = -1;
-    }
+        ~Hitman() = default;
 
-    void completeOrder() {
-        std::scoped_lock lock { s_mutex };
-        s_gun();
-        s_gun = [] {};
-        s_counter = -1;
-    }
+        Hitman & operator=(const Hitman &) = delete;
+        Hitman & operator=(Hitman &&) = delete;
 
-    [[maybe_unused]]
-    void countDown() {
-        std::scoped_lock lock { s_mutex };
-        if (s_counter > 0) {
-            --s_counter;
+        template<typename T>
+        requires std::is_convertible_v<T, std::function<void()>>
+        [[maybe_unused]]
+        void placeOrder(T && gun) {
+            std::scoped_lock lock { m_mutex };
+            m_gun = gun;
+            m_counter.store(0);
         }
-    }
 
-    [[nodiscard, maybe_unused]]
-    bool awaiting() {
-        std::scoped_lock lock { s_mutex };
-        return s_counter > 0;
-    }
+        template<typename T, std::integral U>
+        requires std::is_convertible_v<T, std::function<void()>>
+        [[maybe_unused]]
+        void placeOrder(T && gun, U waitingTime) {
+            assert(waitingTime >= 0);
+            std::scoped_lock lock { m_mutex };
+            m_gun = gun;
+            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+        }
 
-    [[nodiscard, maybe_unused]]
-    bool ready() {
-        std::scoped_lock lock { s_mutex };
-        return s_counter == 0;
-    }
+        [[maybe_unused]]
+        void cancelOrder() {
+            std::scoped_lock lock { m_mutex };
+            m_gun = [] {};
+            m_counter = -1;
+        }
 
-    [[nodiscard, maybe_unused]]
-    int64_t counter() {
-        std::scoped_lock lock { s_mutex };
-        return s_counter;
-    }
+        [[maybe_unused]]
+        void await() {
+            while (m_counter.load() > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                --m_counter;
+            }
+        }
+
+        [[maybe_unused]]
+        void await(std::integral auto waitingTime) {
+            assert(waitingTime >= 0);
+            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+            while (m_counter.load() > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                --m_counter;
+            }
+        }
+
+        template<typename T>
+        requires std::is_invocable_r_v<bool, T>
+        [[maybe_unused]]
+        void await(T && safetyLock) {
+            while (m_counter.load() > 0 && std::invoke(safetyLock)) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                --m_counter;
+            }
+            m_counter.store(0);
+        }
+
+        template<std::integral T, typename U>
+        requires std::is_invocable_r_v<bool, U>
+        [[maybe_unused]]
+        void await(T waitingTime, U && safetyLock) {
+            assert(waitingTime >= 0);
+            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+            while (m_counter.load() > 0 && std::invoke(safetyLock)) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                --m_counter;
+            }
+            m_counter.store(0);
+        }
+
+        [[nodiscard, maybe_unused]]
+        bool awaiting() {
+            return m_counter.load() > 0;
+        }
+
+        [[maybe_unused]]
+        void completeOrder() {
+            if (m_counter.load() < 0) {
+                return;
+            }
+            std::scoped_lock lock { m_mutex };
+            m_gun();
+            m_gun = [] {};
+            m_counter.store(-1);
+        }
+    };
 }
