@@ -5,15 +5,32 @@ configure_file(kkmha_config.h.in kkmha_config.h)
 add_executable(
     kkmha
     kkmha_main.cpp
-    library/text.cpp library/datetime.cpp library/utils.cpp log.cpp config.cpp kkm.cpp
-    http_cache.cpp kkm_handler.cpp static_handler.cpp config_handler.cpp ping_handler.cpp default_handler.cpp
-    http_parser.cpp server.cpp service.cpp
+    library/datetime.cpp
+    library/text.cpp
+    library/utils.cpp
+    config.cpp
+    config_handler.cpp
+    default_handler.cpp
+    http_cache.cpp
+    http_parser.cpp
+    kkm.cpp
+    kkm_handler.cpp
+    log.cpp
+    ping_handler.cpp
+    server.cpp
+    service.cpp
+    static_handler.cpp
 )
 target_compile_definitions(
     kkmha
     PUBLIC
-        WIN32_LEAN_AND_MEAN ASIO_STANDALONE ASIO_NO_WIN32_LEAN_AND_MEAN ASIO_NO_NOMINMAX
-        ASIO_HAS_THREADS ASIO_HAS_STD_COROUTINE ASIO_HAS_CO_AWAIT
+        WIN32_LEAN_AND_MEAN
+        ASIO_STANDALONE
+        ASIO_NO_WIN32_LEAN_AND_MEAN
+        ASIO_NO_NOMINMAX
+        ASIO_HAS_THREADS
+        ASIO_HAS_STD_COROUTINE
+        ASIO_HAS_CO_AWAIT
 )
 target_include_directories(kkmha PRIVATE "${PROJECT_BINARY_DIR}/src")
 target_include_directories(kkmha PRIVATE ${KKMHA_DEPS_FPTR10_INCL})
@@ -25,28 +42,6 @@ add_custom_command(
     TARGET kkmha POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${KKMHA_DEPS_VCPKG_DLL} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
-
-#add_executable(
-#    helper
-#    helper_main.cpp
-#    library/text.cpp library/datetime.cpp library/utils.cpp log.cpp config.cpp kkm.cpp
-#    http_cache.cpp kkm_handler.cpp static_handler.cpp config_handler.cpp ping_handler.cpp default_handler.cpp
-#    http_parser.cpp server.cpp service.cpp
-#)
-#target_compile_definitions(
-#    helper
-#    PUBLIC
-#        WIN32_LEAN_AND_MEAN ASIO_STANDALONE ASIO_NO_WIN32_LEAN_AND_MEAN ASIO_NO_NOMINMAX
-#        ASIO_HAS_THREADS ASIO_HAS_STD_COROUTINE ASIO_HAS_CO_AWAIT
-#)
-#target_include_directories(helper PRIVATE ${KKMHA_DEPS_FPTR10_INCL})
-#target_link_libraries(helper PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-#target_link_libraries(helper PRIVATE asio::asio)
-#target_link_libraries(helper PRIVATE nlohmann_json::nlohmann_json)
-#add_custom_command(
-#    TARGET helper POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${KKMHA_DEPS_VCPKG_DLL} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#)
 
 if (BUILD_TESTS)
     add_test(NAME test_kkmha COMMAND kkmha help)

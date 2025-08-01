@@ -36,6 +36,7 @@ namespace Server {
     static std::atomic<State> s_state { State::Initial };
     static Hitman s_hitman {};
     static std::latch s_shutdownSync { 2 };
+
     static Http::DefaultHandler s_defaultHandler {};
     static Kkm::HttpHandler s_kkmHandler {};
     static Http::StaticHandler s_staticHandler {};
@@ -246,12 +247,11 @@ namespace Server {
                 }
             } while (s_state.load() == State::Running);
 
-            if (s_state.load() == State::Shutdown) {
-                Asio::Timer timer(executor);
-                while (s_state.load() == State::Shutdown) {
-                    timer.expires_after(std::chrono::milliseconds(c_sleepQuantum));
-                    co_await timer.async_wait(asio::use_awaitable);
-                }
+            Asio::Timer timer(executor);
+
+            while (s_state.load() == State::Shutdown) {
+                timer.expires_after(std::chrono::milliseconds(c_sleepQuantum));
+                co_await timer.async_wait(asio::use_awaitable);
             }
         } catch (const Failure & e) {
             tsLogError(e);
@@ -279,6 +279,9 @@ namespace Server {
 
     void run() {
         assert(s_state.load() == State::Initial);
+        // if (s_state.load() != State::Initial) {
+        //     return;
+        // }
 
         tsLogDebug(Wcs::c_starting);
         s_state.store(State::Starting);
@@ -313,12 +316,12 @@ namespace Server {
     }
 
     void stop() try {
-        if (s_state.load() != State::Running) {
-            return;
-        }
+        assert(s_state.load() == State::Running);
+        // if (s_state.load() != State::Running) {
+        //     return;
+        // }
 
         tsLogDebug(Wcs::c_stopping);
-
         s_state.store(State::Shutdown);
         s_hitman.await(c_controlTimeout, [] { return Counter::value() > 0; });
         s_state.store(State::Stopping);

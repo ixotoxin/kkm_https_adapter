@@ -14,9 +14,9 @@ namespace Http {
 
     void ConfigHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
-        if (request.m_response.m_status != Status::Ok) {
-            return;
-        }
+        // if (request.m_response.m_status != Status::Ok) {
+        //     return;
+        // }
 
         if (request.m_method == Method::Get && request.m_hint.size() == 3 && request.m_hint[2] == "general") {
             auto response = std::make_shared<JsonResponse>();

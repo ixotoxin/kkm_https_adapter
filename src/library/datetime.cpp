@@ -34,7 +34,20 @@ namespace DateTime {
         ::GetLocalTime(&localTime);
         stream
             << std::format(
-                Wcs::c_timestampPrefix,
+                Wcs::c_timestamp,
+                localTime.wYear, localTime.wMonth, localTime.wDay,
+                localTime.wHour, localTime.wMinute, localTime.wSecond
+            );
+        return stream;
+    }
+
+    [[nodiscard, maybe_unused]]
+    std::ostream & iso(std::ostream & stream) {
+        ::SYSTEMTIME localTime;
+        ::GetLocalTime(&localTime);
+        stream
+            << std::format(
+                Mbs::c_timestamp,
                 localTime.wYear, localTime.wMonth, localTime.wDay,
                 localTime.wHour, localTime.wMinute, localTime.wSecond
             );

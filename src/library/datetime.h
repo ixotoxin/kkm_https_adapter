@@ -27,12 +27,10 @@ namespace Meta {
 namespace DateTime {
     namespace Wcs {
         constexpr std::wstring_view c_timestamp { L"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
-        constexpr std::wstring_view c_timestampPrefix [[maybe_unused]] { L"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}: " };
     }
 
     namespace Mbs {
         constexpr std::string_view c_timestamp { "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
-        constexpr std::string_view c_timestampPrefix [[maybe_unused]] { "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}: " };
     }
 
     using Clock = std::chrono::system_clock;
@@ -43,6 +41,7 @@ namespace DateTime {
     [[nodiscard, maybe_unused]] int64_t windows();
     [[nodiscard, maybe_unused]] int64_t unix();
     [[nodiscard, maybe_unused]] std::wostream & iso(std::wostream &);
+    [[nodiscard, maybe_unused]] std::ostream & iso(std::ostream &);
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]

@@ -31,9 +31,9 @@ namespace Http {
 
     void DefaultHandler::operator()(Request & request) const noexcept try {
         assert(request.m_response.m_status == Status::Ok);
-        if (request.m_response.m_status != Status::Ok) {
-            return;
-        }
+        // if (request.m_response.m_status != Status::Ok) {
+        //     return;
+        // }
 
         if (request.m_method == Method::Get) {
             if (s_enableStatic && request.m_hint.size() < 2) {

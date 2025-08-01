@@ -17,9 +17,10 @@ namespace Log {
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
             assert(ready(level));
+
             std::wostream & output { level >= Level::Warning ? std::wcerr : std::wcout };
             if (s_outputTimestamp) {
-                output << DateTime::iso;
+                output << DateTime::iso << L": ";
             }
             if (s_outputLevel) {
                 output << s_levelLabels.at(level) << L": ";
@@ -57,7 +58,7 @@ namespace Log {
                 }
             }
             s_currentMonth = localTime.wMonth;
-            filePath /= std::format(L"kkmha-{:04d}-{:02d}.log", localTime.wYear, localTime.wMonth);
+            filePath /= std::format(c_logFileFormat, localTime.wYear, localTime.wMonth);
             s_file.open(filePath, std::ios::out | std::ios::app);
             s_file.imbue(std::locale(".utf-8"));
             if (!s_file.good()) {
@@ -86,7 +87,7 @@ namespace Log {
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
             assert(ready(level));
-            s_file << DateTime::iso << s_levelLabels.at(level) << L": " << message << std::endl;
+            s_file << DateTime::iso << L": " << s_levelLabels.at(level) << L": " << message << std::endl;
         } catch (...) {
             std::wclog << Wcs::c_loggingError << std::endl;
         }
@@ -129,10 +130,12 @@ namespace Log {
         [[maybe_unused]]
         void write(Level level, const std::wstring & message) noexcept try {
             assert(ready(level));
+
             const wchar_t * strings[2] {
                 c_eventSource,
                 message.c_str()
             };
+
             ::ReportEventW(
                 s_sourceHandle,     // Event log handle
                 s_types.at(level),  // Event type

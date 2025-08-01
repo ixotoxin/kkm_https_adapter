@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(kkm_https_adapter VERSION 1.4.2 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.4.3 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -126,6 +126,7 @@ if (BUILD_TESTS)
 endif ()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/heap)
 
 if (BUILD_TESTS)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)

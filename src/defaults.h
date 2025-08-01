@@ -34,6 +34,7 @@ namespace Log {
     constexpr bool c_outputTimestamp { false };
     constexpr bool c_outputLevel { true };
     constexpr std::wstring_view c_directory { L"logs" };
+    constexpr std::wstring_view c_logFileFormat { L"kkmha-{:04d}-{:02d}.log" };
     constexpr const wchar_t * c_eventSource { Service::c_displayName };
     constexpr ::DWORD c_eventId { 0 };
     constexpr ::WORD c_eventCategory { 0 };
