@@ -47,13 +47,14 @@ namespace Server {
     inline Http::RequestHandler & lookupHandler(const Http::Request & request) {
         // ISSUE: При большем количестве обработчиков стоит оптимизировать.
         if (request.m_hint.size() >= 2) {
-            if (request.m_hint[1] == "kkm") {
+            auto area = request.m_hint[1];
+            if (area == "kkm") {
                 return s_kkmHandler;
-            } else if (request.m_hint[1] == "static") {
+            } else if (area == "static") {
                 return s_staticHandler;
-            } else if (request.m_hint[1] == "config") {
+            } else if (area == "config") {
                 return s_configHandler;
-            } else if (request.m_hint[1] == "ping") {
+            } else if (area == "ping") {
                 return s_pingHandler;
             }
         }
@@ -98,7 +99,6 @@ namespace Server {
 
                 { /** Читаем запрос **/
                     Asio::StreamBuffer buffer {};
-
                     const auto & [headerReadingError, headerSize]
                         = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
                     if (headerReadingError) {

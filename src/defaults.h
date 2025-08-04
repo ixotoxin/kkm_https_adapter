@@ -16,7 +16,6 @@ namespace Config {
     constexpr std::wstring_view c_configDirectoryEnv { L"kkmha_conf_dir" };
     constexpr std::wstring_view c_configDirectory { L"conf" };
     constexpr std::wstring_view c_configFile { L"kkmha.json" };
-    constexpr std::wstring_view c_logsDirectoryEnv [[maybe_unused]] { L"kkmha_logs_dir" };
 }
 
 namespace Service {

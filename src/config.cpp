@@ -178,7 +178,12 @@ namespace Config {
                         Json::handleKey(
                             json, "cliOperator",
                             [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                                Json::handleKey(json, "name", Kkm::s_cliOperatorName, Text::Wcs::trim(), path);
+                                Json::handleKey(
+                                    json, "name",
+                                    Kkm::s_cliOperatorName,
+                                    Text::Wcs::noEmpty(Text::Wcs::trim()),
+                                    path
+                                );
                                 Json::handleKey(json, "inn", Kkm::s_cliOperatorInn, Text::Wcs::trim(), path);
                                 return true;
                             },
