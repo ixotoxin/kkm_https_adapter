@@ -738,10 +738,14 @@ namespace Kkm {
         std::wstring m_customerDocumentCode {}; // Код вида документа, удостоверяющего личность [строка формата "ЦЦ"]
         std::wstring m_customerDocumentData {}; // Данные документа, удостоверяющего личность
         std::wstring m_customerAddress {}; // Адрес покупателя (клиента)
+        std::wstring m_ePaymentId {};
+        std::wstring m_ePaymentAddInfo {};
         std::vector<ItemDetails> m_items;
         double m_paymentSum { 0 };
         PaymentType m_paymentType { PaymentType::Cash };
+        int m_ePaymentMethod { 0 };
         bool m_customerDataIsPresent { false };
+        bool m_ePaymentExt { false };
 
     public:
         ReceiptDetails() = default;

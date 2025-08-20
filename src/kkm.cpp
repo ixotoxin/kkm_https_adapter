@@ -1057,7 +1057,7 @@ namespace Kkm {
                 if (separator) {
                     separated = true;
                 } else {
-                    if (!Json::handleKey(block, "content", content, L"document[].content")) {
+                    if (!Json::handleKey(block, "content", content, L"document[].content")) { // TODO: Добавить проверку длинны текста
                         throw Failure(std::format(Wcs::c_requiresProperty, L"document[].content")); // NOLINT(*-exception-baseclass)
                     }
                     Json::handleKey(block, "center", center, L"document[].center");
@@ -1168,18 +1168,17 @@ namespace Kkm {
         bool result = Json::handleKey(
             details, "operator",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                using NameType = decltype(this->m_operatorName);
                 auto success
                     = Json::handleKey(
                         json, "name",
                         this->m_operatorName,
-                        Text::maxLength<NameType>(c_maxLength, Text::trim<NameType>()),
+                        Text::Wcs::length(1, 64, Text::Wcs::trim()),
                         path
                     );
                 if (!success) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"operator.name")); // NOLINT(*-exception-baseclass)
                 }
-                Json::handleKey(json, "inn", this->m_operatorInn, path);
+                Json::handleKey(json, "inn", this->m_operatorInn, Text::Wcs::maxLength(12), path);
                 return true;
             }
         );
@@ -1270,15 +1269,15 @@ namespace Kkm {
         Json::handleKey(
             details, "customer",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "account", this->m_customerAccount, path);
-                Json::handleKey(json, "contact", this->m_customerContact, path);
-                Json::handleKey(json, "name", this->m_customerName, path);
-                Json::handleKey(json, "inn", this->m_customerInn, path);
-                Json::handleKey(json, "birthdate", this->m_customerBirthdate, path);
-                Json::handleKey(json, "citizenship", this->m_customerCitizenship, path);
-                Json::handleKey(json, "documentCode", this->m_customerDocumentCode, path);
-                Json::handleKey(json, "documentData", this->m_customerDocumentData, path);
-                Json::handleKey(json, "address", this->m_customerAddress, path);
+                Json::handleKey(json, "account", this->m_customerAccount, Text::Wcs::maxLength(32), path);
+                Json::handleKey(json, "contact", this->m_customerContact, Text::Wcs::maxLength(64), path);
+                Json::handleKey(json, "name", this->m_customerName, Text::Wcs::maxLength(256), path);
+                Json::handleKey(json, "inn", this->m_customerInn, Text::Wcs::maxLength(12), path);
+                Json::handleKey(json, "birthdate", this->m_customerBirthdate, Text::Wcs::maxLength(10), path);
+                Json::handleKey(json, "citizenship", this->m_customerCitizenship, Text::Wcs::maxLength(3), path);
+                Json::handleKey(json, "documentCode", this->m_customerDocumentCode, Text::Wcs::maxLength(32), path);
+                Json::handleKey(json, "documentData", this->m_customerDocumentData, Text::Wcs::maxLength(64), path);
+                Json::handleKey(json, "address", this->m_customerAddress, Text::Wcs::maxLength(256), path);
                 this->m_customerDataIsPresent
                     = !this->m_customerAccount.empty() || !this->m_customerContact.empty()
                     || !this->m_customerName.empty() || !this->m_customerInn.empty()
@@ -1291,7 +1290,7 @@ namespace Kkm {
         Json::handleKey(
             details, "text",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", this->m_text.m_content, path);
+                Json::handleKey(json, "content", this->m_text.m_content, path); // TODO: Добавить проверку длинны текста
                 Json::handleKey(json, "center", this->m_text.m_center, path);
                 Json::handleKey(json, "magnified", this->m_text.m_magnified, path);
                 Json::handleKey(json, "separated", this->m_text.m_separated, path);
@@ -1301,7 +1300,7 @@ namespace Kkm {
         Json::handleKey(
             details, "headerText",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", this->m_headerText.m_content, path);
+                Json::handleKey(json, "content", this->m_headerText.m_content, path); // TODO: Добавить проверку длинны текста
                 Json::handleKey(json, "center", this->m_headerText.m_center, path);
                 Json::handleKey(json, "magnified", this->m_headerText.m_magnified, path);
                 Json::handleKey(json, "separated", this->m_headerText.m_separated, path);
@@ -1311,7 +1310,7 @@ namespace Kkm {
         Json::handleKey(
             details, "footerText",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", this->m_footerText.m_content, path);
+                Json::handleKey(json, "content", this->m_footerText.m_content, path); // TODO: Добавить проверку длинны текста
                 Json::handleKey(json, "center", this->m_footerText.m_center, path);
                 Json::handleKey(json, "magnified", this->m_footerText.m_magnified, path);
                 Json::handleKey(json, "separated", this->m_footerText.m_separated, path);
@@ -1323,7 +1322,7 @@ namespace Kkm {
         if (details.contains("items") && details["items"].is_array()) {
             for (auto & item : details["items"].get<std::vector<Nln::Json>>()) {
                 std::wstring title;
-                if (!Json::handleKey(item, "title", title, Text::Wcs::noEmpty(Text::Wcs::trim()))) {
+                if (!Json::handleKey(item, "title", title, Text::Wcs::length(1, 128, Text::Wcs::trim()))) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title")); // NOLINT(*-exception-baseclass)
                 }
                 double price;
@@ -1351,8 +1350,7 @@ namespace Kkm {
             throw Failure(std::format(Wcs::c_requiresProperty, L"items")); // NOLINT(*-exception-baseclass)
         }
         bool payment = Json::handleKey(
-            details,
-            "payment",
+            details, "payment",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
                 std::wstring sum {};
                 if (Json::handleKey(json, "sum", sum, path)) {
@@ -1371,6 +1369,21 @@ namespace Kkm {
                 }
                 if (!Json::handleKey(json, "type", this->m_paymentType, s_paymentTypeCastMap, path)) {
                     throw Failure(std::format(Wcs::c_requiresProperty, L"payment.type")); // NOLINT(*-exception-baseclass)
+                }
+                if (this->m_paymentType == PaymentType::Electronically) {
+                    Json::handleKey(
+                        json, "ext",
+                        [this] (const Nln::Json & json, const std::wstring & path) -> bool {
+                            if (!Json::handleKey(json, "method", this->m_ePaymentMethod, path)) {
+                                throw Failure(std::format(Wcs::c_requiresProperty, L"payment.ext.method")); // NOLINT(*-exception-baseclass)
+                            }
+                            if (!Json::handleKey(json, "id", this->m_ePaymentId, Text::Wcs::length(1, 256), path)) {
+                                throw Failure(std::format(Wcs::c_requiresProperty, L"payment.ext.id")); // NOLINT(*-exception-baseclass)
+                            }
+                            Json::handleKey(json, "addInfo", this->m_ePaymentAddInfo, Text::Wcs::maxLength(256), path);
+                            return true;
+                        }
+                    );
                 }
                 return true;
             }
@@ -1456,6 +1469,24 @@ namespace Kkm {
             }
             // result.m_remainder = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_REMAINDER); // Неоплаченный остаток чека
             // result.m_change = m_kkm.getParamDouble(Atol::LIBFPTR_PARAM_CHANGE); // Сдача по чеку
+
+            /**
+             * «Сведения обо всех оплатах по чеку безналичными»
+             * (необязательный реквизит, приказ ФНС России от 26.03.2025 № ЕД-7-20/236@).
+             * https://www.nalog.gov.ru/rn71/news/activities_fts/16524721/
+             **/
+            if (details.m_paymentType == PaymentType::Electronically && details.m_ePaymentExt) {
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Atol::LIBFPTR_PT_ADD_INFO);
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_SUM, details.m_paymentSum);
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_PAYMENT_METHOD, details.m_ePaymentMethod);
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ID, details.m_ePaymentId);
+                if (!details.m_ePaymentAddInfo.empty()) {
+                    m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ADD_INFO, details.m_ePaymentAddInfo);
+                }
+                if (m_kkm.payment() < 0) {
+                    return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+                }
+            }
         }
 
         tsLogDebug(Wcs::c_subRegisterReceiptAndPrint, m_logPrefix, m_serialNumber);
