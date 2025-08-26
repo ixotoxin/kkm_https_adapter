@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <library/json.h>
+#include <lib/json.h>
 
 // TODO: Реализовать полноценное тестирование.
 

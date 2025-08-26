@@ -2,7 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include <catch2/catch_test_macros.hpp>
-#include <library/utils.h>
+#include <lib/utils.h>
 
 namespace UnitTests {
     using namespace std::string_view_literals;

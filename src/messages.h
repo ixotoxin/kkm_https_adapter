@@ -14,12 +14,14 @@ namespace Basic {
         constexpr S c_connParamsSaved { L"ПП [{}]: Параметры подключения ККМ [{}] успешно сохранены" };
         constexpr S c_getKkmInfo { L"ПП [{}]: ККМ [{}]: Получение информации об устройстве" };
         constexpr S c_requiresProperty { L"Требуется корректное свойство '{}'" };
+        constexpr S c_requiresProperty2 { L"Требуется корректное свойство '{}.{}'" };
     }
 
     namespace Mbs {
         using S = std::string_view;
 
         constexpr S c_requiresProperty { "Требуется корректное свойство '{}'" };
+        constexpr S c_requiresProperty2 { "Требуется корректное свойство '{}.{}'" };
     }
 }
 
@@ -106,6 +108,7 @@ namespace Kkm {
         using P = std::wstring_view; // const wchar_t *;
 
         using Basic::Wcs::c_requiresProperty;
+        using Basic::Wcs::c_requiresProperty2;
         using Http::Wcs::c_requestPrefix;
         using Http::Wcs::c_prefixedText;
 
@@ -145,6 +148,7 @@ namespace Kkm {
 
         constexpr S c_subSetOperator { L"{}ККМ [{}]: Операция: Регистрация оператора" };
         constexpr S c_subSetCustomer { L"{}ККМ [{}]: Операция: Регистрация покупателя" };
+        constexpr S c_subSetSeller { L"{}ККМ [{}]: Операция: Регистрация продавца" };
         constexpr S c_subRegisterCashInAndPrint { L"{}ККМ [{}]: Операция: Регистрация внесения и печать" };
         constexpr S c_subCashOut { L"{}ККМ [{}]: Операция: Выплата" };
         constexpr S c_subCashOutNoNeed { L"{}ККМ [{}]: Операция: Выплата: Не требуется" };
@@ -164,11 +168,13 @@ namespace Kkm {
         constexpr S c_cashStatMethod { L"{}ККМ [{}]: Запрос статистики по наличным" };
         constexpr S c_ofdExchangeStatusMethod { L"{}ККМ [{}]: Запрос статуса информационного обмена с ОФД" };
         constexpr S c_fnInfoMethod { L"{}ККМ [{}]: Запрос информации и статуса ФН" };
+        constexpr S c_registrationInfoMethod { L"{}ККМ [{}]: Запрос информации о регистрации" };
         constexpr S c_lastRegistrationMethod { L"{}ККМ [{}]: Запрос информации о последней (пере)регистрации" };
         constexpr S c_lastReceiptMethod { L"{}ККМ [{}]: Запрос информации о последнем чеке" };
         constexpr S c_lastDocumentMethod { L"{}ККМ [{}]: Запрос информации о последнем фискальном документе" };
         constexpr S c_errorsMethod { L"{}ККМ [{}]: Запрос информации об ошибках обмена с ОФД" };
-        constexpr S c_versionMethod { L"{}ККМ [{}]: Запрос версий ПО" };
+        constexpr S c_ffdVersionMethod { L"{}ККМ [{}]: Запрос версий ФФД" };
+        constexpr S c_fwVersionMethod { L"{}ККМ [{}]: Запрос версий ПО" };
         constexpr S c_printDemoMethod { L"{}ККМ [{}]: Демо-печать" };
         constexpr S c_printHelloMethod { L"{}ККМ [{}]: Печать приветствия" };
         constexpr S c_printNfDocumentMethod { L"{}ККМ [{}]: Печать не фискального документа" };
@@ -191,34 +197,37 @@ namespace Kkm {
         constexpr S c_helloText {
             L"\nЯ трудолюбивая касса.\n\nЯ очень рада работать в компании таких замечательных людей."
         };
-
-        constexpr P c_closedShift { L"Сессия закрыта" };
-        constexpr P c_openedShift { L"Сессия открыта" };
-        constexpr P c_expiredShift { L"Сессия истекла" };
-        constexpr P c_closedReceipt { L"Чек закрыт" };
-        constexpr P c_sellReceipt { L"Чек прихода" };
-        constexpr P c_sellReturnReceipt { L"Чек возврата прихода" };
-        constexpr P c_sellCorrectionReceipt { L"Чек коррекции прихода" };
-        constexpr P c_sellReturnCorrectionReceipt { L"Чек коррекции возврата прихода" };
-        constexpr P c_buyReceipt { L"Чек расхода" };
-        constexpr P c_buyReturnReceipt { L"Чек возврата расхода" };
-        constexpr P c_buyCorrectionReceipt { L"Чек коррекции расхода" };
-        constexpr P c_buyReturnCorrectionReceipt { L"Чек коррекции возврата расхода" };
-        constexpr P c_closedDocument { L"Документ закрыт" };
-        constexpr P c_openShiftDocument { L"Документ открытия смены" };
-        constexpr P c_closeShiftDocument { L"Документ закрытия смены" };
-        constexpr P c_registrationDocument { L"Документ пере/регистрации" };
-        constexpr P c_closeArchiveDocument { L"Документ закрытия архива ФН" };
-        constexpr P c_ofdExchangeStatusDocument { L"Отчёт о состоянии расчётов" };
-        constexpr P c_serviceDocument { L"Сервисный документ" };
-        constexpr P c_documentCopy { L"Копия документа" };
     }
 
     namespace Mbs {
         using S = std::string_view;
+        using P = std::string_view; // const char *;
+
         using Basic::Mbs::c_requiresProperty;
+        using Basic::Mbs::c_requiresProperty2;
 
         constexpr S c_notFound { "Запрос [{:04x}]: ККМ [{}] не доступна" };
         constexpr S c_cantClearRegistry { "Не удалось очистить реестр параметров подключения" };
+
+        constexpr P c_closedShift { "Сессия закрыта" };
+        constexpr P c_openedShift { "Сессия открыта" };
+        constexpr P c_expiredShift { "Сессия истекла" };
+        constexpr P c_closedReceipt { "Чек закрыт" };
+        constexpr P c_sellReceipt { "Чек прихода" };
+        constexpr P c_sellReturnReceipt { "Чек возврата прихода" };
+        constexpr P c_sellCorrectionReceipt { "Чек коррекции прихода" };
+        constexpr P c_sellReturnCorrectionReceipt { "Чек коррекции возврата прихода" };
+        constexpr P c_buyReceipt { "Чек расхода" };
+        constexpr P c_buyReturnReceipt { "Чек возврата расхода" };
+        constexpr P c_buyCorrectionReceipt { "Чек коррекции расхода" };
+        constexpr P c_buyReturnCorrectionReceipt { "Чек коррекции возврата расхода" };
+        constexpr P c_closedDocument { "Документ закрыт" };
+        constexpr P c_openShiftDocument { "Документ открытия смены" };
+        constexpr P c_closeShiftDocument { "Документ закрытия смены" };
+        constexpr P c_registrationDocument { "Документ пере/регистрации" };
+        constexpr P c_closeArchiveDocument { "Документ закрытия архива ФН" };
+        constexpr P c_ofdExchangeStatusDocument { "Отчёт о состоянии расчётов" };
+        constexpr P c_serviceDocument { "Сервисный документ" };
+        constexpr P c_documentCopy { "Копия документа" };
     }
 }

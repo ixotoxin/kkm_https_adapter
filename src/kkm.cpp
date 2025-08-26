@@ -11,8 +11,16 @@ namespace Kkm {
         using Json::Mbs::c_messageKey;
     }
 
+    using namespace std::string_view_literals;
+
     using Basic::DataError;
     using Basic::c_sleepQuantum;
+
+    template<typename T>
+    requires std::is_scalar_v<T>
+    std::string_view safeGet(const std::unordered_map<T, std::string_view> & dictionary, const T key) {
+        return dictionary.contains(key) ? dictionary.at(key) : ""sv;
+    }
 
     Failure::Failure(const std::wstring_view message, std::source_location && location)
     : Basic::Failure(message, std::forward<std::source_location>(location)) {}
@@ -69,7 +77,7 @@ namespace Kkm {
         std::wstring baudRate;
         if (m_params.size() < 3) {
             baudRate.assign(c_defBaudRate);
-        } else if (std::ranges::find(s_allowedBaudRate, m_params[2]) != s_allowedBaudRate.end()) {
+        } else if (std::ranges::find(Wcs::c_allowedBaudRate, m_params[2]) != Wcs::c_allowedBaudRate.end()) {
             baudRate.assign(m_params[2]);
         } else {
             throw Failure(Wcs::c_invalidConnParams); // NOLINT(*-exception-baseclass)
@@ -402,10 +410,7 @@ namespace Kkm {
     void Device::subSetCustomer(const Call::ReceiptDetails & details) {
         tsLogDebug(Wcs::c_subSetCustomer, m_logPrefix, m_serialNumber);
 
-        /** Регистрация информации о покупателе / клиенте **/
-        if (!details.m_customerContact.empty()) {
-            m_kkm.setParam(1008, details.m_customerContact);
-        }
+        /** Регистрация информации о покупателе / клиенте для ФФД >= 1.2 **/
         bool hasRequisite1256 { false };
         if (!details.m_customerName.empty()) {
             m_kkm.setParam(1227, details.m_customerName);
@@ -454,6 +459,28 @@ namespace Kkm {
             }
             std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
             m_kkm.setParam(1084, clientInfo);
+        }
+
+        /** Регистрация информации о покупателе / клиенте для ФФД < 1.2 **/
+        if (!details.m_customerName.empty()) {
+            m_kkm.setParam(1227, details.m_customerName);
+        }
+        if (!details.m_customerInn.empty()) {
+            m_kkm.setParam(1228, details.m_customerInn);
+        }
+
+        /** Регистрация информации о покупателе / клиенте **/
+        if (!details.m_customerContact.empty()) {
+            m_kkm.setParam(1008, details.m_customerContact);
+        }
+    }
+
+    void Device::subSetSeller(const Call::ReceiptDetails & details) {
+        tsLogDebug(Wcs::c_subSetSeller, m_logPrefix, m_serialNumber);
+
+        /** Регистрация информации о продавце / поставщике **/
+        if (!details.m_customerInn.empty()) {
+            m_kkm.setParam(1117, details.m_sellerEmail);
         }
     }
 
@@ -517,7 +544,7 @@ namespace Kkm {
                 { "dateTime", DateTime::cast<std::string>(m_dateTime) },
                 { "documentNumber", m_documentNumber },
                 { "documentType", m_documentType },
-                { "documentTypeText", Text::convert(s_documentTypeLabels.at(m_documentType)) },
+                { "documentTypeText", safeGet(Mbs::c_documentTypeLabels, m_documentType) },
                 { "fiscal", m_fiscal },
                 { "fnFiscal", m_fnFiscal },
                 { "fnPresent", m_fnPresent },
@@ -525,6 +552,7 @@ namespace Kkm {
                 { "logicalNumber", m_logicalNumber },
                 { "mode", m_mode },
                 { "model", m_model },
+                { "modelText", safeGet(Mbs::c_models, m_model) },
                 { "operatorId", m_operatorId },
                 { "operatorRegistered", m_operatorRegistered },
                 { "paperNearEnd", m_paperNearEnd },
@@ -537,11 +565,11 @@ namespace Kkm {
                 { "receiptPaperPresent", m_receiptPaperPresent },
                 { "receiptSum", m_receiptSum },
                 { "receiptType", m_receiptType },
-                { "receiptTypeText", Text::convert(s_receiptTypeLabels.at(m_receiptType)) },
+                { "receiptTypeText", safeGet(Mbs::c_receiptTypeLabels, m_receiptType) },
                 { "serialNumber", Text::convert(m_serialNumber) },
                 { "shiftNumber", m_shiftNumber },
                 { "shiftState", m_shiftState },
-                { "shiftStateText", Text::convert(s_shiftStateLabels.at(m_shiftState)) },
+                { "shiftStateText", safeGet(Mbs::c_shiftStateLabels, m_shiftState) },
                 { "subMode", m_subMode }
             };
             return true;
@@ -597,7 +625,7 @@ namespace Kkm {
                 { "expiredAt", DateTime::cast<std::string>(m_expirationDateTime) },
                 { "shiftNumber", m_shiftNumber },
                 { "shiftState", m_shiftState },
-                { "shiftStateText", Text::convert(s_shiftStateLabels.at(m_shiftState)) }
+                { "shiftStateText", safeGet(Mbs::c_shiftStateLabels, m_shiftState) }
             };
             return true;
         }
@@ -641,7 +669,7 @@ namespace Kkm {
         if (this->Device::Call::Result::exportTo(json) && m_success) {
             json["receiptState"] = {
                 { "receiptType", m_receiptType },
-                { "receiptTypeText", Text::convert(s_receiptTypeLabels.at(m_receiptType)) },
+                { "receiptTypeText", safeGet(Mbs::c_receiptTypeLabels, m_receiptType) },
                 { "receiptNumber", m_receiptNumber },
                 { "documentNumber", m_documentNumber },
                 { "sum", m_sum },
@@ -826,6 +854,104 @@ namespace Kkm {
         }
     }
 
+    bool Device::Call::FndtRegistrationInfoResult::exportTo(Nln::Json & json) {
+        if (this->Device::Call::Result::exportTo(json) && m_success) {
+            json["registrationInfo"] = {
+                { "fnsUrl", Text::convert(m_fnsUrl) },
+                { "organizationAddress", Text::convert(m_organizationAddress) },
+                { "organizationVATIN", Text::convert(m_organizationVATIN) },
+                { "organizationName", Text::convert(m_organizationName) },
+                { "organizationEmail", Text::convert(m_organizationEmail) },
+                { "paymentsAddress", Text::convert(m_paymentsAddress) },
+                { "registrationNumber", Text::convert(m_registrationNumber) },
+                { "machineNumber", Text::convert(m_machineNumber) },
+                { "ofdVATIN", Text::convert(m_ofdVATIN) },
+                { "ofdName", Text::convert(m_ofdName) },
+                {
+                    "taxationTypes",
+                    {
+                        { "osn", static_cast<bool>(m_taxationTypes & Atol::LIBFPTR_TT_OSN) },
+                        { "usnIncome", static_cast<bool>(m_taxationTypes & Atol::LIBFPTR_TT_USN_INCOME) },
+                        { "usnIncomeOutcome", static_cast<bool>(m_taxationTypes & Atol::LIBFPTR_TT_USN_INCOME_OUTCOME) },
+                        { "esn", static_cast<bool>(m_taxationTypes & Atol::LIBFPTR_TT_ESN) },
+                        { "patent", static_cast<bool>(m_taxationTypes & Atol::LIBFPTR_TT_PATENT) },
+                    }
+                },
+                {
+                    "agentSign",
+                    {
+                        { "bankPayingAgent", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_BANK_PAYING_AGENT) },
+                        { "bankPayingSubagent", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_BANK_PAYING_SUBAGENT) },
+                        { "payingAgent", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_PAYING_AGENT) },
+                        { "payingSubagent", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_PAYING_SUBAGENT) },
+                        { "attorney", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_ATTORNEY) },
+                        { "commissionAgent", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_COMMISSION_AGENT) },
+                        { "another", static_cast<bool>(m_agentSign & Atol::LIBFPTR_AT_ANOTHER) }
+                    }
+                },
+                { "ffdVersion", safeGet(Mbs::c_ffdVersions, m_ffdVersion) },
+                { "autoModeSign", m_autoModeSign },
+                { "offlineModeSign", m_offlineModeSign },
+                { "encryptionSign", m_encryptionSign },
+                { "internetSign", m_internetSign },
+                { "serviceSign", m_serviceSign },
+                { "bsoSign", m_bsoSign },
+                { "lotterySign", m_lotterySign },
+                { "gamblingSign", m_gamblingSign },
+                { "exciseSign", m_exciseSign },
+                { "machineInstallationSign", m_machineInstallationSign },
+                { "tradeMarkedProducts", m_tradeMarkedProducts },
+                { "insuranceActivity", m_insuranceActivity },
+                { "pawnShopActivity", m_pawnShopActivity },
+                { "vending", m_vending },
+                { "catering", m_catering },
+                { "wholesale", m_wholesale }
+            };
+            return true;
+        }
+        return false;
+    }
+
+    void Device::getFndtRegistrationInfo(Call::FndtRegistrationInfoResult & result) {
+        tsLogDebug(Wcs::c_registrationInfoMethod, m_logPrefix, m_serialNumber);
+
+        /** Запрос реквизитов регистрации ККТ **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_REG_INFO);
+        if (m_kkm.fnQueryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+
+        result.m_fnsUrl = m_kkm.getParamString(1060);
+        result.m_organizationAddress = m_kkm.getParamString(1009);
+        result.m_organizationVATIN = m_kkm.getParamString(1018);
+        result.m_organizationName = m_kkm.getParamString(1048);
+        result.m_organizationEmail = m_kkm.getParamString(1117);
+        result.m_paymentsAddress = m_kkm.getParamString(1187);
+        result.m_registrationNumber = m_kkm.getParamString(1037);
+        result.m_machineNumber = m_kkm.getParamString(1036);
+        result.m_ofdVATIN = m_kkm.getParamString(1017);
+        result.m_ofdName = m_kkm.getParamString(1046);
+        result.m_taxationTypes = m_kkm.getParamInt(1062);
+        result.m_agentSign = m_kkm.getParamInt(1057);
+        result.m_ffdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(1209));
+        result.m_autoModeSign = m_kkm.getParamBool(1001);
+        result.m_offlineModeSign = m_kkm.getParamBool(1002);
+        result.m_encryptionSign = m_kkm.getParamBool(1056);
+        result.m_internetSign = m_kkm.getParamBool(1108);
+        result.m_serviceSign = m_kkm.getParamBool(1109);
+        result.m_bsoSign = m_kkm.getParamBool(1110);
+        result.m_lotterySign = m_kkm.getParamBool(1126);
+        result.m_gamblingSign = m_kkm.getParamBool(1193);
+        result.m_exciseSign = m_kkm.getParamBool(1207);
+        result.m_machineInstallationSign = m_kkm.getParamBool(1221);
+        result.m_tradeMarkedProducts = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_TRADE_MARKED_PRODUCTS);
+        result.m_insuranceActivity = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_INSURANCE_ACTIVITY);
+        result.m_pawnShopActivity = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_PAWN_SHOP_ACTIVITY);
+        result.m_vending = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_VENDING);
+        result.m_catering = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_CATERING);
+        result.m_wholesale = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_WHOLESALE);
+    }
+
     bool Device::Call::FndtLastRegistrationResult::exportTo(Nln::Json & json) {
         if (this->Device::Call::Result::exportTo(json) && m_success) {
             json["lastRegistration"] = {
@@ -942,9 +1068,42 @@ namespace Kkm {
         result.m_dataForSendIsEmpty = m_kkm.getParamBool(Atol::LIBFPTR_PARAM_DATA_FOR_SEND_IS_EMPTY);
     }
 
-    bool Device::Call::VersionResult::exportTo(Nln::Json & json) {
+    bool Device::Call::FfdVersionResult::exportTo(Nln::Json & json) {
         if (this->Device::Call::Result::exportTo(json) && m_success) {
-            json["versions"] = {
+            json["ffdVersions"] = {
+                { "deviceFfd", safeGet(Mbs::c_ffdVersions, m_deviceFfdVersion) },
+                { "deviceMinFfd", safeGet(Mbs::c_ffdVersions, m_devMinFfdVersion) },
+                { "deviceMaxFfd", safeGet(Mbs::c_ffdVersions, m_devMaxFfdVersion) },
+                { "fnFfd", safeGet(Mbs::c_ffdVersions, m_fnFfdVersion) },
+                { "fnMaxFfd", safeGet(Mbs::c_ffdVersions, m_fnMaxFfdVersion) },
+                { "ffd", safeGet(Mbs::c_ffdVersions, m_ffdVersion) }
+            };
+            return true;
+        }
+        return false;
+    }
+
+    void Device::getFfdVersion(Call::FfdVersionResult & result) {
+        tsLogDebug(Wcs::c_ffdVersionMethod, m_logPrefix, m_serialNumber);
+
+        /** Запрос версий ФФД **/
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_FN_DATA_TYPE, Atol::LIBFPTR_FNDT_FFD_VERSIONS);
+        if (m_kkm.fnQueryData() < 0) {
+            return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)
+        }
+
+        result.m_deviceFfdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DEVICE_FFD_VERSION));
+        result.m_devMinFfdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DEVICE_MIN_FFD_VERSION));
+        result.m_devMaxFfdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_DEVICE_MAX_FFD_VERSION));
+        result.m_fnFfdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_FN_FFD_VERSION));
+        result.m_fnMaxFfdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_FN_MAX_FFD_VERSION));
+        result.m_ffdVersion = static_cast<FfdVersion>(m_kkm.getParamInt(Atol::LIBFPTR_PARAM_FFD_VERSION));
+        // result.m_kktVersion = m_kkm.getParamInt(Atol::LIBFPTR_PARAM_VERSION);
+    }
+
+    bool Device::Call::FwVersionResult::exportTo(Nln::Json & json) {
+        if (this->Device::Call::Result::exportTo(json) && m_success) {
+            json["fwVersions"] = {
                 { "boot", Text::convert(m_bootVersion) },
                 { "configuration", Text::convert(m_configurationVersion) },
                 { "controlUnit", Text::convert(m_controlUnitVersion) },
@@ -957,8 +1116,8 @@ namespace Kkm {
         return false;
     }
 
-    void Device::getVersion(Call::VersionResult & result) {
-        tsLogDebug(Wcs::c_versionMethod, m_logPrefix, m_serialNumber);
+    void Device::getFwVersion(Call::FwVersionResult & result) {
+        tsLogDebug(Wcs::c_fwVersionMethod, m_logPrefix, m_serialNumber);
 
         /** Запрос версии прошивки **/
         m_kkm.setParam(Atol::LIBFPTR_PARAM_DATA_TYPE, Atol::LIBFPTR_DT_UNIT_VERSION);
@@ -1047,22 +1206,24 @@ namespace Kkm {
         Json::handleKey(details, "footer", m_footer);
         Json::handleKey(details, "margin", margin);
         if (details.contains("document") && details["document"].is_array()) {
+            int i { 0 };
             for (auto & block : details["document"].get<std::vector<Nln::Json>>()) {
                 bool center { false };
                 bool magnified { false };
                 bool separated { false };
                 bool separator { false };
                 std::wstring content {};
-                Json::handleKey(block, "separator", separator, L"document[].separator");
+                auto basePath { std::format(L"document[{}]", i++) };
+                Json::handleKey(block, "separator", separator, basePath);
                 if (separator) {
                     separated = true;
                 } else {
-                    if (!Json::handleKey(block, "content", content, L"document[].content")) { // TODO: Добавить проверку длинны текста
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"document[].content")); // NOLINT(*-exception-baseclass)
+                    if (!Json::handleKey(block, "content", content, basePath)) { // TODO: Добавить проверку длинны текста
+                        throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"content")); // NOLINT(*-exception-baseclass)
                     }
-                    Json::handleKey(block, "center", center, L"document[].center");
-                    Json::handleKey(block, "magnified", magnified, L"document[].magnified");
-                    Json::handleKey(block, "separated", separated, L"document[].separated");
+                    Json::handleKey(block, "center", center, basePath);
+                    Json::handleKey(block, "magnified", magnified, basePath);
+                    Json::handleKey(block, "separated", separated, basePath);
                 }
                 auto actualMargin = margin && !content.empty();
                 m_document.emplace_back(std::move(content), center, magnified, separated, actualMargin);
@@ -1168,15 +1329,15 @@ namespace Kkm {
         bool result = Json::handleKey(
             details, "operator",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                auto success
+                auto hasName
                     = Json::handleKey(
                         json, "name",
                         this->m_operatorName,
                         Text::Wcs::length(1, 64, Text::Wcs::trim()),
                         path
                     );
-                if (!success) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"operator.name")); // NOLINT(*-exception-baseclass)
+                if (!hasName) {
+                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"name")); // NOLINT(*-exception-baseclass)
                 }
                 Json::handleKey(json, "inn", this->m_operatorInn, Text::Wcs::maxLength(12), path);
                 return true;
@@ -1288,6 +1449,14 @@ namespace Kkm {
             }
         );
         Json::handleKey(
+            details, "seller",
+            [this] (const Nln::Json & json, const std::wstring & path) -> bool {
+                Json::handleKey(json, "email", this->m_sellerEmail, Text::Wcs::maxLength(64), path);
+                this->m_sellerDataIsPresent = !this->m_sellerEmail.empty();
+                return true;
+            }
+        );
+        Json::handleKey(
             details, "text",
             [this] (const Nln::Json & json, const std::wstring & path) -> bool {
                 Json::handleKey(json, "content", this->m_text.m_content, path); // TODO: Добавить проверку длинны текста
@@ -1318,29 +1487,31 @@ namespace Kkm {
             }
         );
         Tax defaultTax { Tax::No };
-        bool hasDefaultTax = Json::handleKey(details, "tax", defaultTax, s_taxCastMap);
+        bool hasDefaultTax = Json::handleKey(details, "tax", defaultTax, Mbs::c_taxCastMap);
         if (details.contains("items") && details["items"].is_array()) {
+            int i { 0 };
             for (auto & item : details["items"].get<std::vector<Nln::Json>>()) {
+                auto basePath { std::format(L"items[{}]", i++) };
                 std::wstring title;
-                if (!Json::handleKey(item, "title", title, Text::Wcs::length(1, 128, Text::Wcs::trim()))) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].title")); // NOLINT(*-exception-baseclass)
+                if (!Json::handleKey(item, "title", title, Text::Wcs::length(1, 128, Text::Wcs::trim()), basePath)) {
+                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"title")); // NOLINT(*-exception-baseclass)
                 }
                 double price;
-                if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, s_maxPrice))) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].price")); // NOLINT(*-exception-baseclass)
+                if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, s_maxPrice), basePath)) {
+                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"price")); // NOLINT(*-exception-baseclass)
                 }
                 double quantity;
-                if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, s_maxQuantity))) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"items[].quantity")); // NOLINT(*-exception-baseclass)
+                if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, s_maxQuantity), basePath)) {
+                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"quantity")); // NOLINT(*-exception-baseclass)
                 }
                 MeasurementUnit unit { MeasurementUnit::Piece };
-                Json::handleKey(item, "unit", unit, s_measurementUnitMap);
+                Json::handleKey(item, "unit", unit, Mbs::c_measurementUnitMap);
                 Tax tax;
-                if (!Json::handleKey(item, "tax", tax, s_taxCastMap)) {
+                if (!Json::handleKey(item, "tax", tax, Mbs::c_taxCastMap)) {
                     if (hasDefaultTax) {
                         tax = defaultTax;
                     } else {
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"items[].tax")); // NOLINT(*-exception-baseclass)
+                        throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"tax")); // NOLINT(*-exception-baseclass)
                     }
                 }
                 m_paymentSum += price * quantity;
@@ -1362,25 +1533,25 @@ namespace Kkm {
                             this->m_paymentSum = Text::cast<double>(sum);
                         }
                     } catch (...) {
-                        throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum")); // NOLINT(*-exception-baseclass)
+                        throw Failure(std::format(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                     }
                 } else {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.sum")); // NOLINT(*-exception-baseclass)
+                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                 }
-                if (!Json::handleKey(json, "type", this->m_paymentType, s_paymentTypeCastMap, path)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty, L"payment.type")); // NOLINT(*-exception-baseclass)
+                if (!Json::handleKey(json, "type", this->m_paymentType, Mbs::c_paymentTypeCastMap, path)) {
+                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"type")); // NOLINT(*-exception-baseclass)
                 }
                 if (this->m_paymentType == PaymentType::Electronically) {
-                    Json::handleKey(
-                        json, "ext",
+                    this->m_electroPaymentInfo = Json::handleKey(
+                        json, "electroPaymentInfo",
                         [this] (const Nln::Json & json, const std::wstring & path) -> bool {
-                            if (!Json::handleKey(json, "method", this->m_ePaymentMethod, path)) {
-                                throw Failure(std::format(Wcs::c_requiresProperty, L"payment.ext.method")); // NOLINT(*-exception-baseclass)
+                            if (!Json::handleKey(json, "method", this->m_electroPaymentMethod, path)) {
+                                throw Failure(std::format(Wcs::c_requiresProperty2, path, L"method")); // NOLINT(*-exception-baseclass)
                             }
-                            if (!Json::handleKey(json, "id", this->m_ePaymentId, Text::Wcs::length(1, 256), path)) {
-                                throw Failure(std::format(Wcs::c_requiresProperty, L"payment.ext.id")); // NOLINT(*-exception-baseclass)
+                            if (!Json::handleKey(json, "id", this->m_electroPaymentId, Text::Wcs::length(1, 256), path)) {
+                                throw Failure(std::format(Wcs::c_requiresProperty2, path, L"id")); // NOLINT(*-exception-baseclass)
                             }
-                            Json::handleKey(json, "addInfo", this->m_ePaymentAddInfo, Text::Wcs::maxLength(256), path);
+                            Json::handleKey(json, "addInfo", this->m_electroPaymentAddInfo, Text::Wcs::maxLength(256), path);
                             return true;
                         }
                     );
@@ -1411,10 +1582,13 @@ namespace Kkm {
             subPrintText(details.m_headerText, TextPosition::Pre);
         }
 
-        /** Открытие печатного чека **/
+        /** Открытие чека **/
         subSetOperator(details);
         if (details.m_customerDataIsPresent) {
             subSetCustomer(details);
+        }
+        if (details.m_sellerDataIsPresent) {
+            subSetSeller(details);
         }
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, static_cast<unsigned>(type));
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_ELECTRONICALLY, details.m_electronically); // Открытие электрочека
@@ -1475,13 +1649,13 @@ namespace Kkm {
              * (необязательный реквизит, приказ ФНС России от 26.03.2025 № ЕД-7-20/236@).
              * https://www.nalog.gov.ru/rn71/news/activities_fts/16524721/
              **/
-            if (details.m_paymentType == PaymentType::Electronically && details.m_ePaymentExt) {
+            if (details.m_electroPaymentInfo) {
                 m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Atol::LIBFPTR_PT_ADD_INFO);
                 m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_SUM, details.m_paymentSum);
-                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_PAYMENT_METHOD, details.m_ePaymentMethod);
-                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ID, details.m_ePaymentId);
-                if (!details.m_ePaymentAddInfo.empty()) {
-                    m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ADD_INFO, details.m_ePaymentAddInfo);
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_PAYMENT_METHOD, details.m_electroPaymentMethod);
+                m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ID, details.m_electroPaymentId);
+                if (!details.m_electroPaymentAddInfo.empty()) {
+                    m_kkm.setParam(Atol::LIBFPTR_PARAM_ELECTRONICALLY_ADD_INFO, details.m_electroPaymentAddInfo);
                 }
                 if (m_kkm.payment() < 0) {
                     return result.fail(*this); // throw Failure(*this); // NOLINT(*-exception-baseclass)

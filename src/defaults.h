@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "library/basic.h"
-#include "library/datetime.h"
+#include <lib/basic.h>
+#include <lib/datetime.h>
 
 namespace Basic {
     constexpr size_t c_defaultBufferSize { 2'048 };

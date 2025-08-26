@@ -1,10 +1,10 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
-#include <kkmha_config.h>
-#include "library/basic.h"
-#include <fcntl.h>
-#include <io.h>
+#include <cmake_options.h>
+#include <build_options.h>
+#include <lib/setcou16.h>
+#include <lib/memprof.h>
 #include "defaults.h"
 #include "messages.h"
 #include "log.h"
@@ -25,16 +25,16 @@ std::wstring logLevelLabel(int level) {
     if (level == Log::c_levelNone) {
         return L"none";
     }
-    if (Log::s_levelLabels.contains(static_cast<Log::Level>(level))) {
-        return Text::lowered(Log::s_levelLabels.at(static_cast<Log::Level>(level)));
+    if (Log::Wcs::c_levelLabels.contains(static_cast<Log::Level>(level))) {
+        return Text::lowered(Log::Wcs::c_levelLabels.at(static_cast<Log::Level>(level)));
     }
-    return L"[error]";
+    return Basic::Wcs::c_fallbackErrorMessage;
 }
 
 void usage(std::wostream & stream, const std::filesystem::path & path) {
     stream <<
         L"\n"
-        L"Версия: " << Basic::Wcs::c_version << L"\n"
+        L"Версия: " << BUILD_VERSION << L"\n"
         L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
         L"Команды:\n"
         L"    help                   Вывести справку\n"
@@ -68,14 +68,8 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
 }
 
 int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
-    // ::SetConsoleOutputCP(CP_UTF8);
-    // ::SetConsoleCP(CP_UTF8);
-    // ::setlocale(LC_ALL, ".UTF8");
-    ::_setmode(::_fileno(stdout), _O_U16TEXT);
-    ::_setmode(::_fileno(stderr), _O_U16TEXT);
-
-    ENABLE_MEMORY_PROFILING;
-    MEMORY_LEAK;
+    START_MEMORY_PROFILING;
+    FORCE_MEMORY_LEAK;
 
     bool jsonOut { false };
 
@@ -101,8 +95,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 }
                 std::wcout
                     << L"\n"
-                    L"[BLD] main.version = \"" << Basic::Wcs::c_version << L"\"\n"
-                    L"[BLD] main.buildTimestamp = \"" << Basic::Wcs::c_buildTimestamp << L"\"\n"
+                    L"[BLD] main.version = \"" << BUILD_VERSION << L"\"\n"
+                    L"[BLD] main.buildTimestamp = \"" << BUILD_TIMESTAMP << L"\"\n"
+                    L"[BLD] main.buildType = \"" << BUILD_TYPE << L"\"\n"
                     L"[RTM] main.binaryFile = \"" << Config::s_binaryFile.c_str() << L"\"\n"
                     L"[RTM] main.workDirectory = \"" << Config::s_workDirectory.c_str() << L"\"\n"
                     L"[RTM] main.configDirectory = \"" << Config::s_configDirectory.c_str() << L"\"\n"
@@ -283,11 +278,13 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                     &Kkm::Device::getCashStat,
                     &Kkm::Device::getFndtOfdExchangeStatus,
                     &Kkm::Device::getFndtFnInfo,
+                    &Kkm::Device::getFndtRegistrationInfo,
                     &Kkm::Device::getFndtLastRegistration,
                     &Kkm::Device::getFndtLastReceipt,
                     &Kkm::Device::getFndtLastDocument,
                     &Kkm::Device::getFndtErrors,
-                    &Kkm::Device::getVersion
+                    &Kkm::Device::getFfdVersion,
+                    &Kkm::Device::getFwVersion
                 );
                 std::wcout << Text::convert(json.dump(4));
                 return EXIT_SUCCESS;

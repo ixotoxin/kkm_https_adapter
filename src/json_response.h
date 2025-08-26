@@ -50,13 +50,13 @@ namespace Http {
         }
 
         void render(Asio::StreamBuffer & buffer, Status status) override {
-            assert(s_statusStrings.contains(status));
+            assert(Mbs::c_statusStrings.contains(status));
             assert(m_data.is_object());
             if (!m_data.contains(Mbs::c_successKey) || !m_data[Mbs::c_successKey].is_boolean()) {
                 m_data[Mbs::c_successKey] = status < Status::BadRequest;
             }
             if (!m_data.contains(Mbs::c_messageKey) || !m_data[Mbs::c_messageKey].is_string()) {
-                m_data[Mbs::c_messageKey] = s_statusStrings.at(status);
+                m_data[Mbs::c_messageKey] = Mbs::c_statusStrings.at(status);
             }
             std::string text { m_data.dump() };
             std::ostream output { &buffer };
@@ -64,7 +64,7 @@ namespace Http {
                 << std::format(
                     Mbs::c_responseHeaderTemplate,
                     static_cast<int>(status),
-                    s_statusStrings.at(status),
+                    Mbs::c_statusStrings.at(status),
                     Mbs::c_jsonMimeType,
                     text.size()
                 )

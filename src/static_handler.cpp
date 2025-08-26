@@ -2,7 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "static_handler.h"
-#include "library/utils.h"
+#include <lib/utils.h>
 #include <fstream>
 #include "messages.h"
 #include "solid_response.h"

@@ -20,7 +20,7 @@ namespace System {
                     nullptr
                 );
             if (status) {
-                wchar_t * end { text + wcslen(text) };
+                wchar_t * end { text + std::wcslen(text) };
                 if (end != text) {
                     --end;
                     while (
@@ -36,11 +36,11 @@ namespace System {
                     }
                 }
             } else {
-                freeTextBuffer.cancel();
+                // freeTextBuffer.cancel();
                 text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
             }
         } catch (...) {
-            freeTextBuffer.cancel();
+            // freeTextBuffer.cancel();
             text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
         }
         return text;

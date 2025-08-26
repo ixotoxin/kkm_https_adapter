@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "library/json.h"
+#include <lib/json.h>
 #include <filesystem>
 #include <vector>
 #include <unordered_set>
@@ -53,10 +53,17 @@ namespace Kkm {
         Zone11 = Atol::LIBFPTR_TIME_ZONE_11
     };
 
+    enum class FfdVersion : int {
+        Unknown = Atol::LIBFPTR_FFD_UNKNOWN,
+        V_1_0_5 = Atol::LIBFPTR_FFD_1_0_5,
+        V_1_1 = Atol::LIBFPTR_FFD_1_1,
+        V_1_2 = Atol::LIBFPTR_FFD_1_2
+    };
+
     enum class ShiftState : int {
         Closed = Atol::LIBFPTR_SS_CLOSED,
         Opened = Atol::LIBFPTR_SS_OPENED,
-        Expired = Atol::LIBFPTR_SS_EXPIRED,
+        Expired = Atol::LIBFPTR_SS_EXPIRED
     };
 
     enum class ReceiptType : int {
@@ -68,7 +75,7 @@ namespace Kkm {
         Buy = Atol::LIBFPTR_RT_BUY,
         BuyReturn = Atol::LIBFPTR_RT_BUY_RETURN,
         BuyCorrection = Atol::LIBFPTR_RT_BUY_CORRECTION,
-        BuyReturnCorrection = Atol::LIBFPTR_RT_BUY_RETURN_CORRECTION,
+        BuyReturnCorrection = Atol::LIBFPTR_RT_BUY_RETURN_CORRECTION
     };
 
     enum class DocumentType : int {
@@ -87,7 +94,7 @@ namespace Kkm {
         ReceiptSellReturnCorrection = Atol::LIBFPTR_DT_RECEIPT_SELL_RETURN_CORRECTION,
         ReceiptBuyReturnCorrection = Atol::LIBFPTR_DT_RECEIPT_BUY_RETURN_CORRECTION,
         DocumentService = Atol::LIBFPTR_DT_DOCUMENT_SERVICE,
-        DocumentCopy = Atol::LIBFPTR_DT_DOCUMENT_COPY,
+        DocumentCopy = Atol::LIBFPTR_DT_DOCUMENT_COPY
     };
 
     enum class MeasurementUnit : int {
@@ -185,11 +192,13 @@ namespace Kkm {
             class CashStatResult;
             class FndtOfdExchangeStatusResult;
             class FndtFnInfoResult;
+            class FndtRegistrationInfoResult;
             class FndtLastRegistrationResult;
             class FndtLastReceiptResult;
             class FndtLastDocumentResult;
             class FndtErrorsResult;
-            class VersionResult;
+            class FfdVersionResult;
+            class FwVersionResult;
             class Details;
             class OperatorDetails;
             class CashDetails;
@@ -215,11 +224,13 @@ namespace Kkm {
         void getCashStat(Call::CashStatResult &);
         void getFndtOfdExchangeStatus(Call::FndtOfdExchangeStatusResult &);
         void getFndtFnInfo(Call::FndtFnInfoResult &);
+        void getFndtRegistrationInfo(Call::FndtRegistrationInfoResult &);
         void getFndtLastRegistration(Call::FndtLastRegistrationResult &);
         void getFndtLastReceipt(Call::FndtLastReceiptResult &);
         void getFndtLastDocument(Call::FndtLastDocumentResult &);
         void getFndtErrors(Call::FndtErrorsResult &);
-        void getVersion(Call::VersionResult &);
+        void getFfdVersion(Call::FfdVersionResult &);
+        void getFwVersion(Call::FwVersionResult &);
         void printHello();
         void printDemo(Call::Result &);
         void printNonFiscalDocument(const Call::PrintDetails &, Call::Result &);
@@ -267,6 +278,7 @@ namespace Kkm {
         void subCheckDocumentClosed(Call::Result &);
         void subSetOperator(const Call::OperatorDetails &);
         void subSetCustomer(const Call::ReceiptDetails &);
+        void subSetSeller(const Call::ReceiptDetails &);
         void subRegisterReceipt(ReceiptType, const Call::ReceiptDetails &, Call::Result &);
         void subCashOut(const Call::OperatorDetails &, Call::Result &);
         void subCloseShift(const Call::OperatorDetails &, Call::Result &);
@@ -526,6 +538,51 @@ namespace Kkm {
         bool exportTo(Nln::Json &) override;
     };
 
+    class Device::Call::FndtRegistrationInfoResult : public Result {
+        friend class Device;
+
+        std::wstring m_fnsUrl {};
+        std::wstring m_organizationAddress {};
+        std::wstring m_organizationVATIN {};
+        std::wstring m_organizationName {};
+        std::wstring m_organizationEmail {};
+        std::wstring m_paymentsAddress {};
+        std::wstring m_registrationNumber {};
+        std::wstring m_machineNumber {};
+        std::wstring m_ofdVATIN {};
+        std::wstring m_ofdName {};
+        unsigned int m_taxationTypes {};
+        unsigned int m_agentSign {};
+        FfdVersion m_ffdVersion { FfdVersion::Unknown };
+        bool m_autoModeSign {};
+        bool m_offlineModeSign {};
+        bool m_encryptionSign {};
+        bool m_internetSign {};
+        bool m_serviceSign {};
+        bool m_bsoSign {};
+        bool m_lotterySign {};
+        bool m_gamblingSign {};
+        bool m_exciseSign {};
+        bool m_machineInstallationSign {};
+        bool m_tradeMarkedProducts {};
+        bool m_insuranceActivity {};
+        bool m_pawnShopActivity {};
+        bool m_vending {};
+        bool m_catering {};
+        bool m_wholesale {};
+
+    public:
+        FndtRegistrationInfoResult() = default;
+        FndtRegistrationInfoResult(const FndtRegistrationInfoResult &) = default;
+        FndtRegistrationInfoResult(FndtRegistrationInfoResult &&) = default;
+        ~FndtRegistrationInfoResult() override = default;
+
+        FndtRegistrationInfoResult & operator=(const FndtRegistrationInfoResult &) = default;
+        FndtRegistrationInfoResult & operator=(FndtRegistrationInfoResult &&) = default;
+
+        bool exportTo(Nln::Json &) override;
+    };
+
     class Device::Call::FndtLastRegistrationResult : public Result {
         friend class Device;
 
@@ -610,7 +667,30 @@ namespace Kkm {
         bool exportTo(Nln::Json &) override;
     };
 
-    class Device::Call::VersionResult : public Result {
+    class Device::Call::FfdVersionResult : public Result {
+        friend class Device;
+
+        FfdVersion m_deviceFfdVersion { FfdVersion::Unknown };
+        FfdVersion m_devMaxFfdVersion { FfdVersion::Unknown };
+        FfdVersion m_devMinFfdVersion { FfdVersion::Unknown };
+        FfdVersion m_fnFfdVersion { FfdVersion::Unknown };
+        FfdVersion m_fnMaxFfdVersion { FfdVersion::Unknown };
+        FfdVersion m_ffdVersion { FfdVersion::Unknown };
+        // unsigned int m_kktVersion {};
+
+    public:
+        FfdVersionResult() = default;
+        FfdVersionResult(const FfdVersionResult &) = default;
+        FfdVersionResult(FfdVersionResult &&) = default;
+        ~FfdVersionResult() override = default;
+
+        FfdVersionResult & operator=(const FfdVersionResult &) = default;
+        FfdVersionResult & operator=(FfdVersionResult &&) = default;
+
+        bool exportTo(Nln::Json &) override;
+    };
+
+    class Device::Call::FwVersionResult : public Result {
         friend class Device;
 
         std::wstring m_bootVersion {};
@@ -621,13 +701,13 @@ namespace Kkm {
         std::wstring m_templatesVersion {};
 
     public:
-        VersionResult() = default;
-        VersionResult(const VersionResult &) = default;
-        VersionResult(VersionResult &&) = default;
-        ~VersionResult() override = default;
+        FwVersionResult() = default;
+        FwVersionResult(const FwVersionResult &) = default;
+        FwVersionResult(FwVersionResult &&) = default;
+        ~FwVersionResult() override = default;
 
-        VersionResult & operator=(const VersionResult &) = default;
-        VersionResult & operator=(VersionResult &&) = default;
+        FwVersionResult & operator=(const FwVersionResult &) = default;
+        FwVersionResult & operator=(FwVersionResult &&) = default;
 
         bool exportTo(Nln::Json &) override;
     };
@@ -729,6 +809,7 @@ namespace Kkm {
         PrintableText m_text {};
         PrintableText m_headerText {};
         PrintableText m_footerText {};
+        std::wstring m_sellerEmail {};
         std::wstring m_customerAccount {};
         std::wstring m_customerContact {}; // Телефон или электронный адрес покупателя
         std::wstring m_customerName {}; // Покупатель (клиент)
@@ -738,14 +819,15 @@ namespace Kkm {
         std::wstring m_customerDocumentCode {}; // Код вида документа, удостоверяющего личность [строка формата "ЦЦ"]
         std::wstring m_customerDocumentData {}; // Данные документа, удостоверяющего личность
         std::wstring m_customerAddress {}; // Адрес покупателя (клиента)
-        std::wstring m_ePaymentId {};
-        std::wstring m_ePaymentAddInfo {};
+        std::wstring m_electroPaymentId {};
+        std::wstring m_electroPaymentAddInfo {};
         std::vector<ItemDetails> m_items;
         double m_paymentSum { 0 };
         PaymentType m_paymentType { PaymentType::Cash };
-        int m_ePaymentMethod { 0 };
+        int m_electroPaymentMethod { 0 };
         bool m_customerDataIsPresent { false };
-        bool m_ePaymentExt { false };
+        bool m_sellerDataIsPresent { false };
+        bool m_electroPaymentInfo { false };
 
     public:
         ReceiptDetails() = default;
@@ -808,180 +890,225 @@ namespace Kkm {
         data.exportTo(result);
     }
 
-    inline const std::array<std::wstring, 11> s_allowedBaudRate {
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_9600),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_19200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_38400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_57600),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_115200),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_230400),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_460800),
-        std::to_wstring(Atol::LIBFPTR_PORT_BR_921600)
-    };
+    namespace Wcs {
+        inline const std::array<std::wstring, 11> c_allowedBaudRate {
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_9600),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_19200),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_38400),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_57600),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_115200),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_230400),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_460800),
+            std::to_wstring(Atol::LIBFPTR_PORT_BR_921600)
+        };
+    }
 
-    inline const std::unordered_map<std::string, TimeZone> s_timeZoneMap {
-        { "device", TimeZone::Device },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Device)), TimeZone::Device },
-        { "+2", TimeZone::Zone1 },
-        { "utc+2", TimeZone::Zone1 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone1)), TimeZone::Zone1 },
-        { "+3", TimeZone::Zone2 },
-        { "utc+3", TimeZone::Zone2 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone2)), TimeZone::Zone2 },
-        { "+4", TimeZone::Zone3 },
-        { "utc+4", TimeZone::Zone3 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone3)), TimeZone::Zone3 },
-        { "+5", TimeZone::Zone4 },
-        { "utc+5", TimeZone::Zone4 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone4)), TimeZone::Zone4 },
-        { "+6", TimeZone::Zone5 },
-        { "utc+6", TimeZone::Zone5 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone5)), TimeZone::Zone5 },
-        { "+7", TimeZone::Zone6 },
-        { "utc+7", TimeZone::Zone6 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone6)), TimeZone::Zone6 },
-        { "+8", TimeZone::Zone7 },
-        { "utc+8", TimeZone::Zone7 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone7)), TimeZone::Zone7 },
-        { "+9", TimeZone::Zone8 },
-        { "utc+9", TimeZone::Zone8 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone8)), TimeZone::Zone8 },
-        { "+10", TimeZone::Zone9 },
-        { "utc+10", TimeZone::Zone9 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone9)), TimeZone::Zone9 },
-        { "+11", TimeZone::Zone10 },
-        { "utc+11", TimeZone::Zone10 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone10)), TimeZone::Zone10 },
-        { "+12", TimeZone::Zone11 },
-        { "utc+12", TimeZone::Zone11 },
-        { "tz" + std::to_string(static_cast<int>(TimeZone::Zone11)), TimeZone::Zone11 }
-    };
+    namespace Mbs {
+        inline const std::unordered_map<unsigned int, std::string_view> c_models {
+            { Atol::LIBFPTR_MODEL_ALLIANCE_20F, "АЛЬЯНС 20Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_1F, "АТОЛ 1Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_2F, "АТОЛ 2Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_11F, "АТОЛ 11Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_15F, "АТОЛ 15Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_20F, "АТОЛ 20Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_22F, "АТОЛ 22Ф (АТОЛ FPrint-22ПТК)" },
+            { Atol::LIBFPTR_MODEL_ATOL_22V2F, "АТОЛ 22 v2 Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_25F, "АТОЛ 25Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_27F, "АТОЛ 27Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_27_FP7_F, "АТОЛ 27 FP7 Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_30F, "АТОЛ 30Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_35F, "АТОЛ 35Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_42FA, "АТОЛ 42ФА" },
+            { Atol::LIBFPTR_MODEL_ATOL_42FS, "АТОЛ 42ФС" },
+            { Atol::LIBFPTR_MODEL_ATOL_47FA, "АТОЛ 47ФА" },
+            { Atol::LIBFPTR_MODEL_ATOL_50F, "АТОЛ 50Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_52F, "АТОЛ 52Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_55F, "АТОЛ 55Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_55V2F, "АТОЛ 55 v2 Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_60F, "АТОЛ 60Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_77F, "АТОЛ 77Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_90F, "АТОЛ 90Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_91F, "АТОЛ 91Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_92F, "АТОЛ 92Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_PT_5F, "АТОЛ PT-5Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_SIGMA_10, "АТОЛ Sigma 10" },
+            { Atol::LIBFPTR_MODEL_ATOL_SIGMA_7F, "АТОЛ Sigma 7Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_SIGMA_8F, "АТОЛ Sigma 8Ф" },
+            { Atol::LIBFPTR_MODEL_ATOL_STB_6F, "АТОЛ СТБ 6Ф" },
+            { Atol::LIBFPTR_MODEL_KAZNACHEY_FA, "Казначей ФА" }
+        };
 
-    inline const std::unordered_map<ShiftState, std::wstring_view> s_shiftStateLabels {
-        { ShiftState::Closed, Wcs::c_closedShift },
-        { ShiftState::Opened, Wcs::c_openedShift },
-        { ShiftState::Expired, Wcs::c_expiredShift },
-    };
+        inline const std::unordered_map<std::string, TimeZone> c_timeZoneMap {
+            { "device", TimeZone::Device },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Device)), TimeZone::Device },
+            { "+2", TimeZone::Zone1 },
+            { "utc+2", TimeZone::Zone1 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone1)), TimeZone::Zone1 },
+            { "+3", TimeZone::Zone2 },
+            { "utc+3", TimeZone::Zone2 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone2)), TimeZone::Zone2 },
+            { "+4", TimeZone::Zone3 },
+            { "utc+4", TimeZone::Zone3 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone3)), TimeZone::Zone3 },
+            { "+5", TimeZone::Zone4 },
+            { "utc+5", TimeZone::Zone4 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone4)), TimeZone::Zone4 },
+            { "+6", TimeZone::Zone5 },
+            { "utc+6", TimeZone::Zone5 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone5)), TimeZone::Zone5 },
+            { "+7", TimeZone::Zone6 },
+            { "utc+7", TimeZone::Zone6 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone6)), TimeZone::Zone6 },
+            { "+8", TimeZone::Zone7 },
+            { "utc+8", TimeZone::Zone7 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone7)), TimeZone::Zone7 },
+            { "+9", TimeZone::Zone8 },
+            { "utc+9", TimeZone::Zone8 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone8)), TimeZone::Zone8 },
+            { "+10", TimeZone::Zone9 },
+            { "utc+10", TimeZone::Zone9 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone9)), TimeZone::Zone9 },
+            { "+11", TimeZone::Zone10 },
+            { "utc+11", TimeZone::Zone10 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone10)), TimeZone::Zone10 },
+            { "+12", TimeZone::Zone11 },
+            { "utc+12", TimeZone::Zone11 },
+            { "tz" + std::to_string(static_cast<int>(TimeZone::Zone11)), TimeZone::Zone11 }
+        };
 
-    inline const std::unordered_map<ReceiptType, std::wstring_view> s_receiptTypeLabels {
-        { ReceiptType::Closed, Wcs::c_closedReceipt },
-        { ReceiptType::Sell, Wcs::c_sellReceipt },
-        { ReceiptType::SellReturn, Wcs::c_sellReturnReceipt },
-        { ReceiptType::SellCorrection, Wcs::c_sellCorrectionReceipt },
-        { ReceiptType::SellReturnCorrection, Wcs::c_sellReturnCorrectionReceipt },
-        { ReceiptType::Buy, Wcs::c_buyReceipt },
-        { ReceiptType::BuyReturn, Wcs::c_buyReturnReceipt },
-        { ReceiptType::BuyCorrection, Wcs::c_buyCorrectionReceipt },
-        { ReceiptType::BuyReturnCorrection, Wcs::c_buyReturnCorrectionReceipt },
-    };
+        inline const std::unordered_map<FfdVersion, std::string_view> c_ffdVersions {
+            { FfdVersion::Unknown, "[неизвестная версия]" },
+            { FfdVersion::V_1_0_5, "1.0.5" },
+            { FfdVersion::V_1_1, "1.1" },
+            { FfdVersion::V_1_2, "1.2" }
+        };
 
-    inline const std::unordered_map<DocumentType, std::wstring_view> s_documentTypeLabels {
-        { DocumentType::Closed, Wcs::c_closedDocument },
-        { DocumentType::ReceiptSell, Wcs::c_sellReceipt },
-        { DocumentType::ReceiptSellReturn, Wcs::c_sellReturnReceipt },
-        { DocumentType::ReceiptSellCorrection, Wcs::c_sellCorrectionReceipt },
-        { DocumentType::ReceiptSellReturnCorrection, Wcs::c_sellReturnCorrectionReceipt },
-        { DocumentType::ReceiptBuy, Wcs::c_buyReceipt },
-        { DocumentType::ReceiptBuyReturn, Wcs::c_buyReturnReceipt },
-        { DocumentType::ReceiptBuyCorrection, Wcs::c_buyCorrectionReceipt },
-        { DocumentType::ReceiptBuyReturnCorrection, Wcs::c_buyReturnCorrectionReceipt },
-        { DocumentType::OpenShift, Wcs::c_openShiftDocument },
-        { DocumentType::CloseShift, Wcs::c_closeShiftDocument },
-        { DocumentType::Registration, Wcs::c_registrationDocument },
-        { DocumentType::CloseArchive, Wcs::c_closeArchiveDocument },
-        { DocumentType::OfdExchangeStatus, Wcs::c_ofdExchangeStatusDocument },
-        { DocumentType::DocumentService, Wcs::c_serviceDocument },
-        { DocumentType::DocumentCopy, Wcs::c_documentCopy },
-    };
+        inline const std::unordered_map<ShiftState, std::string_view> c_shiftStateLabels {
+            { ShiftState::Closed, Mbs::c_closedShift },
+            { ShiftState::Opened, Mbs::c_openedShift },
+            { ShiftState::Expired, Mbs::c_expiredShift },
+        };
 
-    inline const std::unordered_map<std::string, MeasurementUnit> s_measurementUnitMap {
-        { "piece", MeasurementUnit::Piece },
-        { std::to_string(static_cast<int>(MeasurementUnit::Piece)), MeasurementUnit::Piece },
-        { "gram", MeasurementUnit::Gram },
-        { std::to_string(static_cast<int>(MeasurementUnit::Gram)), MeasurementUnit::Gram },
-        { "kilogram", MeasurementUnit::Kilogram },
-        { std::to_string(static_cast<int>(MeasurementUnit::Kilogram)), MeasurementUnit::Kilogram },
-        { "ton", MeasurementUnit::Ton },
-        { std::to_string(static_cast<int>(MeasurementUnit::Ton)), MeasurementUnit::Ton },
-        { "centimeter", MeasurementUnit::Centimeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::Centimeter)), MeasurementUnit::Centimeter },
-        { "decimeter", MeasurementUnit::Decimeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::Decimeter)), MeasurementUnit::Decimeter },
-        { "meter", MeasurementUnit::Meter },
-        { std::to_string(static_cast<int>(MeasurementUnit::Meter)), MeasurementUnit::Meter },
-        { "squarecentimeter", MeasurementUnit::SquareCentimeter },
-        { "square_centimeter", MeasurementUnit::SquareCentimeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::SquareCentimeter)), MeasurementUnit::SquareCentimeter },
-        { "squaredecimeter", MeasurementUnit::SquareDecimeter },
-        { "square_decimeter", MeasurementUnit::SquareDecimeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::SquareDecimeter)), MeasurementUnit::SquareDecimeter },
-        { "squaremeter", MeasurementUnit::SquareMeter },
-        { "square_meter", MeasurementUnit::SquareMeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::SquareMeter)), MeasurementUnit::SquareMeter },
-        { "milliliter", MeasurementUnit::Milliliter },
-        { std::to_string(static_cast<int>(MeasurementUnit::Milliliter)), MeasurementUnit::Milliliter },
-        { "liter", MeasurementUnit::Liter },
-        { std::to_string(static_cast<int>(MeasurementUnit::Liter)), MeasurementUnit::Liter },
-        { "cubicmeter", MeasurementUnit::CubicMeter },
-        { "cubic_meter", MeasurementUnit::CubicMeter },
-        { std::to_string(static_cast<int>(MeasurementUnit::CubicMeter)), MeasurementUnit::CubicMeter },
-        { "kilowatthour", MeasurementUnit::KilowattHour },
-        { "kilowatt_hour", MeasurementUnit::KilowattHour },
-        { std::to_string(static_cast<int>(MeasurementUnit::KilowattHour)), MeasurementUnit::KilowattHour },
-        { "gkal", MeasurementUnit::Gkal },
-        { std::to_string(static_cast<int>(MeasurementUnit::Gkal)), MeasurementUnit::Gkal },
-        { "day", MeasurementUnit::Day },
-        { std::to_string(static_cast<int>(MeasurementUnit::Day)), MeasurementUnit::Day },
-        { "hour", MeasurementUnit::Hour },
-        { std::to_string(static_cast<int>(MeasurementUnit::Hour)), MeasurementUnit::Hour },
-        { "minute", MeasurementUnit::Minute },
-        { std::to_string(static_cast<int>(MeasurementUnit::Minute)), MeasurementUnit::Minute },
-        { "second", MeasurementUnit::Second },
-        { std::to_string(static_cast<int>(MeasurementUnit::Second)), MeasurementUnit::Second },
-        { "kilobyte", MeasurementUnit::Kilobyte },
-        { std::to_string(static_cast<int>(MeasurementUnit::Kilobyte)), MeasurementUnit::Kilobyte },
-        { "megabyte", MeasurementUnit::Megabyte },
-        { std::to_string(static_cast<int>(MeasurementUnit::Megabyte)), MeasurementUnit::Megabyte },
-        { "gigabyte", MeasurementUnit::Gigabyte },
-        { std::to_string(static_cast<int>(MeasurementUnit::Gigabyte)), MeasurementUnit::Gigabyte },
-        { "terabyte", MeasurementUnit::Terabyte },
-        { std::to_string(static_cast<int>(MeasurementUnit::Terabyte)), MeasurementUnit::Terabyte },
-        { "other", MeasurementUnit::Other },
-        { std::to_string(static_cast<int>(MeasurementUnit::Other)), MeasurementUnit::Other },
-    };
+        inline const std::unordered_map<ReceiptType, std::string_view> c_receiptTypeLabels {
+            { ReceiptType::Closed, Mbs::c_closedReceipt },
+            { ReceiptType::Sell, Mbs::c_sellReceipt },
+            { ReceiptType::SellReturn, Mbs::c_sellReturnReceipt },
+            { ReceiptType::SellCorrection, Mbs::c_sellCorrectionReceipt },
+            { ReceiptType::SellReturnCorrection, Mbs::c_sellReturnCorrectionReceipt },
+            { ReceiptType::Buy, Mbs::c_buyReceipt },
+            { ReceiptType::BuyReturn, Mbs::c_buyReturnReceipt },
+            { ReceiptType::BuyCorrection, Mbs::c_buyCorrectionReceipt },
+            { ReceiptType::BuyReturnCorrection, Mbs::c_buyReturnCorrectionReceipt },
+        };
 
-    inline const std::unordered_map<std::string, Tax> s_taxCastMap {
-        { "no", Tax::No },
-        { std::to_string(static_cast<int>(Tax::No)), Tax::No },
-        { "vat0", Tax::Vat0 },
-        { std::to_string(static_cast<int>(Tax::Vat0)), Tax::Vat0 },
-        { "vat5", Tax::Vat5 },
-        { std::to_string(static_cast<int>(Tax::Vat5)), Tax::Vat5 },
-        { "vat105", Tax::Vat105 },
-        { std::to_string(static_cast<int>(Tax::Vat105)), Tax::Vat105 },
-        { "vat7", Tax::Vat7 },
-        { std::to_string(static_cast<int>(Tax::Vat7)), Tax::Vat7 },
-        { "vat107", Tax::Vat107 },
-        { std::to_string(static_cast<int>(Tax::Vat107)), Tax::Vat107 },
-        { "vat10", Tax::Vat10 },
-        { std::to_string(static_cast<int>(Tax::Vat10)), Tax::Vat10 },
-        { "vat110", Tax::Vat110 },
-        { std::to_string(static_cast<int>(Tax::Vat110)), Tax::Vat110 },
-        { "vat20", Tax::Vat20 },
-        { std::to_string(static_cast<int>(Tax::Vat20)), Tax::Vat20 },
-        { "vat120", Tax::Vat120 },
-        { std::to_string(static_cast<int>(Tax::Vat120)), Tax::Vat120 }
-    };
+        inline const std::unordered_map<DocumentType, std::string_view> c_documentTypeLabels {
+            { DocumentType::Closed, Mbs::c_closedDocument },
+            { DocumentType::ReceiptSell, Mbs::c_sellReceipt },
+            { DocumentType::ReceiptSellReturn, Mbs::c_sellReturnReceipt },
+            { DocumentType::ReceiptSellCorrection, Mbs::c_sellCorrectionReceipt },
+            { DocumentType::ReceiptSellReturnCorrection, Mbs::c_sellReturnCorrectionReceipt },
+            { DocumentType::ReceiptBuy, Mbs::c_buyReceipt },
+            { DocumentType::ReceiptBuyReturn, Mbs::c_buyReturnReceipt },
+            { DocumentType::ReceiptBuyCorrection, Mbs::c_buyCorrectionReceipt },
+            { DocumentType::ReceiptBuyReturnCorrection, Mbs::c_buyReturnCorrectionReceipt },
+            { DocumentType::OpenShift, Mbs::c_openShiftDocument },
+            { DocumentType::CloseShift, Mbs::c_closeShiftDocument },
+            { DocumentType::Registration, Mbs::c_registrationDocument },
+            { DocumentType::CloseArchive, Mbs::c_closeArchiveDocument },
+            { DocumentType::OfdExchangeStatus, Mbs::c_ofdExchangeStatusDocument },
+            { DocumentType::DocumentService, Mbs::c_serviceDocument },
+            { DocumentType::DocumentCopy, Mbs::c_documentCopy },
+        };
 
-    inline const std::unordered_map<std::string, PaymentType> s_paymentTypeCastMap {
-        { "cash", PaymentType::Cash },
-        { std::to_string(static_cast<int>(PaymentType::Cash)), PaymentType::Cash },
-        { "electronically", PaymentType::Electronically },
-        { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically }
-    };
+        inline const std::unordered_map<std::string, MeasurementUnit> c_measurementUnitMap {
+            { "piece", MeasurementUnit::Piece },
+            { std::to_string(static_cast<int>(MeasurementUnit::Piece)), MeasurementUnit::Piece },
+            { "gram", MeasurementUnit::Gram },
+            { std::to_string(static_cast<int>(MeasurementUnit::Gram)), MeasurementUnit::Gram },
+            { "kilogram", MeasurementUnit::Kilogram },
+            { std::to_string(static_cast<int>(MeasurementUnit::Kilogram)), MeasurementUnit::Kilogram },
+            { "ton", MeasurementUnit::Ton },
+            { std::to_string(static_cast<int>(MeasurementUnit::Ton)), MeasurementUnit::Ton },
+            { "centimeter", MeasurementUnit::Centimeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::Centimeter)), MeasurementUnit::Centimeter },
+            { "decimeter", MeasurementUnit::Decimeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::Decimeter)), MeasurementUnit::Decimeter },
+            { "meter", MeasurementUnit::Meter },
+            { std::to_string(static_cast<int>(MeasurementUnit::Meter)), MeasurementUnit::Meter },
+            { "squarecentimeter", MeasurementUnit::SquareCentimeter },
+            { "square_centimeter", MeasurementUnit::SquareCentimeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::SquareCentimeter)), MeasurementUnit::SquareCentimeter },
+            { "squaredecimeter", MeasurementUnit::SquareDecimeter },
+            { "square_decimeter", MeasurementUnit::SquareDecimeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::SquareDecimeter)), MeasurementUnit::SquareDecimeter },
+            { "squaremeter", MeasurementUnit::SquareMeter },
+            { "square_meter", MeasurementUnit::SquareMeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::SquareMeter)), MeasurementUnit::SquareMeter },
+            { "milliliter", MeasurementUnit::Milliliter },
+            { std::to_string(static_cast<int>(MeasurementUnit::Milliliter)), MeasurementUnit::Milliliter },
+            { "liter", MeasurementUnit::Liter },
+            { std::to_string(static_cast<int>(MeasurementUnit::Liter)), MeasurementUnit::Liter },
+            { "cubicmeter", MeasurementUnit::CubicMeter },
+            { "cubic_meter", MeasurementUnit::CubicMeter },
+            { std::to_string(static_cast<int>(MeasurementUnit::CubicMeter)), MeasurementUnit::CubicMeter },
+            { "kilowatthour", MeasurementUnit::KilowattHour },
+            { "kilowatt_hour", MeasurementUnit::KilowattHour },
+            { std::to_string(static_cast<int>(MeasurementUnit::KilowattHour)), MeasurementUnit::KilowattHour },
+            { "gkal", MeasurementUnit::Gkal },
+            { std::to_string(static_cast<int>(MeasurementUnit::Gkal)), MeasurementUnit::Gkal },
+            { "day", MeasurementUnit::Day },
+            { std::to_string(static_cast<int>(MeasurementUnit::Day)), MeasurementUnit::Day },
+            { "hour", MeasurementUnit::Hour },
+            { std::to_string(static_cast<int>(MeasurementUnit::Hour)), MeasurementUnit::Hour },
+            { "minute", MeasurementUnit::Minute },
+            { std::to_string(static_cast<int>(MeasurementUnit::Minute)), MeasurementUnit::Minute },
+            { "second", MeasurementUnit::Second },
+            { std::to_string(static_cast<int>(MeasurementUnit::Second)), MeasurementUnit::Second },
+            { "kilobyte", MeasurementUnit::Kilobyte },
+            { std::to_string(static_cast<int>(MeasurementUnit::Kilobyte)), MeasurementUnit::Kilobyte },
+            { "megabyte", MeasurementUnit::Megabyte },
+            { std::to_string(static_cast<int>(MeasurementUnit::Megabyte)), MeasurementUnit::Megabyte },
+            { "gigabyte", MeasurementUnit::Gigabyte },
+            { std::to_string(static_cast<int>(MeasurementUnit::Gigabyte)), MeasurementUnit::Gigabyte },
+            { "terabyte", MeasurementUnit::Terabyte },
+            { std::to_string(static_cast<int>(MeasurementUnit::Terabyte)), MeasurementUnit::Terabyte },
+            { "other", MeasurementUnit::Other },
+            { std::to_string(static_cast<int>(MeasurementUnit::Other)), MeasurementUnit::Other },
+        };
+
+        inline const std::unordered_map<std::string, Tax> c_taxCastMap {
+            { "no", Tax::No },
+            { std::to_string(static_cast<int>(Tax::No)), Tax::No },
+            { "vat0", Tax::Vat0 },
+            { std::to_string(static_cast<int>(Tax::Vat0)), Tax::Vat0 },
+            { "vat5", Tax::Vat5 },
+            { std::to_string(static_cast<int>(Tax::Vat5)), Tax::Vat5 },
+            { "vat105", Tax::Vat105 },
+            { std::to_string(static_cast<int>(Tax::Vat105)), Tax::Vat105 },
+            { "vat7", Tax::Vat7 },
+            { std::to_string(static_cast<int>(Tax::Vat7)), Tax::Vat7 },
+            { "vat107", Tax::Vat107 },
+            { std::to_string(static_cast<int>(Tax::Vat107)), Tax::Vat107 },
+            { "vat10", Tax::Vat10 },
+            { std::to_string(static_cast<int>(Tax::Vat10)), Tax::Vat10 },
+            { "vat110", Tax::Vat110 },
+            { std::to_string(static_cast<int>(Tax::Vat110)), Tax::Vat110 },
+            { "vat20", Tax::Vat20 },
+            { std::to_string(static_cast<int>(Tax::Vat20)), Tax::Vat20 },
+            { "vat120", Tax::Vat120 },
+            { std::to_string(static_cast<int>(Tax::Vat120)), Tax::Vat120 }
+        };
+
+        inline const std::unordered_map<std::string, PaymentType> c_paymentTypeCastMap {
+            { "cash", PaymentType::Cash },
+            { std::to_string(static_cast<int>(PaymentType::Cash)), PaymentType::Cash },
+            { "electronically", PaymentType::Electronically },
+            { std::to_string(static_cast<int>(PaymentType::Electronically)), PaymentType::Electronically }
+        };
+    }
 
     inline std::wstring s_dbDirectory { c_defDbDirectory };
     inline std::wstring s_defaultBaudRate { c_defBaudRate };

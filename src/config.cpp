@@ -2,8 +2,8 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "config.h"
-#include "library/utils.h"
-#include "library/json.h"
+#include <lib/utils.h>
+#include <lib/json.h>
 #include <fstream>
 #include "log.h"
 #include "kkm.h"
@@ -76,7 +76,7 @@ namespace Config {
                         Json::handleKey(
                             json, "console",
                             [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                                Json::handleKey(json, "level", Log::Console::s_level, Log::s_levelCastMap, path);
+                                Json::handleKey(json, "level", Log::Console::s_level, Log::Wcs::c_levelCastMap, path);
                                 Json::handleKey(json, "outputTimestamp", Log::Console::s_outputTimestamp, path);
                                 Json::handleKey(json, "outputLevel", Log::Console::s_outputLevel, path);
                                 return true;
@@ -86,7 +86,7 @@ namespace Config {
                         Json::handleKey(
                             json, "file",
                             [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                                Json::handleKey(json, "level", Log::File::s_level, Log::s_levelCastMap, path);
+                                Json::handleKey(json, "level", Log::File::s_level, Log::Wcs::c_levelCastMap, path);
                                 Json::handleKey(json, "directory", Log::File::s_directory, Text::Wcs::noEmpty(), path);
                                 return true;
                             },
@@ -98,7 +98,7 @@ namespace Config {
                                 Json::handleKey(
                                     json, "level",
                                     Log::EventLog::s_level,
-                                    Log::s_levelCastMap, Numeric::min(Log::c_levelInfo),
+                                    Log::Wcs::c_levelCastMap, Numeric::min(Log::c_levelInfo),
                                     path
                                 );
                                 return true;
@@ -143,12 +143,12 @@ namespace Config {
                         Json::handleKey(json, "secret", Http::s_secret, path);
                         Json::handleKey(json, "loopbackWithoutSecret", Http::s_loopbackWithoutSecret, path);
                         Json::handleKey(json, "enableStatic", Http::s_enableStatic, path);
-                        if (Http::s_enableStatic) {
+                        // if (Http::s_enableStatic) {
                             Json::handleKey(json, "staticDirectory", Http::s_staticDirectory, path);
                             Json::handleKey(json, "indexFile", Http::s_indexFile, Http::filterFileName, path);
                             Json::handleKey(json, "mimeMap", Http::s_mimeMapFile, Text::Wcs::noEmpty(), path);
                             Json::handleKey(json, "enableUnknownType", Http::s_enableUnknownType, path);
-                        }
+                        // }
                         return true;
                     }
                 );
@@ -156,17 +156,17 @@ namespace Config {
                     json, "kkm",
                     [] (const Nln::Json & json, const std::wstring & path) -> bool {
                         Json::handleKey(json, "dbDirectory", Kkm::s_dbDirectory, Text::Wcs::trim());
-                        Json::handleKey(json, "defaultBaudRate", Kkm::s_defaultBaudRate, Kkm::s_allowedBaudRate, path);
-                        Json::handleKey(
-                            json, "timeZone",
-                            Kkm::s_timeZone, Kkm::s_timeZoneMap,
-                            [] (auto value) { Kkm::s_timeZoneConfigured = true; return value; },
-                            path
-                        );
+                        Json::handleKey(json, "defaultBaudRate", Kkm::s_defaultBaudRate, Kkm::Wcs::c_allowedBaudRate, path);
                         Json::handleKey(
                             json, "defaultLineLength",
                             Kkm::s_defaultLineLength,
                             Numeric::between(Kkm::c_minLineLength, Kkm::c_maxLineLength),
+                            path
+                        );
+                        Json::handleKey(
+                            json, "timeZone",
+                            Kkm::s_timeZone, Kkm::Mbs::c_timeZoneMap,
+                            [] (auto value) { Kkm::s_timeZoneConfigured = true; return value; },
                             path
                         );
                         Json::handleKey(
