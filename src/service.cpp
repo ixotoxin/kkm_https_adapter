@@ -2,8 +2,8 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "service.h"
-#include "library/utils.h"
-#include "library/except.h"
+#include <lib/utils.h>
+#include <lib/except.h>
 #include <filesystem>
 #include <optional>
 #include <winsvc.h>

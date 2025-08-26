@@ -1,3 +1,3 @@
 @ECHO OFF
 @REM TODO: Реализовать компиляцию зависимостей clang'ом
-CALL "%~dp0..\_msvc\install_deps.cmd"
+CALL "%~dp0..\_msvc\install_static_deps.cmd"

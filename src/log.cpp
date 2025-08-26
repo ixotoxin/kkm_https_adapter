@@ -2,7 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "log.h"
-#include "library/datetime.h"
+#include <lib/datetime.h>
 #include <cassert>
 #include <fstream>
 #include <filesystem>
@@ -16,14 +16,14 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
+            assert(Wcs::c_levelLabels.contains(level));
             assert(ready(level));
-
             std::wostream & output { level >= Level::Warning ? std::wcerr : std::wcout };
             if (s_outputTimestamp) {
                 output << DateTime::iso << L": ";
             }
             if (s_outputLevel) {
-                output << s_levelLabels.at(level) << L": ";
+                output << Wcs::c_levelLabels.at(level) << L": ";
             }
             output << message << std::endl;
         } catch (...) {
@@ -86,15 +86,16 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring_view message) noexcept try {
+            assert(Wcs::c_levelLabels.contains(level));
             assert(ready(level));
-            s_file << DateTime::iso << L": " << s_levelLabels.at(level) << L": " << message << std::endl;
+            s_file << DateTime::iso << L": " << Wcs::c_levelLabels.at(level) << L": " << message << std::endl;
         } catch (...) {
             std::wclog << Wcs::c_loggingError << std::endl;
         }
     }
 
     namespace EventLog {
-        static const std::unordered_map<Level, ::WORD> s_types {
+        static const std::unordered_map<Level, ::WORD> c_types {
             { Level::Debug, static_cast<::WORD>(EVENTLOG_INFORMATION_TYPE) },
             { Level::Info, static_cast<::WORD>(EVENTLOG_INFORMATION_TYPE) },
             { Level::Warning, static_cast<::WORD>(EVENTLOG_WARNING_TYPE) },
@@ -129,6 +130,7 @@ namespace Log {
 
         [[maybe_unused]]
         void write(Level level, const std::wstring & message) noexcept try {
+            assert(c_types.contains(level));
             assert(ready(level));
 
             const wchar_t * strings[2] {
@@ -138,7 +140,7 @@ namespace Log {
 
             ::ReportEventW(
                 s_sourceHandle,     // Event log handle
-                s_types.at(level),  // Event type
+                c_types.at(level),  // Event type
                 c_eventCategory,    // Event category
                 c_eventId,          // Event identifier
                 nullptr,            // No security identifier

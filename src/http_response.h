@@ -35,10 +35,10 @@ namespace Http {
             if (m_data.index() == 2) {
                 std::get<2>(m_data)->render(buffer, m_status);
             } else {
-                assert(s_statusStrings.contains(m_status));
+                assert(Mbs::c_statusStrings.contains(m_status));
                 Nln::Json json({
                     { Mbs::c_successKey, m_status < Status::BadRequest },
-                    { Mbs::c_messageKey, m_data.index() == 1 ? std::get<1>(m_data) : s_statusStrings.at(m_status) }
+                    { Mbs::c_messageKey, m_data.index() == 1 ? std::get<1>(m_data) : Mbs::c_statusStrings.at(m_status) }
                 }, false, Nln::EmptyJsonObject);
                 std::string text { json.dump() };
                 std::ostream output { &buffer };
@@ -46,7 +46,7 @@ namespace Http {
                     << std::format(
                         Mbs::c_responseHeaderTemplate,
                         static_cast<int>(m_status),
-                        s_statusStrings.at(m_status),
+                        Mbs::c_statusStrings.at(m_status),
                         Mbs::c_jsonMimeType,
                         text.size()
                     )

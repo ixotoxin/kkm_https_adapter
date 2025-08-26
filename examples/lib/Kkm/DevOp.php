@@ -10,6 +10,7 @@ defined('KKMHA_EXAMPLES') or die('No direct script access.');
 
 enum DevOp
 {
+    case BaseStatus;
     case Status;
     case FullStatus;
     case PrintDemo;

@@ -21,6 +21,7 @@ class Device extends Performer
     public function prepare(DevOp $operation): \Kkm\DeviceOperation
     {
         return match ($operation) {
+            DevOp::BaseStatus => new \Kkm\Operations\BaseStatus($this),
             DevOp::Status => new \Kkm\Operations\Status($this),
             DevOp::FullStatus => new \Kkm\Operations\FullStatus($this),
             DevOp::PrintDemo => new \Kkm\Operations\PrintDemo($this),
@@ -40,6 +41,11 @@ class Device extends Performer
             DevOp::ReportX => new \Kkm\Operations\ReportX($this),
             DevOp::ResetState => new \Kkm\Operations\ResetState($this),
         };
+    }
+
+    public function baseStatus(): \Kkm\Operations\BaseStatus
+    {
+        return new \Kkm\Operations\BaseStatus($this);
     }
 
     public function status(): \Kkm\Operations\Status

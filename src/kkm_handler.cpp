@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
+#include <cmake_options.h>
+#include <lib/memprof.h>
 #include "kkm_handler.h"
 #include "messages.h"
 #include "kkm.h"
@@ -199,13 +201,13 @@ namespace Kkm {
     }
 
     void baseStatus(Payload & payload) {
-        MEMORY_LEAK;
+        FORCE_MEMORY_LEAK;
         callMethod<Call::StatusResult>(&Device::getStatus, payload);
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;
     }
 
     void status(Payload & payload) {
-        MEMORY_LEAK;
+        FORCE_MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Status::BadRequest, Mbs::c_badRequest);
         }
@@ -229,7 +231,7 @@ namespace Kkm {
     }
 
     void fullStatus(Payload & payload) {
-        MEMORY_LEAK;
+        FORCE_MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Status::BadRequest, Mbs::c_badRequest);
         }
@@ -245,11 +247,13 @@ namespace Kkm {
                 &Device::getCashStat,
                 &Device::getFndtOfdExchangeStatus,
                 &Device::getFndtFnInfo,
+                &Device::getFndtRegistrationInfo,
                 &Device::getFndtLastRegistration,
                 &Device::getFndtLastReceipt,
                 &Device::getFndtLastDocument,
                 &Device::getFndtErrors,
-                &Device::getVersion
+                &Device::getFfdVersion,
+                &Device::getFwVersion
             );
         }
         payload.m_expiresAfter = Http::c_reportCacheLifeTime;

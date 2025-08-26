@@ -53,14 +53,14 @@ namespace Http {
         }
 
         void render(Asio::StreamBuffer & buffer, Status status) override {
-            assert(s_statusStrings.contains(status));
+            assert(Mbs::c_statusStrings.contains(status));
             std::ostream output { &buffer };
             if (m_data && m_size) {
                 output
                     << std::format(
                         Mbs::c_staticResponseHeaderTemplate,
                         static_cast<int>(status),
-                        s_statusStrings.at(status),
+                        Mbs::c_statusStrings.at(status),
                         m_mimeType,
                         m_size
                     );
@@ -74,7 +74,7 @@ namespace Http {
                     << std::format(
                         Mbs::c_staticResponseHeaderTemplate,
                         static_cast<int>(status),
-                        s_statusStrings.at(status),
+                        Mbs::c_statusStrings.at(status),
                         m_mimeType,
                         0
                     );
