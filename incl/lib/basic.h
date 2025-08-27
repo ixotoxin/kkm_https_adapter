@@ -27,22 +27,11 @@
 
 consteval size_t operator""_size_t(const unsigned long long value) noexcept { return value; }
 
-namespace Log {
-#ifdef DEBUG
-    inline bool s_appendLocation { true };
-#else
-    inline bool s_appendLocation { false };
-#endif
-}
-
 namespace Basic {
     namespace Wcs {
         constexpr const wchar_t * c_ok { L"OK" };
         constexpr const wchar_t * c_somethingWrong { L"Что-то пошло не так!" };
         constexpr const wchar_t * c_fallbackErrorMessage { L"[error]" };
-        constexpr std::wstring_view c_invalidValue { L"Недопустимое значение" };
-        constexpr std::wstring_view c_rangeError { L"Значение вне диапазона" };
-        constexpr std::wstring_view c_invalidVariable { L"Ошибка в '{}': {}" };
     }
 
     namespace Mbs {

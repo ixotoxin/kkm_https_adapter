@@ -29,17 +29,22 @@
 #       define FORCE_MEMORY_LEAK \
             do { \
                 auto _memoryLeak_ = new unsigned short[32] { 0xadde, 0xefbe }; \
-                Log::Console::write( \
-                    Log::Level::Warning, \
-                    std::format( \
-                        L"I'll put {:x}{:x} {:x}{:x} here (test message indicating that a leak has taken place)", \
-                        _memoryLeak_[0] & 0xff, _memoryLeak_[0] >> 8, _memoryLeak_[1] & 0xff, _memoryLeak_[1] >> 8 \
-                    ) \
-                ); \
-                Log::Console::write( \
-                    Log::Level::Warning, \
-                    std::format(L"Address of leaked memory block: 0x{:016X}", reinterpret_cast<uintptr_t>(_memoryLeak_)) \
-                ); \
+                if (Log::Console::ready(Log::Level::Warning)) { \
+                    Log::Console::write( \
+                        Log::Level::Warning, \
+                        std::format( \
+                            L"I'll put {:x}{:x} {:x}{:x} here (test message indicating that a leak has taken place)", \
+                            _memoryLeak_[0] & 0xff, _memoryLeak_[0] >> 8, _memoryLeak_[1] & 0xff, _memoryLeak_[1] >> 8 \
+                        ) \
+                    ); \
+                    Log::Console::write( \
+                        Log::Level::Warning, \
+                        std::format( \
+                            L"Address of leaked memory block: 0x{:016X}", \
+                            reinterpret_cast<uintptr_t>(_memoryLeak_) \
+                        ) \
+                    ); \
+                } \
             } while (false)
 #   else
 #       define FORCE_MEMORY_LEAK

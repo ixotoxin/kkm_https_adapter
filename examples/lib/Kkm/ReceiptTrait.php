@@ -35,6 +35,11 @@ trait ReceiptTrait
         return $this;
     }
 
+    public function setSeller(string $email): static {
+        $this->details['seller']['email'] = $email;
+        return $this;
+    }
+
     public function setTax(Tax|string $tax): static
     {
         if (is_string($tax)) {
@@ -100,6 +105,22 @@ trait ReceiptTrait
         }
         $this->details['payment']['type'] = PaymentType::cast($typeOrArray)->value;
         $this->details['payment']['sum'] = $sum ?? 'auto';
+        return $this;
+    }
+
+    public function setElectroPaymentInfo(int|array $methodOrArray, ?string $id = null, ?string $info = null): static
+    {
+        if (is_array($methodOrArray)) {
+            $this->setElectroPaymentInfo($methodOrArray['method'], $methodOrArray['id'], $methodOrArray['info'] ?? null);
+            return $this;
+        }
+        $id = trim($id);
+        if ($id == '') {
+            throw new \RuntimeException('Id транзакции некорректен');
+        }
+        $this->details['electroPaymentInfo']['method'] = $methodOrArray;
+        $this->details['electroPaymentInfo']['id'] = $id;
+        $this->details['electroPaymentInfo']['info'] = $info ?? '';
         return $this;
     }
 

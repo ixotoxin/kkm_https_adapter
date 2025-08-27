@@ -73,3 +73,11 @@ inline std::wstring operator+(const std::wstring_view message, const std::source
     result += location;
     return result;
 }
+
+namespace Log {
+#ifdef DEBUG
+    inline bool s_appendLocation { true };
+#else
+    inline bool s_appendLocation { false };
+#endif
+}

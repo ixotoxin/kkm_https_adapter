@@ -41,6 +41,7 @@ $response
     = $device
     ->sell()
     ->setOperator($config['operator'])
+    ->setSeller('seller@example.com')
     ->setItems([
         ['title' => 'Товар', 'price' => 100.00, 'quantity' => 1],
     ])->setTax(Tax::Vat5)
@@ -68,7 +69,14 @@ $response
             ['title' => 'Дорогой гвоздь', 'price' => 11, 'quantity' => 100, 'tax' => Tax::Vat5],
             ['title' => 'Дорогой молоток', 'price' => 770, 'quantity' => 1, 'tax' => Tax::Vat5],
         ],
-        'payment' => ['type' => PaymentType::Electronically],
+        'payment' => [
+            'type' => PaymentType::Electronically
+        ],
+        'electroPaymentInfo' => [
+            'method' => 3,
+            'id' => Utils::uid(),
+             'info' => 'Bank of Khrakozia'
+         ]
     ]);
 
 Utils::printResponse($response);

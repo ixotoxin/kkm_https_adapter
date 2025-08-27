@@ -36,11 +36,11 @@ namespace System {
                     }
                 }
             } else {
-                // freeTextBuffer.cancel();
+                freeTextBuffer.perform();
                 text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
             }
         } catch (...) {
-            // freeTextBuffer.cancel();
+            freeTextBuffer.perform();
             text = const_cast<wchar_t *>(Wcs::c_somethingWrong);
         }
         return text;

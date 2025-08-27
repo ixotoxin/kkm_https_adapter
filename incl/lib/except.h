@@ -10,13 +10,14 @@
 
 namespace Basic {
     namespace Wcs {
-        using Basic::Wcs::c_invalidVariable;
+        constexpr std::wstring_view c_invalidValue { L"Недопустимое значение" };
+        constexpr std::wstring_view c_rangeError { L"Значение вне диапазона" };
+        constexpr std::wstring_view c_dataError { L"{0} (содержится в '{1}')" };
     }
 
     class Failure {
-        std::wstring m_message {};
-
     protected:
+        std::wstring m_message {};
         std::source_location m_location;
 
     public:
@@ -65,7 +66,7 @@ namespace Basic {
 
         [[nodiscard, maybe_unused]]
         virtual std::wstring explain() const noexcept {
-            std::wstring result { what() };
+            std::wstring result { m_message };
             if (Log::s_appendLocation) {
                 result += m_location;
             }
@@ -73,7 +74,8 @@ namespace Basic {
         }
     };
 
-    class DataError : public Basic::Failure {
+    class DataError : public Failure {
+    protected:
         std::wstring m_variable;
 
     public:
@@ -82,10 +84,8 @@ namespace Basic {
         DataError(DataError &&) = default;
 
         [[maybe_unused]]
-        explicit DataError(
-            Basic::Failure && e,
-            const std::wstring_view variable = {}
-        ) : Failure(std::forward<Basic::Failure>(e)), m_variable(variable) {}
+        explicit DataError(Failure && e, const std::wstring_view variable = {})
+        : Failure(std::forward<Failure>(e)), m_variable(variable) {}
 
         [[maybe_unused]]
         explicit DataError(
@@ -134,7 +134,11 @@ namespace Basic {
 
         [[nodiscard, maybe_unused]]
         std::wstring explain() const noexcept override {
-            std::wstring message { m_variable.empty() ? what() : std::format(Wcs::c_invalidVariable, m_variable, what()) };
+            std::wstring message {
+                m_variable.empty()
+                ? m_message
+                : std::format(Wcs::c_dataError, m_message, m_variable)
+            };
             if (Log::s_appendLocation) {
                 message += m_location;
             }

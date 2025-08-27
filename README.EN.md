@@ -35,8 +35,8 @@ are located in the `.\_msvc` and `.\_clang` directories, respectively.
 | `install_static_deps.cmd`   | Installs static build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10`  |
 | `test_dynamic.cmd`          | Builds the dynamic debug version and runs unit tests                                                                                                   |
 | `test_static.cmd`           | Builds the static debug version and runs unit tests                                                                                                    |
-| `build_dynamic_mprof.cmd`   | Builds the dynamic debug version with memory profiling enabled                                                                                         |
-| `build_static_mprof.cmd`    | Builds the static debug version with memory profiling enabled                                                                                          |
+| `build_dynamic_memprof.cmd` | Builds the dynamic debug version with memory profiling enabled                                                                                         |
+| `build_static_memprof.cmd`  | Builds the static debug version with memory profiling enabled                                                                                          |
 | `build_dynamic_debug.cmd`   | Builds the dynamic debug version                                                                                                                       |
 | `build_static_debug.cmd`    | Builds the static debug version                                                                                                                        |
 | `build_dynamic_release.cmd` | Builds the dynamic release version                                                                                                                     |

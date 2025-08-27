@@ -23,7 +23,8 @@ namespace System {
 
     [[nodiscard, maybe_unused]]
     inline std::wstring
-    explainError(const ::DWORD error = ::GetLastError()) noexcept try {
+    explainError(const ::DWORD error = ::GetLastError())
+    noexcept try {
         return std::format(Wcs::c_fault, error, errorMessage(error));
     } catch (...) {
         return Wcs::c_somethingWrong;
@@ -31,7 +32,8 @@ namespace System {
 
     [[nodiscard, maybe_unused]]
     inline std::wstring
-    explainError(const std::wstring_view operation, const ::DWORD error = ::GetLastError()) noexcept try {
+    explainError(const std::wstring_view operation, const ::DWORD error = ::GetLastError())
+    noexcept try {
         return std::format(Wcs::c_failed, operation, error, errorMessage(error));
     } catch (...) {
         return Wcs::c_somethingWrong;
@@ -79,23 +81,21 @@ namespace System {
 }
 
 namespace Deferred {
+    template<std::invocable T>
     class Exec {
-        using Func = std::function<void()>;
-
-        std::function<void()> m_func;
+        T m_func;
         bool m_permitted { true };
 
     public:
         Exec() = delete;
         Exec(const Exec &) = delete;
         Exec(Exec &&) = delete;
-
-        explicit Exec(Func && func)
-        : m_func(std::forward<Func>(func)) {}
+        [[maybe_unused]] explicit Exec(T & func) : m_func(func) {}
+        [[maybe_unused]] explicit Exec(T && func) : m_func(std::forward<T>(func)) {}
 
         ~Exec() noexcept {
             if (m_permitted) {
-                m_func();
+                std::invoke(m_func);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Deferred {
         [[maybe_unused]]
         void perform(bool repeatable = false) noexcept {
             if (m_permitted) {
-                m_func();
+                std::invoke(m_func);
                 m_permitted = repeatable;
             }
         }

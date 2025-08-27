@@ -21,7 +21,7 @@ namespace Meta {
 
         static constexpr Char c_minus [[maybe_unused]] { L'-' };
         static constexpr Char c_terminator [[maybe_unused]] { L'\0' };
-        static constexpr View c_assignator [[maybe_unused]] { L"=:" };
+        static constexpr View c_assignmentSigns [[maybe_unused]] { L"=:" };
 
         inline static const std::unordered_set<String> c_trueValueStrings [[maybe_unused]] {
             L"true", L"t", L"yes", L"y", L"on", L"enable", L"ena", L"en", L"e", L"allow", L"allowed", L"a", L"+"
@@ -109,7 +109,7 @@ namespace Meta {
 
         static constexpr Char c_minus [[maybe_unused]] { '-' };
         static constexpr Char c_terminator [[maybe_unused]] { '\0' };
-        static constexpr View c_assignator [[maybe_unused]] { "=:" };
+        static constexpr View c_assignmentSigns [[maybe_unused]] { "=:" };
 
         inline static const std::unordered_set<String> c_trueValueStrings {
             "true", "t", "yes", "y", "on", "enable", "ena", "en", "e", "allow", "allowed", "a", "+"
@@ -561,7 +561,7 @@ namespace Text {
         T & value,
         bool lowerName = true,
         bool lowerValue = false,
-        const typename Meta::TextTrait<T>::View separator = Meta::TextTrait<T>::c_assignator
+        const typename Meta::TextTrait<T>::View separator = Meta::TextTrait<T>::c_assignmentSigns
     ) {
         name.clear();
         value.clear();

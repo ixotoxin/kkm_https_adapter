@@ -7,35 +7,114 @@
 namespace UnitTests {
     using namespace std::string_view_literals;
 
-    TEST_CASE("utils", "[deferred]") {
-        int var { 123 };
+    static int s_var { 987 };
 
-        {
-            Deferred::Exec scopeGuard([&var] () { var = 456; });
-            REQUIRE(var == 123);
+    void modifyVar() {
+        s_var = 654;
+    }
+
+    struct Invocable {
+        inline static int s_var { 1000 };
+
+        static void modifyStaticVar() {
+            ++s_var;
         }
 
-        REQUIRE(var == 456);
+        int m_var { 2000 };
 
-        char * buffer { nullptr };
+        void operator()() {
+            ++m_var;
+        }
+    };
 
+    TEST_CASE("utils", "[deferred]") {
         {
-            Deferred::LocalFree scopeGuard(buffer);
+            int var { 123 };
 
-            REQUIRE(buffer == nullptr);
-
-            buffer = (char *)::LocalAlloc(LPTR, 2048);
-            bool zeroed { true };
-
-            for (size_t i {}; i < 2048; ++i) {
-                zeroed = zeroed && !buffer[i];
+            {
+                Deferred::Exec scopeGuard([&var] () { var = 456; });
+                REQUIRE(var == 123);
             }
 
-            REQUIRE(buffer != nullptr);
-            REQUIRE(zeroed);
+            REQUIRE(var == 456);
+
+            {
+                Deferred::Exec scopeGuard(&modifyVar);
+                REQUIRE(s_var == 987);
+            }
+
+            REQUIRE(s_var == 654);
+
+            {
+                Deferred::Exec scopeGuard(&Invocable::modifyStaticVar);
+                REQUIRE(Invocable::s_var == 1000);
+            }
+
+            {
+                Deferred::Exec scopeGuard(&Invocable::modifyStaticVar);
+                REQUIRE(Invocable::s_var == 1001);
+                scopeGuard.perform(true);
+                REQUIRE(Invocable::s_var == 1002);
+                scopeGuard.perform();
+                REQUIRE(Invocable::s_var == 1003);
+            }
+
+            {
+                Deferred::Exec scopeGuard(&Invocable::modifyStaticVar);
+                REQUIRE(Invocable::s_var == 1003);
+                scopeGuard.cancel();
+                REQUIRE(Invocable::s_var == 1003);
+            }
+
+            {
+                Deferred::Exec scopeGuard(&Invocable::modifyStaticVar);
+                REQUIRE(Invocable::s_var == 1003);
+                scopeGuard.perform();
+                REQUIRE(Invocable::s_var == 1004);
+            }
+
+            REQUIRE(Invocable::s_var == 1004);
+
+            Invocable invocable {};
+
+            {
+                Deferred::Exec scopeGuard(invocable);
+                REQUIRE(invocable.m_var == 2000);
+            }
+
+            REQUIRE(invocable.m_var == 2000);
+
+            {
+                Deferred::Exec scopeGuard(std::ref(invocable));
+                REQUIRE(invocable.m_var == 2000);
+                scopeGuard.perform(true);
+                REQUIRE(invocable.m_var == 2001);
+            }
+
+            REQUIRE(invocable.m_var == 2002);
         }
 
-        REQUIRE(buffer == nullptr);
+        {
+            char * buffer { nullptr };
+
+            {
+                Deferred::LocalFree scopeGuard(buffer);
+
+                REQUIRE(buffer == nullptr);
+
+                buffer = (char *)::LocalAlloc(LPTR, 2048);
+                bool zeroed { true };
+
+                for (size_t i {}; i < 2048; ++i) {
+                    zeroed = zeroed && !buffer[i];
+                }
+
+                REQUIRE(buffer != nullptr);
+                REQUIRE(zeroed);
+            }
+
+            REQUIRE(buffer == nullptr);
+        }
     }
 
     TEST_CASE("utils", "[path_check]") {
