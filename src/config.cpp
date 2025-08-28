@@ -2,6 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "config.h"
+#include <lib/slapp.h>
 #include <lib/utils.h>
 #include <lib/json.h>
 #include <fstream>

@@ -25,9 +25,8 @@ target_link_libraries(kkmha PRIVATE nlohmann_json::nlohmann_json)
 #target_link_libraries(kkmha INTERFACE <threads>)
 
 if (BUILD_STATIC)
-    find_path(CRYPT_INCLUDE_DIR wincrypt.h)
-    find_library(CRYPT_LIBRARY crypt32)
-    target_link_libraries(kkmha PRIVATE crypt32.lib)
+    #target_link_libraries(kkmha PRIVATE Advapi32.lib)
+    target_link_libraries(kkmha PRIVATE Crypt32.lib)
     install(
         TARGETS kkmha
         COMPONENT kkmha

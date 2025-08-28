@@ -91,7 +91,7 @@ else ()
         #-Wold-style-cast
         -Woverloaded-virtual
         -Wredundant-decls
-        #-Wsign-conversion
+        -Wsign-conversion
         -Wsign-promo
         -Wno-implicit-int-conversion
         -Wno-shorten-64-to-32
@@ -133,12 +133,12 @@ endif ()
 
 set(KKMHA_TEMP_INCL "${PROJECT_BINARY_DIR}/_Include_${CMAKE_BUILD_TYPE}")
 
-configure_file("${CMAKE_SOURCE_DIR}/incl/build_options.h.in" "${KKMHA_TEMP_INCL}/build_options.h")
-configure_file("${CMAKE_SOURCE_DIR}/incl/cmake_options.h.in" "${KKMHA_TEMP_INCL}/cmake_options.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/incl/build_options.h.in" "${KKMHA_TEMP_INCL}/build_options.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/incl/cmake_options.h.in" "${KKMHA_TEMP_INCL}/cmake_options.h")
 
-include_directories("${CMAKE_SOURCE_DIR}/incl" BEFORE)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/incl" BEFORE)
 include_directories("${KKMHA_TEMP_INCL}" BEFORE)
-include_directories("${CMAKE_SOURCE_DIR}/deps/fptr10")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/fptr10")
 
 if (BUILD_TESTS)
     enable_testing()
