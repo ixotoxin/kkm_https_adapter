@@ -1,0 +1,41 @@
+// Copyright (c) 2025 Vitaly Anasenko
+// Distributed under the MIT License, see accompanying file LICENSE.txt
+
+#pragma once
+
+#include "defaults.h"
+#include "strings.h"
+#include <lib/except.h>
+#include <lib/json.h>
+#include <log/write.h>
+#include <concepts>
+#include <fstream>
+#include <filesystem>
+#include <string>
+#include <format>
+
+namespace Config {
+    using Basic::Failure;
+
+    void setBaseVars(wchar_t ** envp);
+
+    template<typename T, std::same_as<void (*)(const Nln::Json &)> ... SETTERS>
+    requires std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::wstring>
+    void readJson(const T & file, SETTERS ... setters) {
+        if (!std::filesystem::is_regular_file(file)) {
+            throw Failure(std::format(Wcs::c_cantReadConfig, file.c_str())); // NOLINT(*-exception-baseclass)
+        }
+        try {
+            Nln::Json json(Nln::Json::parse(std::ifstream(file)));
+            (setters(json), ...);
+            return; /** Не удаляй, смотри дальше. **/
+        } catch (const Failure & e) {
+            ntsLogWarning(e);
+        } catch (const std::exception & e) {
+            ntsLogWarning(e);
+        } catch (...) {
+            ntsLogWarning(Basic::Wcs::c_somethingWrong);
+        }
+        throw Failure(Wcs::c_invalidConfig); // NOLINT(*-exception-baseclass)
+    }
+}

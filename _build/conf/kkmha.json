@@ -12,6 +12,7 @@
         "eventLog": {
             "level": "none"
         },
+        "consToConsOnly": true,
         "appendLocation": false
     },
     "server": {

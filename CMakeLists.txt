@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(kkm_https_adapter VERSION 1.5.2 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.6.0 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -13,22 +13,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<1:${PROJECT_BINARY_DIR}/_Binary_${CMAKE_BU
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "$<1:${PROJECT_BINARY_DIR}/_Library_${CMAKE_BUILD_TYPE}>" CACHE PATH "Library")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 
+option(BUILD_SEPARATED "Build separated" OFF)
 option(BUILD_STATIC "Build static" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(ENABLE_MEMORY_PROFILING "Build with memory profiling" OFF)
 option(ENABLE_MEMORY_LEAKS "Build with memory leaks" OFF)
-
-set(
-    KKMHA_PUB_DEFS
-    WIN32_LEAN_AND_MEAN
-    ASIO_STANDALONE
-    ASIO_NO_WIN32_LEAN_AND_MEAN
-    ASIO_NO_NOMINMAX
-    ASIO_HAS_THREADS
-    ASIO_HAS_STD_COROUTINE
-    ASIO_HAS_CO_AWAIT
-    JSON_USE_IMPLICIT_CONVERSIONS=0
-)
 
 string(TIMESTAMP KKMHA_BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 set(KKMHA_BUILD_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
@@ -71,7 +60,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/Zc:preprocessor /W4 /WX /EHsc /utf-8 /await:strict)
     add_compile_options(/wd4068 /wd4324 /wd4996)
     add_compile_options(/wd4244 /wd4310 /wd4267)
-    add_definitions(/DUNICODE /D_UNICODE /D_WIN32_WINNT=0x0601)
 else ()
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -94,7 +82,7 @@ else ()
         -Wsign-conversion
         -Wsign-promo
         -Wno-implicit-int-conversion
-        -Wno-shorten-64-to-32
+        #-Wno-shorten-64-to-32
         -Wno-sign-compare
         -Wno-sign-conversion
         -Wno-deprecated-declarations
@@ -105,6 +93,8 @@ else ()
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
     endif ()
 endif ()
+
+add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0601)
 
 #message(STATUS "+ -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + -- + --")
 #message(STATUS "       CMAKE_C_COMPILER = '${CMAKE_C_COMPILER}'")
@@ -131,22 +121,22 @@ endif ()
 #    endif ()
 #endfunction ()
 
-set(KKMHA_TEMP_INCL "${PROJECT_BINARY_DIR}/_Include_${CMAKE_BUILD_TYPE}")
+include("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/incl.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/src/library/incl.cmake")
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/incl/build_options.h.in" "${KKMHA_TEMP_INCL}/build_options.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/incl/cmake_options.h.in" "${KKMHA_TEMP_INCL}/cmake_options.h")
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/incl" BEFORE)
-include_directories("${KKMHA_TEMP_INCL}" BEFORE)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/fptr10")
 
 if (BUILD_TESTS)
     enable_testing()
 endif ()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/incl/lib)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/heap)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/library)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/kkmha)
+if (BUILD_SEPARATED)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/kkmop)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/kkmjl)
+endif ()
 
 if (BUILD_TESTS)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
