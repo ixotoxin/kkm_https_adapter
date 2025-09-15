@@ -73,8 +73,8 @@ namespace Kkm {
     }
 
     std::wostream & vars(std::wostream & stream) {
-        stream <<
-            L"[CFG] kkm.dbDirectory = \"" << Kkm::s_dbDirectory << L"\"\n"
+        stream
+            << L"[CFG] kkm.dbDirectory = \"" << Kkm::s_dbDirectory << L"\"\n"
             L"[CFG] kkm.defaultBaudRate = " << Kkm::s_defaultBaudRate << L"\n"
             L"[CFG] kkm.defaultLineLength = " << Kkm::s_defaultLineLength << L"\n"
             L"[CFG] kkm.timeZone = tz" << static_cast<int>(Kkm::s_timeZone) << L"\n"

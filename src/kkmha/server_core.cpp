@@ -82,7 +82,7 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(std::shared_ptr<Counter> counter, auto && socket, Asio::SslContext & sslContext) {
+    asio::awaitable<void> accept(std::unique_ptr<Counter> counter, auto && socket, Asio::SslContext & sslContext) {
         if (counter->invalid()) {
             tsLogError(Wcs::c_maximumIsExceeded);
             co_return;
@@ -258,7 +258,7 @@ namespace Server {
                 } else {
                     asio::co_spawn(
                         executor,
-                        accept(std::make_shared<Counter>(), std::move(socket), sslContext),
+                        accept(std::make_unique<Counter>(), std::move(socket), sslContext),
                         asio::detached
                     );
                 }

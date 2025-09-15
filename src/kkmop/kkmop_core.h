@@ -193,22 +193,22 @@ inline std::optional<int> deviceCmd(const std::wstring & command, wchar_t * seri
     return std::nullopt;
 
 } catch (const Basic::Failure & e) {
-    std::wcout <<
-        Nln::Json::object({
+    std::wcout
+        << Nln::Json::object({
             { Json::Mbs::c_successKey, false },
             { Json::Mbs::c_messageKey, Text::convert(e.explain(Log::s_appendLocation)) }
         });
     return EXIT_FAILURE;
 } catch (const std::exception & e) {
-    std::wcout <<
-        Nln::Json::object({
+    std::wcout
+        << Nln::Json::object({
             { Json::Mbs::c_successKey, false },
             { Json::Mbs::c_messageKey, e.what() }
         });
     return EXIT_FAILURE;
 } catch (...) {
-    std::wcout <<
-        Nln::Json::object({
+    std::wcout
+        << Nln::Json::object({
             { Json::Mbs::c_successKey, false },
             { Json::Mbs::c_messageKey, Basic::Mbs::c_somethingWrong }
         });

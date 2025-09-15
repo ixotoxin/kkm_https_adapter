@@ -28,19 +28,15 @@ libraries can be used. In this case, you may need to correct `CMakeLists.txt`.
 The assembly was tested using the MSVC and Clang compilers. The scripts with the standard assembly for these compilers
 are located in the `.\_msvc` and `.\_clang` directories, respectively.
 
-| Script                      | Description                                                                                                                                            |
-|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `config_env.cmd`            | Sets environment variables and runs the necessary bootstrap scripts. It is called from the scripts listed below                                        |
-| `install_dynamic_deps.cmd`  | Installs dynamic build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10` |
-| `install_static_deps.cmd`   | Installs static build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10`  |
-| `test_dynamic.cmd`          | Builds the dynamic debug version and runs unit tests                                                                                                   |
-| `test_static.cmd`           | Builds the static debug version and runs unit tests                                                                                                    |
-| `build_dynamic_memprof.cmd` | Builds the dynamic debug version with memory profiling enabled                                                                                         |
-| `build_static_memprof.cmd`  | Builds the static debug version with memory profiling enabled                                                                                          |
-| `build_dynamic_debug.cmd`   | Builds the dynamic debug version                                                                                                                       |
-| `build_static_debug.cmd`    | Builds the static debug version                                                                                                                        |
-| `build_dynamic_release.cmd` | Builds the dynamic release version                                                                                                                     |
-| `build_static_release.cmd`  | Builds the static release version                                                                                                                      |
+| Script                     | Description                                                                                                                                            |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `config_env.cmd`           | Sets environment variables and runs the necessary bootstrap scripts. It is called from the scripts listed below                                        |
+| `install_dynamic_deps.cmd` | Installs dynamic build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10` |
+| `install_static_deps.cmd`  | Installs static build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10`  |
+| `build_config.cmd`         | Sets build options                                                                                                                                     |
+| `test.cmd`                 | Builds the debug version and runs unit tests                                                                                                           |
+| `build_debug.cmd`          | Builds the debug version                                                                                                                               |
+| `build_release.cmd`        | Builds the release version                                                                                                                             |
 
 It is assumed that the required software is installed in the following directories:
 

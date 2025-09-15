@@ -13,14 +13,18 @@
 #include <format>
 
 namespace Http {
+    using Unique = std::unique_ptr<char[]>;
     using Shared = std::shared_ptr<char[]>;
     using Weak = std::weak_ptr<char[]>;
     using Regular = std::add_pointer_t<char>;
 
     template <typename T>
-    concept CustomPointer = std::is_same_v<T, Regular> || std::is_same_v<T, Shared> || std::is_same_v<T, Weak>;
+    concept CustomPointer
+        = std::is_same_v<T, Unique> || std::is_same_v<T, Shared>
+          || std::is_same_v<T, Weak> || std::is_same_v<T, Regular>;
 
     template<CustomPointer> struct isSmartPointer : std::false_type {};
+    template<> struct isSmartPointer<Unique> : std::true_type {};
     template<> struct isSmartPointer<Shared> : std::true_type {};
     template<> struct isSmartPointer<Weak> : std::true_type {};
 

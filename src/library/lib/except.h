@@ -144,7 +144,7 @@ namespace Basic {
         std::wstring explain() const noexcept override {
             return m_variable.empty()
                ? m_message
-               : std::format(Wcs::c_dataError, m_message, m_variable);
+               : LIB_WFMT(Wcs::c_dataError, m_message, m_variable);
         }
 
         [[nodiscard, maybe_unused]]
@@ -152,7 +152,7 @@ namespace Basic {
             std::wstring message {
                 m_variable.empty()
                 ? m_message
-                : std::format(Wcs::c_dataError, m_message, m_variable)
+                : LIB_WFMT(Wcs::c_dataError, m_message, m_variable)
             };
             if (appendLocation) {
                 message += m_location;

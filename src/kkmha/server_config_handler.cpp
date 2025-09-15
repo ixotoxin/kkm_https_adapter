@@ -38,7 +38,7 @@ namespace Server::Config {
                 }
             }
             response->m_data["knownDevices"] = serials;
-            request.m_response.m_data = response;
+            request.m_response.m_data = std::move(response);
         } else {
             request.fail(Http::Status::MethodNotAllowed, Http::Mbs::c_methodNotAllowed);
         }

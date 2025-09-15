@@ -17,13 +17,13 @@
 #include "kkmop_core.h"
 
 void usage(std::wostream & stream, const std::filesystem::path & path) {
-    stream <<
-        L"\n"
+    stream
+        << L"\n"
         L"Версия: " << BUILD_VERSION << L"\n"
         L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
         L"Команды:\n"
-        L"    help                   Вывести справку\n"
-        L"    show-config            Вывести конфигурацию\n"
+        L"    help                Вывести справку\n"
+        L"    show-config         Вывести конфигурацию\n"
         << Main::Wcs::c_kkmopUsage
         << L"\n";
 }

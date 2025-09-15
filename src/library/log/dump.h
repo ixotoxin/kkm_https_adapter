@@ -51,7 +51,7 @@ namespace Log {
                     buffer = std::format(L"  {:5d} [ {:#06x} ] ", index, sizeof(T) * index);
                     count = 0;
                 }
-                buffer.append(std::format(L"{:0{}x} ", *(reinterpret_cast<const T *>(data)), 2 * sizeof(T)));
+                buffer.append(std::format(L"{:0{}x} ", *data, 2 * sizeof(T)));
                 ++count;
                 ++index;
                 ++data;

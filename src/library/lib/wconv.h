@@ -3,39 +3,42 @@
 
 #pragma once
 
+#include "macro.h"
 #include "winapi.h"
 #include "strings.h"
+#include <cmake/options.h>
 #include <memory>
 #include <string>
 #include <stringapiset.h>
 
 namespace Text {
+    constexpr int c_convertBufferReserve { 2 };
+
     [[maybe_unused]]
     inline bool convert(std::wstring & result, const std::string_view text) noexcept try {
         if (text.empty()) {
             result.clear();
             return true;
         }
-        auto count
-            = ::MultiByteToWideChar(
-                CP_UTF8, MB_ERR_INVALID_CHARS,
-                text.data(), static_cast<int>(text.length()), nullptr, 0
-            );
-        if (count <= 0) {
+        auto length = WIN_MB2WC_ESTIMATED(&text[0], static_cast<int>(text.size()));
+        if (length <= 0) {
             return false;
         }
-        const int size { count + 1 };
-        auto buffer = std::make_shared<wchar_t[]>(static_cast<size_t>(size), L'\0');
-        count
-            = ::MultiByteToWideChar(
-                CP_UTF8, MB_ERR_INVALID_CHARS,
-                text.data(), static_cast<int>(text.length()), buffer.get(), size
-            );
-        if (count <= 0) {
+#if STD_STRING_INVASIVE_ACCESS
+        result.resize(length + c_convertBufferReserve);
+        length = WIN_MB2WC(&text[0], static_cast<int>(text.size()), &result[0], static_cast<int>(result.size()));
+        result.resize(length);
+        return length > 0;
+#else
+        const int size { length + c_convertBufferReserve };
+        auto buffer = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
+        length = WIN_MB2WC(&text[0], static_cast<int>(text.size()), buffer.get(), size);
+        if (length <= 0) {
             return false;
         }
-        result.assign(buffer.get());
+        result.assign(buffer.get(), length);
         return true;
+#endif
     } catch (...) {
         return false;
     }
@@ -46,26 +49,25 @@ namespace Text {
             result.clear();
             return true;
         }
-        auto count
-            = ::WideCharToMultiByte(
-                CP_UTF8, WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
-                text.data(), static_cast<int>(text.length()), nullptr, 0, nullptr, nullptr
-            );
-        if (count <= 0) {
+        auto length = WIN_WC2MB_ESTIMATED(&text[0], static_cast<int>(text.size()));
+        if (length <= 0) {
             return false;
         }
-        const int size { count + 1 };
-        auto buffer = std::make_shared<char[]>(static_cast<size_t>(size), '\0');
-        count
-            = ::WideCharToMultiByte(
-                CP_UTF8, WC_ERR_INVALID_CHARS | WC_NO_BEST_FIT_CHARS,
-                text.data(), static_cast<int>(text.length()), buffer.get(), size, nullptr, nullptr
-            );
-        if (count <= 0) {
+#if STD_STRING_INVASIVE_ACCESS
+        result.resize(length + c_convertBufferReserve);
+        length = WIN_WC2MB(&text[0], static_cast<int>(text.size()), &result[0], static_cast<int>(result.size()));
+        result.resize(length);
+        return length > 0;
+#else
+        const int size { length + c_convertBufferReserve };
+        auto buffer = std::make_unique_for_overwrite<char[]>(static_cast<std::size_t>(size));
+        length = WIN_WC2MB(&text[0], static_cast<int>(text.size()), buffer.get(), size);
+        if (length <= 0) {
             return false;
         }
-        result.assign(buffer.get());
+        result.assign(buffer.get(), length);
         return true;
+#endif
     } catch (...) {
         return false;
     }

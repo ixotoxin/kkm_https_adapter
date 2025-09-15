@@ -6,8 +6,8 @@
 
 namespace Service {
     std::wostream & vars(std::wostream & stream) {
-        stream <<
-            L"[DEF] service.systemName = \"" << Service::c_systemName << L"\"\n"
+        stream
+            << L"[DEF] service.systemName = \"" << Service::c_systemName << L"\"\n"
             L"[DEF] service.displayName = \"" << Service::c_displayName << L"\"\n";
 
         return stream;

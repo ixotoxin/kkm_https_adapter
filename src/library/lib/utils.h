@@ -32,11 +32,7 @@ namespace System {
     inline std::wstring
     explainError(const std::wstring_view operation, const ::DWORD error = ::GetLastError())
     noexcept try {
-#ifdef EXTERNAL_LIB_STRINGS
-        return std::vformat(Wcs::c_failed, std::make_(operation, error, errorMessage(error)));
-#else
         return std::format(Wcs::c_failed, operation, error, errorMessage(error));
-#endif
     } catch (...) {
         return Basic::Wcs::c_somethingWrong;
     }

@@ -10,11 +10,6 @@
 #include <unordered_map>
 
 namespace Kkm {
-    namespace Mbs {
-        using Json::Mbs::c_successKey;
-        using Json::Mbs::c_messageKey;
-    }
-
     using namespace std::string_view_literals;
 
     using Basic::DataError;
@@ -127,13 +122,13 @@ namespace Kkm {
 
     void Device::NewConnParams::save(const std::wstring & serialNumber) {
         if (serialNumber.empty()) {
-            throw Failure(std::format(Wcs::c_savingError, L"-")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_savingError, L"-")); // NOLINT(*-exception-baseclass)
         }
         std::filesystem::path filePath { s_dbDirectory };
         if (!std::filesystem::is_directory(filePath)) {
             std::filesystem::create_directories(filePath);
             if (!std::filesystem::is_directory(filePath)) {
-                throw Failure(std::format(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
+                throw Failure(KKM_WFMT(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
             }
         }
         filePath /= serialNumber + L".json";
@@ -142,7 +137,7 @@ namespace Kkm {
         file << json.dump();
         file.close();
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_savingError, serialNumber)); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -160,7 +155,7 @@ namespace Kkm {
         std::filesystem::path filePath { s_dbDirectory };
         filePath /= m_serialNumber + L".json";
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
         Nln::Json json(Nln::Json::parse(std::ifstream(filePath)));
         Json::handle(json, m_params);
@@ -169,7 +164,7 @@ namespace Kkm {
     Device::KnownConnParams::KnownConnParams(const std::filesystem::path & filePath)
     : KnownConnParams(serialNumber(filePath)) {
         if (!std::filesystem::is_regular_file(filePath)) {
-            throw Failure(std::format(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_loadingError, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
         Nln::Json json(Nln::Json::parse(std::ifstream(filePath)));
         Json::handle(json, m_params);
@@ -199,7 +194,7 @@ namespace Kkm {
     : Device(logPrefix) {
         connect(connParams);
         if (m_serialNumber != connParams.m_serialNumber) {
-            throw Failure(std::format(Wcs::c_serialNumberMismatch, connParams.m_serialNumber, m_serialNumber)); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_serialNumberMismatch, connParams.m_serialNumber, m_serialNumber)); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -499,7 +494,7 @@ namespace Kkm {
             m_success = false;
             m_message = message;
         }
-        std::wstring logMessage { std::format(Wcs::c_fault, kkm.m_logPrefix, kkm.m_serialNumber, message) };
+        std::wstring logMessage { KKM_WFMT(Wcs::c_fault, kkm.m_logPrefix, kkm.m_serialNumber, message) };
         if (Log::s_appendLocation) {
             logMessage += location;
         }
@@ -510,23 +505,23 @@ namespace Kkm {
     bool Device::Call::Result::exportTo(Nln::Json & json) {
         bool overrideMessage { false };
         if (
-            !json.contains(Mbs::c_successKey)
-            || !json[Mbs::c_successKey].is_boolean()
-            || (json[Mbs::c_successKey].get<bool>() && !m_success)
+            !json.contains(Json::Mbs::c_successKey)
+            || !json[Json::Mbs::c_successKey].is_boolean()
+            || (json[Json::Mbs::c_successKey].get<bool>() && !m_success)
         ) {
-            json[Mbs::c_successKey] = m_success;
+            json[Json::Mbs::c_successKey] = m_success;
             overrideMessage = true;
         }
         if (
             overrideMessage
-            || !json.contains(Mbs::c_messageKey)
-            || !json[Mbs::c_messageKey].is_string()
-            || json[Mbs::c_messageKey].empty()
-            || json[Mbs::c_messageKey].get<std::string>() == Basic::Mbs::c_ok
+            || !json.contains(Json::Mbs::c_messageKey)
+            || !json[Json::Mbs::c_messageKey].is_string()
+            || json[Json::Mbs::c_messageKey].empty()
+            || json[Json::Mbs::c_messageKey].get<std::string>() == Basic::Mbs::c_ok
         ) {
-            json[Mbs::c_messageKey] = Text::convert(m_message);
+            json[Json::Mbs::c_messageKey] = Text::convert(m_message);
         }
-        return json[Mbs::c_successKey].get<bool>();
+        return json[Json::Mbs::c_successKey].get<bool>();
     }
 
     bool Device::Call::StatusResult::exportTo(Nln::Json & json) {
@@ -1214,7 +1209,7 @@ namespace Kkm {
                     separated = true;
                 } else {
                     if (!Json::handleKey(block, "content", content, basePath)) { // TODO: Добавить проверку длинны текста.
-                        throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"content")); // NOLINT(*-exception-baseclass)
+                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"content")); // NOLINT(*-exception-baseclass)
                     }
                     Json::handleKey(block, "center", center, basePath);
                     Json::handleKey(block, "magnified", magnified, basePath);
@@ -1224,7 +1219,7 @@ namespace Kkm {
                 m_document.emplace_back(std::move(content), center, magnified, separated, actualMargin);
             }
         } else {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"document")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"document")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1332,14 +1327,14 @@ namespace Kkm {
                         path
                     );
                 if (!hasName) {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"name")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"name")); // NOLINT(*-exception-baseclass)
                 }
                 Json::handleKey(json, "inn", this->m_operatorInn, Text::Wcs::maxLength(12), path);
                 return true;
             }
         );
         if (!result) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"operator")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"operator")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1349,7 +1344,7 @@ namespace Kkm {
     Device::Call::CashDetails::CashDetails(const Nln::Json & details)
     : OperatorDetails(details) {
         if (!Json::handleKey(details, "cashSum", m_cashSum, Numeric::between(c_minCashInOut, s_maxCashInOut))) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"cashSum")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"cashSum")); // NOLINT(*-exception-baseclass)
         }
     }
 
@@ -1489,15 +1484,15 @@ namespace Kkm {
                 auto basePath { std::format(L"items[{}]", i++) };
                 std::wstring title;
                 if (!Json::handleKey(item, "title", title, Text::Wcs::length(1, 128, Text::Wcs::trim()), basePath)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"title")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"title")); // NOLINT(*-exception-baseclass)
                 }
                 double price;
                 if (!Json::handleKey(item, "price", price, Numeric::between(c_minPrice, s_maxPrice), basePath)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"price")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"price")); // NOLINT(*-exception-baseclass)
                 }
                 double quantity;
                 if (!Json::handleKey(item, "quantity", quantity, Numeric::between(c_minQuantity, s_maxQuantity), basePath)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"quantity")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"quantity")); // NOLINT(*-exception-baseclass)
                 }
                 MeasurementUnit unit { MeasurementUnit::Piece };
                 Json::handleKey(item, "unit", unit, Mbs::c_measurementUnitMap);
@@ -1506,14 +1501,14 @@ namespace Kkm {
                     if (hasDefaultTax) {
                         tax = defaultTax;
                     } else {
-                        throw Failure(std::format(Wcs::c_requiresProperty2, basePath, L"tax")); // NOLINT(*-exception-baseclass)
+                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"tax")); // NOLINT(*-exception-baseclass)
                     }
                 }
                 m_paymentSum += price * quantity;
                 m_items.emplace_back(std::move(title), price, quantity, unit, tax);
             }
         } else {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"items")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"items")); // NOLINT(*-exception-baseclass)
         }
         bool payment = Json::handleKey(
             details, "payment",
@@ -1528,23 +1523,23 @@ namespace Kkm {
                             this->m_paymentSum = Text::cast<double>(sum);
                         }
                     } catch (...) {
-                        throw Failure(std::format(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
+                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                     }
                 } else {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                 }
                 if (!Json::handleKey(json, "type", this->m_paymentType, Mbs::c_paymentTypeCastMap, path)) {
-                    throw Failure(std::format(Wcs::c_requiresProperty2, path, L"type")); // NOLINT(*-exception-baseclass)
+                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"type")); // NOLINT(*-exception-baseclass)
                 }
                 if (this->m_paymentType == PaymentType::Electronically) {
                     this->m_electroPaymentInfo = Json::handleKey(
                         json, "electroPaymentInfo",
                         [this] (const Nln::Json & json, const std::wstring & path) -> bool {
                             if (!Json::handleKey(json, "method", this->m_electroPaymentMethod, path)) {
-                                throw Failure(std::format(Wcs::c_requiresProperty2, path, L"method")); // NOLINT(*-exception-baseclass)
+                                throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"method")); // NOLINT(*-exception-baseclass)
                             }
                             if (!Json::handleKey(json, "id", this->m_electroPaymentId, Text::Wcs::length(1, 256), path)) {
-                                throw Failure(std::format(Wcs::c_requiresProperty2, path, L"id")); // NOLINT(*-exception-baseclass)
+                                throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"id")); // NOLINT(*-exception-baseclass)
                             }
                             Json::handleKey(json, "addInfo", this->m_electroPaymentAddInfo, Text::Wcs::maxLength(256), path);
                             return true;
@@ -1555,7 +1550,7 @@ namespace Kkm {
             }
         );
         if (!payment) {
-            throw Failure(std::format(Wcs::c_requiresProperty, L"payment")); // NOLINT(*-exception-baseclass)
+            throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"payment")); // NOLINT(*-exception-baseclass)
         }
     }
 

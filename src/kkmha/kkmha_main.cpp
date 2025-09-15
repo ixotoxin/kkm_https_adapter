@@ -27,8 +27,8 @@
 #endif
 
 void usage(std::wostream & stream, const std::filesystem::path & path) {
-    stream <<
-        L"\n"
+    stream
+        << L"\n"
         L"Версия: " << BUILD_VERSION << L"\n"
         L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
         L"Команды:\n"

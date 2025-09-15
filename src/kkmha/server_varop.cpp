@@ -57,8 +57,8 @@ namespace Server {
             securityLevel.assign(L"<openssl-default>");
         }
 
-        stream <<
-            L"[CFG] server.ipv4Only = " << Text::Wcs::yesNo(s_ipv4Only) << L"\n"
+        stream
+            << L"[CFG] server.ipv4Only = " << Text::Wcs::yesNo(s_ipv4Only) << L"\n"
             L"[CFG] server.port = " << s_port << L"\n"
             L"[CFG] server.concurrencyLimit = " << s_concurrencyLimit << L"\n"
             L"[CFG] server.enableLegacyTls = " << Text::Wcs::yesNo(s_enableLegacyTls) << L"\n"

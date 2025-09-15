@@ -127,7 +127,7 @@ namespace Server::Static {
         }
 
         if (fileSize > 0) {
-            response->m_data = std::make_shared<char[]>(fileSize);
+            response->m_data = std::make_shared_for_overwrite<char[]>(fileSize);
             std::ifstream file { path, std::ios::binary };
             if (file.good()) {
                 file.read(response->m_data.get(), static_cast<std::streamsize>(fileSize));
@@ -137,7 +137,7 @@ namespace Server::Static {
         Cache::store(cacheKey, Cache::expiresAfter(c_fileCacheLifeTime), request.m_response.m_status, response);
         assert(request.m_response.m_status == Http::Status::Ok);
         if (request.m_response.m_status == Http::Status::Ok) {
-            request.m_response.m_data = response;
+            request.m_response.m_data = std::move(response);
         }
 
     } catch (const Failure & e) {

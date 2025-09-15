@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(kkm_https_adapter VERSION 1.6.0 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.6.1 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -16,6 +16,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 option(BUILD_SEPARATED "Build separated" OFF)
 option(BUILD_STATIC "Build static" OFF)
 option(BUILD_TESTS "Build tests" OFF)
+option(ENABLE_HACKS "Enable questionable optimizations" OFF)
 option(ENABLE_MEMORY_PROFILING "Build with memory profiling" OFF)
 option(ENABLE_MEMORY_LEAKS "Build with memory leaks" OFF)
 
@@ -120,6 +121,8 @@ add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0601
 #        endif ()
 #    endif ()
 #endfunction ()
+
+set(STD_STRING_INVASIVE_ACCESS ${ENABLE_HACKS})
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/incl.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/src/library/incl.cmake")

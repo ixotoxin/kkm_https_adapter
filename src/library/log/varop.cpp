@@ -54,8 +54,8 @@ namespace Log {
     }
 
     std::wostream & vars(std::wostream & stream) {
-        stream <<
-            L"[CFG] log.console.level = " << Log::levelLabel(Log::Console::s_level) << L"\n"
+        stream
+            << L"[CFG] log.console.level = " << Log::levelLabel(Log::Console::s_level) << L"\n"
             L"[CFG] log.console.outputTimestamp = " << Text::Wcs::yesNo(Log::Console::s_outputTimestamp) << L"\n"
             L"[CFG] log.console.outputLevel = " << Text::Wcs::yesNo(Log::Console::s_outputLevel) << L"\n"
             L"[CFG] log.file.level = " << Log::levelLabel(Log::File::s_level) << L"\n"

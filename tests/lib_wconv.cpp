@@ -29,6 +29,20 @@ namespace UnitTests {
         REQUIRE(Text::convert("Test string") == L"Test string"sv);
         REQUIRE(Text::convert(L"Тестовая строка") == "Тестовая строка"sv);
         REQUIRE(Text::convert("Тестовая строка") == L"Тестовая строка"sv);
+        REQUIRE(Text::convert(L"测试线") == "测试线"sv);
+        REQUIRE(Text::convert("测试线") == L"测试线"sv);
+    REQUIRE(Text::convert(L"테스트 라인") == "테스트 라인"sv);
+    REQUIRE(Text::convert("테스트 라인") == L"테스트 라인"sv);
+
+        REQUIRE(
+            Text::convert(L"Test string ** Тестовая строка ** 测试线 ** 테스트 라인")
+            == "Test string ** Тестовая строка ** 测试线 ** 테스트 라인"sv
+        );
+
+        REQUIRE(
+            Text::convert("Test string ** Тестовая строка ** 测试线 ** 테스트 라인")
+            == L"Test string ** Тестовая строка ** 测试线 ** 테스트 라인"sv
+        );
 
         std::wstring_view wcString0 {
             L"\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"

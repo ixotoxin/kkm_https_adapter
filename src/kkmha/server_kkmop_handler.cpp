@@ -17,11 +17,6 @@
 #include <unordered_map>
 
 namespace Server::KkmOp {
-    namespace Mbs {
-        using Json::Mbs::c_successKey;
-        using Json::Mbs::c_messageKey;
-    }
-
     using Basic::Failure;
     using TimeOffsetValue = DateTime::OffsetValue;
     using Http::Method;
@@ -74,7 +69,7 @@ namespace Server::KkmOp {
             assert(static_cast<int>(status) >= 400);
             m_status = status;
             std::string message2 { message };
-            m_result[Mbs::c_messageKey] = message2;
+            m_result[Json::Mbs::c_messageKey] = message2;
             if (Log::s_appendLocation) {
                 message2 += location;
             }
@@ -164,7 +159,7 @@ namespace Server::KkmOp {
 
         std::wstring connString;
         if (!Json::handleKey(payload.m_details, "connParams", connString)) {
-            return payload.fail(Http::Status::BadRequest, std::format(Kkm::Mbs::c_requiresProperty, "connParams"));
+            return payload.fail(Http::Status::BadRequest, KKM_FMT(Kkm::Mbs::c_requiresProperty, "connParams"));
         }
 
         std::wstring serialNumber;
@@ -471,7 +466,7 @@ namespace Server::KkmOp {
         assert(request.m_response.m_status == Http::Status::Ok);
         if (request.m_response.m_status == Http::Status::Ok) {
             request.m_response.m_status = payload.m_status;
-            request.m_response.m_data = response;
+            request.m_response.m_data = std::move(response);
         }
 
     } catch (Failure & e) {

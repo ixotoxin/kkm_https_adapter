@@ -4,12 +4,11 @@
 #pragma once
 
 #include "winapi.h"
+#include "strings.h"
 #include <memory>
 #include <string>
 #include <source_location>
 #include <stringapiset.h>
-
-// TODO: Переделать форматирование сообщений.
 
 namespace Basic {
     [[maybe_unused]]
@@ -25,12 +24,12 @@ namespace Basic {
     [[maybe_unused]]
     inline void append(std::wstring & message, const std::source_location & location) noexcept try {
         auto mbFilePath = location.file_name();
-        auto size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, mbFilePath, -1, nullptr, 0);
+        auto size = WIN_MB2WC_ESTIMATED(mbFilePath, -1);
         if (size <= 0) {
             return;
         }
-        auto wcFilePath = std::make_shared<wchar_t[]>(static_cast<size_t>(size));
-        size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, mbFilePath, -1, wcFilePath.get(), size);
+        auto wcFilePath = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
+        size = WIN_MB2WC(mbFilePath, -1, wcFilePath.get(), size);
         if (size <= 0) {
             return;
         }
@@ -45,7 +44,9 @@ namespace Basic {
 
 [[maybe_unused]]
 inline std::string & operator+=(std::string & message, const std::source_location & location) noexcept {
-    message.append(" (в файле ");
+    message.append(" (");
+    message.append(Basic::Mbs::c_inFile);
+    message.append(" ");
     Basic::append(message, location);
     message.append(")");
     return message;
@@ -67,7 +68,9 @@ inline std::string operator+(const std::string_view message, const std::source_l
 
 [[maybe_unused]]
 inline std::wstring & operator+=(std::wstring & message, const std::source_location & location) {
-    message.append(L" (в файле ");
+    message.append(L" (");
+    message.append(Basic::Wcs::c_inFile);
+    message.append(L" ");
     Basic::append(message, location);
     message.append(L")");
     return message;

@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Log {
-    enum class Level : int { Debug, Info, Warning, Error };
+    enum class Level : int { Debug = 0, Info = 1, Warning = 2, Error = 3 };
 
     constexpr const int c_levelDebug [[maybe_unused]] { static_cast<int>(Level::Debug) };
     constexpr const int c_levelInfo [[maybe_unused]] { static_cast<int>(Level::Info) };

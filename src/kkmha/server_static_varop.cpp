@@ -70,8 +70,8 @@ namespace Server::Static {
     }
 
     std::wostream & vars(std::wostream & stream) {
-        stream <<
-            L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(s_enable) << L"\n"
+        stream
+            << L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(s_enable) << L"\n"
             L"[CFG] server.staticDirectory = \"" << s_directory << L"\"\n"
             L"[CFG] server.indexFile = \"" << Text::convert(s_indexFile) << L"\"\n"
             L"[CFG] server.mimeMapFile = \"" << s_mimeMapFile << L"\"\n"

@@ -13,11 +13,6 @@
 #include <format>
 
 namespace Http {
-    namespace Mbs {
-        using Json::Mbs::c_successKey;
-        using Json::Mbs::c_messageKey;
-    }
-
     struct JsonResponse : public ProtoResponse {
         Nln::Json m_data;
 
@@ -41,14 +36,14 @@ namespace Http {
         [[maybe_unused]]
         JsonResponse(bool success, const std::string & message)
         : ProtoResponse(),
-          m_data({ { Mbs::c_successKey, success }, { Mbs::c_messageKey, message } }) {
+          m_data({ { Json::Mbs::c_successKey, success }, { Json::Mbs::c_messageKey, message } }) {
             assert(m_data.is_object());
         }
 
         [[maybe_unused]]
         JsonResponse(bool success, std::string && message)
         : ProtoResponse(),
-          m_data({ { Mbs::c_successKey, success }, { Mbs::c_messageKey, std::forward<std::string>(message) } }) {
+          m_data({ { Json::Mbs::c_successKey, success }, { Json::Mbs::c_messageKey, std::forward<std::string>(message) } }) {
             assert(m_data.is_object());
         }
 
@@ -66,11 +61,11 @@ namespace Http {
         void render(Asio::StreamBuffer & buffer, Status status) override {
             assert(Mbs::c_statusStrings.contains(status));
             assert(m_data.is_object());
-            if (!m_data.contains(Mbs::c_successKey) || !m_data[Mbs::c_successKey].is_boolean()) {
-                m_data[Mbs::c_successKey] = status < Status::BadRequest;
+            if (!m_data.contains(Json::Mbs::c_successKey) || !m_data[Json::Mbs::c_successKey].is_boolean()) {
+                m_data[Json::Mbs::c_successKey] = status < Status::BadRequest;
             }
-            if (!m_data.contains(Mbs::c_messageKey) || !m_data[Mbs::c_messageKey].is_string()) {
-                m_data[Mbs::c_messageKey] = Mbs::c_statusStrings.at(status);
+            if (!m_data.contains(Json::Mbs::c_messageKey) || !m_data[Json::Mbs::c_messageKey].is_string()) {
+                m_data[Json::Mbs::c_messageKey] = Mbs::c_statusStrings.at(status);
             }
             std::string text { m_data.dump() };
             std::ostream output { &buffer };
