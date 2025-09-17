@@ -8,5 +8,9 @@ if (BUILD_SEPARATED)
     target_sources(xtxn_lib PRIVATE variables.cpp)
 endif ()
 
+#target_link_libraries(xtxn_lib PRIVATE clang_rt.asan_dynamic-x86_64 clang_rt.asan_dynamic_runtime_thunk-x86_64)
+#target_link_libraries(xtxn_lib PRIVATE clang_rt.asan_dynamic-x86_64)
+#target_link_libraries(xtxn_lib PRIVATE clang_rt.ubsan_standalone_cxx-x86_64)
+
 target_compile_definitions(xtxn_lib PUBLIC ${XTXN_PUB_DEFS} PRIVATE ${XTXN_PRI_DEFS})
 target_link_libraries(xtxn_lib PRIVATE nlohmann_json::nlohmann_json)
