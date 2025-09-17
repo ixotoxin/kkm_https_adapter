@@ -6,6 +6,7 @@
 #include "http_types.h"
 #include "http_response.h"
 #include "asio.h"
+#include <lib/meta.h>
 #include <lib/datetime.h>
 #include <log/write.h>
 #include <cassert>
@@ -68,7 +69,7 @@ namespace Http {
             const std::string_view message,
             const std::source_location & location = std::source_location::current()
         ) {
-            assert(static_cast<int>(status) >= 400);
+            assert(Meta::toUnderlying(status) >= 400);
             m_response.m_status = status;
             std::string message2 { message };
             m_response.m_data = message2;

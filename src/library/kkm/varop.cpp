@@ -72,7 +72,7 @@ namespace Kkm {
             << L"[CFG] kkm.dbDirectory = \"" << s_dbDirectory << L"\"\n"
             L"[CFG] kkm.defaultBaudRate = " << s_defaultBaudRate << L"\n"
             L"[CFG] kkm.defaultLineLength = " << s_defaultLineLength << L"\n"
-            L"[CFG] kkm.timeZone = tz" << static_cast<int>(s_timeZone) << L"\n"
+            L"[CFG] kkm.timeZone = tz" << Meta::toUnderlying(s_timeZone) << L"\n"
             L"[CFG] kkm.documentClosingTimeout = " << s_documentClosingTimeout << L"\n"
             L"[CFG] kkm.cliOperator.name = \"" << s_cliOperatorName << L"\"\n"
             L"[CFG] kkm.cliOperator.inn = \"" << s_cliOperatorInn << L"\"\n"

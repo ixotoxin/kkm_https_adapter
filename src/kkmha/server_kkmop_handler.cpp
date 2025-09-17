@@ -8,6 +8,7 @@
 #include "server_strings.h"
 #include "server_cache_strings.h"
 #include "server_cache_core.h"
+#include <lib/meta.h>
 #include <debug/memprof.h>
 #include <kkm/strings.h>
 #include <kkm/device.h>
@@ -63,7 +64,7 @@ namespace Server::KkmOp {
             const std::string_view message,
             const std::source_location & location = std::source_location::current()
         ) {
-            assert(static_cast<int>(status) >= 400);
+            assert(Meta::toUnderlying(status) >= 400);
             m_status = status;
             std::string message2 { message };
             m_result[Json::Mbs::c_messageKey] = message2;

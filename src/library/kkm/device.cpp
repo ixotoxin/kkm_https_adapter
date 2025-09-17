@@ -5,6 +5,7 @@
 #include "defaults.h"
 #include "variables.h"
 #include "strings.h"
+#include <lib/meta.h>
 #include <log/write.h>
 #include <fstream>
 #include <unordered_map>
@@ -49,7 +50,7 @@ namespace Kkm {
     void Device::ConnParams::applyCommon(Device & kkm) const { // NOLINT(*-convert-member-functions-to-static)
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_MODEL, std::to_wstring(Atol::LIBFPTR_MODEL_ATOL_AUTO));
         if (s_timeZoneConfigured) {
-            kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_TIME_ZONE, std::to_wstring(static_cast<int>(s_timeZone)));
+            kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_TIME_ZONE, std::to_wstring(Meta::toUnderlying(s_timeZone)));
         }
         kkm.m_kkm.setSingleSetting(Atol::LIBFPTR_SETTING_OFD_CHANNEL, std::to_wstring(Atol::LIBFPTR_OFD_CHANNEL_AUTO));
         // ISSUE: Из документации не ясно, что передавать в качестве значения параметра.
@@ -344,7 +345,7 @@ namespace Kkm {
         }
         m_kkm.setParam(Atol::LIBFPTR_PARAM_TEXT_WRAP, Atol::LIBFPTR_TW_WORDS);
         m_kkm.setParam(Atol::LIBFPTR_PARAM_TEXT, text);
-        m_kkm.setParam(Atol::LIBFPTR_PARAM_DEFER, static_cast<int>(position));
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_DEFER, Meta::toUnderlying(position));
         if (m_kkm.printText() < 0) {
             throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
         }
@@ -1580,7 +1581,7 @@ namespace Kkm {
         if (details.m_sellerDataIsPresent) {
             subSetSeller(details);
         }
-        m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, static_cast<unsigned>(type));
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_TYPE, Meta::toUnderlying(type));
         m_kkm.setParam(Atol::LIBFPTR_PARAM_RECEIPT_ELECTRONICALLY, details.m_electronically); // Открытие электрочека
         if (m_kkm.openReceipt() < 0) {
             return result.fail(*this); // throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
@@ -1615,8 +1616,8 @@ namespace Kkm {
             m_kkm.setParam(Atol::LIBFPTR_PARAM_COMMODITY_NAME, item.m_commodityName);
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PRICE, item.m_price);
             m_kkm.setParam(Atol::LIBFPTR_PARAM_QUANTITY, item.m_quantity);
-            m_kkm.setParam(Atol::LIBFPTR_PARAM_MEASUREMENT_UNIT, static_cast<int>(item.m_unit));
-            m_kkm.setParam(Atol::LIBFPTR_PARAM_TAX_TYPE, static_cast<int>(item.m_tax));
+            m_kkm.setParam(Atol::LIBFPTR_PARAM_MEASUREMENT_UNIT, Meta::toUnderlying(item.m_unit));
+            m_kkm.setParam(Atol::LIBFPTR_PARAM_TAX_TYPE, Meta::toUnderlying(item.m_tax));
             if (m_kkm.registration() < 0) {
                 return result.fail(*this); // throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
             }
@@ -1626,7 +1627,7 @@ namespace Kkm {
 
         /** Оплата чека **/
         if (details.m_paymentSum > 0) {
-            m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, static_cast<int>(details.m_paymentType));
+            m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Meta::toUnderlying(details.m_paymentType));
             m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_SUM, details.m_paymentSum);
             if (m_kkm.payment() < 0) {
                 return result.fail(*this); // throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
@@ -1656,7 +1657,7 @@ namespace Kkm {
         tsLogDebug(Wcs::c_subRegisterReceiptAndPrint, m_logPrefix, m_serialNumber);
 
         /** Закрытие чека **/
-        m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, static_cast<int>(details.m_paymentType));
+        m_kkm.setParam(Atol::LIBFPTR_PARAM_PAYMENT_TYPE, Meta::toUnderlying(details.m_paymentType));
         if (m_kkm.closeReceipt() < 0) {
             return result.fail(*this); // throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
         }

@@ -4,6 +4,7 @@
 #include "core.h"
 #include "variables.h"
 #include "strings.h"
+#include <lib/meta.h>
 #include <lib/winapi.h>
 #include <lib/datetime.h>
 #include <cassert>
@@ -15,7 +16,7 @@ namespace Log {
     namespace Console {
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return static_cast<int>(level) >= s_level;
+            return Meta::toUnderlying(level) >= s_level;
         }
 
         [[maybe_unused]]
@@ -89,7 +90,7 @@ namespace Log {
 
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return static_cast<int>(level) >= s_level && open();
+            return Meta::toUnderlying(level) >= s_level && open();
         }
 
         [[maybe_unused]]
@@ -133,7 +134,7 @@ namespace Log {
 
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return static_cast<int>(level) >= s_level && s_sourceHandle;
+            return Meta::toUnderlying(level) >= s_level && s_sourceHandle;
         }
 
         [[maybe_unused]]

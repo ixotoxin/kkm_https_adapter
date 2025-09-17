@@ -13,12 +13,12 @@
 #include <winsvc.h>
 
 namespace Service {
-    using Basic::Failure;
-
     static_assert(c_waitHint >= c_sleepQuantum.count());
     static_assert(c_waitHint > Server::c_controlTimeout.count());
     static_assert(c_controlTimeout >= c_sleepQuantum.count());
     static_assert(c_controlTimeout > Server::c_controlTimeout.count());
+
+    using Basic::Failure;
 
     namespace Worker {
         static ::SERVICE_STATUS s_status {};

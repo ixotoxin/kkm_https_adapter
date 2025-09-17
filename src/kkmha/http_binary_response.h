@@ -6,6 +6,7 @@
 #include "http_types.h"
 #include "http_strings.h"
 #include "http_proto_response.h"
+#include <lib/meta.h>
 #include <type_traits>
 #include <cassert>
 #include <memory>
@@ -60,7 +61,7 @@ namespace Http {
                 output
                     << std::format(
                         Mbs::c_staticResponseHeaderTemplate,
-                        static_cast<int>(status),
+                        Meta::toUnderlying(status),
                         Mbs::c_statusStrings.at(status),
                         m_mimeType,
                         m_size
@@ -74,7 +75,7 @@ namespace Http {
                 output
                     << std::format(
                         Mbs::c_staticResponseHeaderTemplate,
-                        static_cast<int>(status),
+                        Meta::toUnderlying(status),
                         Mbs::c_statusStrings.at(status),
                         m_mimeType,
                         0

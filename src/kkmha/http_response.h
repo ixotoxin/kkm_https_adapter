@@ -6,6 +6,7 @@
 #include "http_types.h"
 #include "http_strings.h"
 #include "http_proto_response.h"
+#include <lib/meta.h>
 #include <lib/json.h>
 #include <cassert>
 #include <memory>
@@ -40,7 +41,7 @@ namespace Http {
                 output
                     << std::format(
                         Mbs::c_responseHeaderTemplate,
-                        static_cast<int>(m_status),
+                        Meta::toUnderlying(m_status),
                         Mbs::c_statusStrings.at(m_status),
                         Mbs::c_jsonMimeType,
                         text.size()

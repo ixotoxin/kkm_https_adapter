@@ -36,7 +36,7 @@ namespace Kkm {
         Failure & operator=(Failure &&) noexcept = default;
     };
 
-    enum class TimeZone : int {
+    enum class TimeZone : decltype(Atol::LIBFPTR_TIME_ZONE_DEVICE) {
         Device = Atol::LIBFPTR_TIME_ZONE_DEVICE,
         Zone1 = Atol::LIBFPTR_TIME_ZONE_1,
         Zone2 = Atol::LIBFPTR_TIME_ZONE_2,
@@ -51,20 +51,20 @@ namespace Kkm {
         Zone11 = Atol::LIBFPTR_TIME_ZONE_11
     };
 
-    enum class FfdVersion : int {
+    enum class FfdVersion : decltype(Atol::LIBFPTR_FFD_UNKNOWN) {
         Unknown = Atol::LIBFPTR_FFD_UNKNOWN,
         V_1_0_5 = Atol::LIBFPTR_FFD_1_0_5,
         V_1_1 = Atol::LIBFPTR_FFD_1_1,
         V_1_2 = Atol::LIBFPTR_FFD_1_2
     };
 
-    enum class ShiftState : int {
+    enum class ShiftState : decltype(Atol::LIBFPTR_SS_CLOSED) {
         Closed = Atol::LIBFPTR_SS_CLOSED,
         Opened = Atol::LIBFPTR_SS_OPENED,
         Expired = Atol::LIBFPTR_SS_EXPIRED
     };
 
-    enum class ReceiptType : int {
+    enum class ReceiptType : decltype(Atol::LIBFPTR_RT_CLOSED) {
         Closed = Atol::LIBFPTR_RT_CLOSED,
         Sell = Atol::LIBFPTR_RT_SELL,
         SellReturn = Atol::LIBFPTR_RT_SELL_RETURN,
@@ -76,7 +76,7 @@ namespace Kkm {
         BuyReturnCorrection = Atol::LIBFPTR_RT_BUY_RETURN_CORRECTION
     };
 
-    enum class DocumentType : int {
+    enum class DocumentType : decltype(Atol::LIBFPTR_DT_CLOSED) {
         Closed = Atol::LIBFPTR_DT_CLOSED,
         ReceiptSell = Atol::LIBFPTR_DT_RECEIPT_SELL,
         ReceiptSellReturn = Atol::LIBFPTR_DT_RECEIPT_SELL_RETURN,
@@ -95,7 +95,7 @@ namespace Kkm {
         DocumentCopy = Atol::LIBFPTR_DT_DOCUMENT_COPY
     };
 
-    enum class MeasurementUnit : int {
+    enum class MeasurementUnit : decltype(Atol::LIBFPTR_IU_PIECE) {
         Piece = Atol::LIBFPTR_IU_PIECE,
         Gram = Atol::LIBFPTR_IU_GRAM,
         Kilogram = Atol::LIBFPTR_IU_KILOGRAM,
@@ -122,7 +122,7 @@ namespace Kkm {
         Other = Atol::LIBFPTR_IU_OTHER
     };
 
-    enum class Tax : int {
+    enum class Tax : decltype(Atol::LIBFPTR_TAX_NO) {
         No = Atol::LIBFPTR_TAX_NO,
         Vat0 = Atol::LIBFPTR_TAX_VAT0,
         Vat5 = Atol::LIBFPTR_TAX_VAT5,
@@ -138,7 +138,7 @@ namespace Kkm {
         // Department = Atol::LIBFPTR_TAX_DEPARTMENT
     };
 
-    enum class PaymentType : int {
+    enum class PaymentType : decltype(Atol::LIBFPTR_PT_CASH) {
         Cash = Atol::LIBFPTR_PT_CASH,
         Electronically = Atol::LIBFPTR_PT_ELECTRONICALLY,
         // Prepaid = Atol::LIBFPTR_PT_PREPAID,
@@ -151,7 +151,7 @@ namespace Kkm {
         // Pt10 = Atol::LIBFPTR_PT_10
     };
 
-    enum class TextPosition {
+    enum class TextPosition : decltype(Atol::LIBFPTR_DEFER_NONE) {
         Auto = Atol::LIBFPTR_DEFER_NONE,
         Pre = Atol::LIBFPTR_DEFER_PRE,
         Post = Atol::LIBFPTR_DEFER_POST

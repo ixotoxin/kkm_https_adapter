@@ -20,6 +20,10 @@
 #include <latch>
 
 namespace Server {
+    static_assert(c_controlTimeout >= c_sleepQuantum);
+
+    using namespace std::chrono_literals;
+
     namespace Wcs {
         using namespace Http::Wcs;
     }
@@ -28,11 +32,7 @@ namespace Server {
         using namespace Http::Mbs;
     }
 
-    using namespace std::chrono_literals;
-
     using Basic::Failure;
-
-    static_assert(c_controlTimeout >= c_sleepQuantum);
 
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 

@@ -21,6 +21,11 @@ namespace Meta {
     template<class T, classTplt U>
     concept fromTemplate = requires(T t) { [] <typename ... V>(U<V ...> &) {} (t); };
 
+    template<class T>
+    constexpr std::underlying_type_t<T> toUnderlying(T e) noexcept {
+        return static_cast<std::underlying_type_t<T>>(e);
+    }
+
     template<typename>
     struct ArrayElement {};
 

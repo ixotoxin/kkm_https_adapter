@@ -3,12 +3,14 @@
 
 #pragma once
 
-namespace Log {
-    enum class Level : int { Debug = 0, Info = 1, Warning = 2, Error = 3 };
+#include <lib/meta.h>
 
-    constexpr const int c_levelDebug [[maybe_unused]] { static_cast<int>(Level::Debug) };
-    constexpr const int c_levelInfo [[maybe_unused]] { static_cast<int>(Level::Info) };
-    constexpr const int c_levelWarning [[maybe_unused]] { static_cast<int>(Level::Warning) };
-    constexpr const int c_levelError [[maybe_unused]] { static_cast<int>(Level::Error) };
-    constexpr const int c_levelNone [[maybe_unused]] { c_levelError + 1 };
+namespace Log {
+    enum class Level { Debug = 0, Info = 1, Warning = 2, Error = 3 };
+
+    constexpr const std::underlying_type_t<Level> c_levelDebug [[maybe_unused]] { Meta::toUnderlying(Level::Debug) };
+    constexpr const std::underlying_type_t<Level> c_levelInfo [[maybe_unused]] { Meta::toUnderlying(Level::Info) };
+    constexpr const std::underlying_type_t<Level> c_levelWarning [[maybe_unused]] { Meta::toUnderlying(Level::Warning) };
+    constexpr const std::underlying_type_t<Level> c_levelError [[maybe_unused]] { Meta::toUnderlying(Level::Error) };
+    constexpr const std::underlying_type_t<Level> c_levelNone [[maybe_unused]] { c_levelError + 1 };
 }
