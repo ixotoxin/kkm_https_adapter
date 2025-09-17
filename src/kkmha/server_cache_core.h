@@ -8,8 +8,8 @@
 
 namespace Server::Cache {
     [[nodiscard, maybe_unused]]
-    inline DateTime::Point expiresAfter(DateTime::OffsetValue seconds) {
-        return DateTime::Clock::now() + DateTime::Offset(seconds);
+    inline DateTime::Point expiresAfter(DateTime::Offset seconds) {
+        return DateTime::Clock::now() + seconds;
     }
 
     [[maybe_unused]] void store(const Key &, const Entry &);

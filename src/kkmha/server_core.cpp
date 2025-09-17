@@ -32,8 +32,6 @@ namespace Server {
 
     using Basic::Failure;
 
-    static_assert(std::is_integral_v<decltype(c_sleepQuantum)>);
-    static_assert(std::is_integral_v<decltype(c_controlTimeout)>);
     static_assert(c_controlTimeout >= c_sleepQuantum);
 
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
@@ -242,33 +240,38 @@ namespace Server {
             sslContext.set_verify_mode(asio::ssl::verify_none);
 
             auto executor = co_await asio::this_coro::executor;
-            Asio::Acceptor acceptor(executor, endpoint);
 
-            tsLogInfo(Wcs::c_started);
-            s_state.store(State::Running);
+            { /** Принимаем подключений **/
+                Asio::Acceptor acceptor(executor, endpoint);
 
-            do {
-                auto [acceptingError, socket] = co_await acceptor.async_accept();
-                if (acceptingError) {
-                    tsLogError(acceptingError);
-                    tsLogError(Wcs::c_servicingFailed);
-                } else if (!socket.is_open()) {
-                    tsLogError(Wcs::c_socketOpeningError);
-                    tsLogError(Wcs::c_servicingFailed);
-                } else {
-                    asio::co_spawn(
-                        executor,
-                        accept(std::make_unique<Counter>(), std::move(socket), sslContext),
-                        asio::detached
-                    );
+                tsLogInfo(Wcs::c_started);
+                s_state.store(State::Running);
+
+                do {
+                    auto [acceptingError, socket] = co_await acceptor.async_accept();
+                    if (acceptingError) {
+                        tsLogError(acceptingError);
+                        tsLogError(Wcs::c_servicingFailed);
+                    } else if (!socket.is_open()) {
+                        tsLogError(Wcs::c_socketOpeningError);
+                        tsLogError(Wcs::c_servicingFailed);
+                    } else {
+                        asio::co_spawn(
+                            executor,
+                            accept(std::make_unique<Counter>(), std::move(socket), sslContext),
+                            asio::detached
+                        );
+                    }
+                } while (s_state.load() == State::Running);
+            }
+
+            { /** Ждем остановки обработчиков в корутинах **/
+                Asio::Timer timer(executor);
+
+                while (s_state.load() == State::Shutdown) {
+                    timer.expires_after(c_sleepQuantum);
+                    co_await timer.async_wait(asio::use_awaitable);
                 }
-            } while (s_state.load() == State::Running);
-
-            Asio::Timer timer(executor);
-
-            while (s_state.load() == State::Shutdown) {
-                timer.expires_after(std::chrono::milliseconds(c_sleepQuantum));
-                co_await timer.async_wait(asio::use_awaitable);
             }
         } catch (const Failure & e) {
             tsLogError(e);

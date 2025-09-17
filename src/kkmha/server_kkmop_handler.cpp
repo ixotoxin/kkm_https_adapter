@@ -18,9 +18,6 @@
 
 namespace Server::KkmOp {
     using Basic::Failure;
-    using TimeOffsetValue = DateTime::OffsetValue;
-    using Http::Method;
-    using Http::Status;
     using Device = Kkm::Device;
     using NewConnParams = Kkm::Device::NewConnParams;
     using KnownConnParams = Kkm::Device::KnownConnParams;
@@ -35,8 +32,8 @@ namespace Server::KkmOp {
         const std::string m_serialNumber;
         const Nln::Json m_details;
         Nln::Json m_result;
-        TimeOffsetValue m_expiresAfter;
-        Status m_status { Status::Ok };
+        DateTime::Offset m_expiresAfter;
+        Http::Status m_status { Http::Status::Ok };
         const Id m_requestId;
 
         Payload() = delete;
@@ -45,7 +42,7 @@ namespace Server::KkmOp {
             std::string && serialNumber,
             Nln::Json && details,
             const Id requestId,
-            const TimeOffsetValue expiresAfter = 0
+            const DateTime::Offset expiresAfter = 0s
         ) : m_serialNumber(std::forward<std::string>(serialNumber)),
             m_details(std::forward<Nln::Json>(details)), m_result(Nln::EmptyJsonObject),
             m_expiresAfter(expiresAfter), m_requestId(requestId) {
@@ -62,7 +59,7 @@ namespace Server::KkmOp {
 
         [[maybe_unused]]
         inline void fail(
-            const Status status,
+            const Http::Status status,
             const std::string_view message,
             const std::source_location & location = std::source_location::current()
         ) {
@@ -80,7 +77,7 @@ namespace Server::KkmOp {
     [[maybe_unused]]
     inline std::shared_ptr<KnownConnParams> resolveConnParams(Payload & payload) {
         if (payload.m_serialNumber.empty()) {
-            payload.fail(Status::BadRequest, Http::Mbs::c_badRequest);
+            payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
             return nullptr;
         }
         std::wstring wcSerialNumber { Text::convert(payload.m_serialNumber) };
@@ -101,7 +98,7 @@ namespace Server::KkmOp {
             }
         }
         payload.fail(
-            Status::NotFound,
+            Http::Status::NotFound,
             std::format(Mbs::c_notFound, payload.m_requestId, payload.m_serialNumber)
         );
         return nullptr;
@@ -192,7 +189,7 @@ namespace Server::KkmOp {
         std::scoped_lock registryLock(s_registryMutex);
         s_connParamsRegistry.clear();
         if (!s_connParamsRegistry.empty()) {
-            payload.fail(Status::InternalServerError, Mbs::c_cantClearRegistry);
+            payload.fail(Http::Status::InternalServerError, Mbs::c_cantClearRegistry);
         }
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
@@ -230,7 +227,7 @@ namespace Server::KkmOp {
     void fullStatus(Payload & payload) {
         FORCE_MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
-            return payload.fail(Status::BadRequest, Http::Mbs::c_badRequest);
+            return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
         }
 
         auto connParams = resolveConnParams(payload);
@@ -362,7 +359,7 @@ namespace Server::KkmOp {
     }
 
     void Handler::operator()(Http::Request & request) const noexcept try {
-        assert(request.m_response.m_status == Status::Ok);
+        assert(request.m_response.m_status == Http::Status::Ok);
         // if (request.m_response.m_status != Status::Ok) {
         //     return;
         // }
@@ -376,7 +373,7 @@ namespace Server::KkmOp {
             }
         }
 
-        if (request.m_method == Method::Post) {
+        if (request.m_method == Http::Method::Post) {
             if (idempotencyKey.empty()) {
                 return request.fail(Http::Status::BadRequest, Http::Mbs::c_invalidXIdempotencyKey);
             }

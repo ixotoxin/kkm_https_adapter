@@ -8,8 +8,7 @@
 #include <string_view>
 
 namespace Kkm {
-    KKM_CONST(DateTime::SleepUnit, c_sleep, 1'000); // Миллисекунды
-    KKM_CONST(DateTime::SleepUnit, c_sleepQuantum, 200); // Миллисекунды
+    KKM_CONST(DateTime::SleepUnit, c_sleepQuantum, DateTime::c_basicSleepQuantum); // Миллисекунды
     KKM_CONST(std::wstring_view, c_connParamsSeparator, L",");
     KKM_CONST(wchar_t, c_separatorChar, L'-');
     KKM_DEF(std::wstring_view, c_defDbDirectory, L"conf\\kkm");
@@ -17,9 +16,9 @@ namespace Kkm {
     KKM_CONST(size_t, c_minLineLength, 24);
     KKM_CONST(size_t, c_maxLineLength, 192);
     KKM_DEF(size_t, c_defLineLength, 42);
-    KKM_CONST(DateTime::SleepUnit, c_minDocumentClosingTimeout, c_sleepQuantum); // Миллисекунды
-    KKM_CONST(DateTime::SleepUnit, c_maxDocumentClosingTimeout, c_sleep * 10); // Миллисекунды
-    KKM_DEF(DateTime::SleepUnit, c_defDocumentClosingTimeout, c_sleep); // Миллисекунды
+    KKM_CONST(DateTime::SleepUnit, c_minDocumentClosingTimeout, DateTime::c_basicSleepQuantum); // Миллисекунды
+    KKM_CONST(DateTime::SleepUnit, c_maxDocumentClosingTimeout, 10 * DateTime::c_basicSleep); // Миллисекунды
+    KKM_DEF(DateTime::SleepUnit, c_defDocumentClosingTimeout, DateTime::c_basicSleep); // Миллисекунды
     KKM_DEF(std::wstring_view, c_defCliOperatorName, L"Оператор");
     KKM_DEF(std::wstring_view, c_defCliOperatorInn, );
     KKM_DEF(std::wstring_view, c_defCustomerAccountField, L"Лицевой счёт (идентификатор для оплаты):");

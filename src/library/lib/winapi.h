@@ -4,11 +4,11 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#   define WIN32_LEAN_AND_MEAN
+#   error Requires WIN32_LEAN_AND_MEAN definition
 #endif
 
 #ifndef NOMINMAX
-#   define NOMINMAX
+#   error Requires NOMINMAX definition
 #endif
 
 #include <windows.h>

@@ -362,10 +362,10 @@ namespace Kkm {
         // ISSUE: Из документации не очень понятно как работать с методом checkDocumentClosed() - описания нет,
         //  приведенный пример выглядит странно и рассчитан скорее всего на интерактивное взаимодействие с ККМ.
         //  В нашем случае интерактивность невозможна. Будем ждать чуда. Если чуда не произойдет, отменяем чек.
-        decltype(s_documentClosingTimeout) i;
+        decltype(s_documentClosingTimeout)::rep i;
         for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.checkDocumentClosed() < 0 && i; --i) {
             tsLogWarning(Wcs::c_closingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
-            std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+            std::this_thread::sleep_for(c_sleepQuantum);
         }
         if (!i || !m_kkm.getParamBool(Atol::LIBFPTR_PARAM_DOCUMENT_CLOSED)) {
             if (m_kkm.cancelReceipt() < 0) {
@@ -376,7 +376,7 @@ namespace Kkm {
         if (!m_kkm.getParamBool(Atol::LIBFPTR_PARAM_DOCUMENT_PRINTED)) {
             for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.continuePrint() < 0 && i; --i) {
                 tsLogWarning(Wcs::c_printingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                std::this_thread::sleep_for(c_sleepQuantum);
             }
             if (!i) {
                 return result.fail(Wcs::c_checkingError);

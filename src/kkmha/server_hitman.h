@@ -4,12 +4,15 @@
 #pragma once
 
 #include "server_defaults.h"
+#include <lib/datetime.h>
 #include <cassert>
 #include <functional>
 #include <atomic>
 #include <mutex>
 
 namespace Server {
+    using namespace std::chrono_literals;
+
     class Hitman {
         std::mutex m_mutex {};
         std::function<void()> m_gun { [] {} };
@@ -26,12 +29,12 @@ namespace Server {
         explicit Hitman(T && gun)
         : m_gun { gun }, m_counter { 0 } {}
 
-        template<typename T, std::integral U>
+        template<typename T>
         requires std::is_convertible_v<T, std::function<void()>>
         [[maybe_unused]]
-        Hitman(T && gun, U waitingTime)
-        : m_gun { gun }, m_counter { static_cast<int64_t>(waitingTime / c_sleepQuantum) } {
-            assert(waitingTime >= 0);
+        Hitman(T && gun, DateTime::SleepUnit waitingTime)
+        : m_gun { gun }, m_counter { waitingTime / c_sleepQuantum } {
+            assert(waitingTime >= 0ms);
         }
 
         ~Hitman() = default;
@@ -48,14 +51,14 @@ namespace Server {
             m_counter.store(0);
         }
 
-        template<typename T, std::integral U>
+        template<typename T>
         requires std::is_convertible_v<T, std::function<void()>>
         [[maybe_unused]]
-        void placeOrder(T && gun, U waitingTime) {
-            assert(waitingTime >= 0);
+        void placeOrder(T && gun, DateTime::SleepUnit waitingTime) {
+            assert(waitingTime >= 0ms);
             std::scoped_lock lock { m_mutex };
             m_gun = gun;
-            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+            m_counter.store(waitingTime / c_sleepQuantum);
         }
 
         [[maybe_unused]]
@@ -68,17 +71,17 @@ namespace Server {
         [[maybe_unused]]
         void await() {
             while (m_counter.load() > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                std::this_thread::sleep_for(c_sleepQuantum);
                 --m_counter;
             }
         }
 
         [[maybe_unused]]
-        void await(std::integral auto waitingTime) {
-            assert(waitingTime >= 0);
-            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+        void await(DateTime::SleepUnit waitingTime) {
+            assert(waitingTime.count() >= 0);
+            m_counter.store(waitingTime / c_sleepQuantum);
             while (m_counter.load() > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                std::this_thread::sleep_for(c_sleepQuantum);
                 --m_counter;
             }
         }
@@ -88,20 +91,20 @@ namespace Server {
         [[maybe_unused]]
         void await(T && safetyLock) {
             while (m_counter.load() > 0 && std::invoke(safetyLock)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                std::this_thread::sleep_for(c_sleepQuantum);
                 --m_counter;
             }
             m_counter.store(0);
         }
 
-        template<std::integral T, typename U>
-        requires std::is_invocable_r_v<bool, U>
+        template<typename T>
+        requires std::is_invocable_r_v<bool, T>
         [[maybe_unused]]
-        void await(T waitingTime, U && safetyLock) {
-            assert(waitingTime >= 0);
-            m_counter.store(static_cast<int64_t>(waitingTime / c_sleepQuantum));
+        void await(DateTime::SleepUnit waitingTime, T && safetyLock) {
+            assert(waitingTime >= 0ms);
+            m_counter.store(waitingTime / c_sleepQuantum);
             while (m_counter.load() > 0 && std::invoke(safetyLock)) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(c_sleepQuantum));
+                std::this_thread::sleep_for(c_sleepQuantum);
                 --m_counter;
             }
             m_counter.store(0);

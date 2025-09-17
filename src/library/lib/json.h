@@ -6,6 +6,7 @@
 #include "macro.h"
 #include "except.h"
 #include "numeric.h"
+#include "datetime.h"
 #include "text.h"
 #include <ostream>
 #include <nlohmann/json.hpp>
@@ -55,6 +56,19 @@ namespace Json {
             return Text::cast<T>(static_cast<std::string>(json));
         } else if (json.is_boolean()) {
             return static_cast<T>(json.get<bool>());
+        }
+        throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+    } catch (const Nln::Exception & e) {
+        throw DataError(e); // NOLINT(*-exception-baseclass)
+    }
+
+    template<Meta::fromTemplate<std::chrono::duration> T>
+    [[nodiscard, maybe_unused]]
+    inline T cast(const Nln::Json & json) try {
+        if (json.is_number/*_integer*/()) {
+            return T(json.get<typename T::rep>());
+        } else if (json.is_string()) {
+            return T(Text::cast<typename T::rep>(static_cast<std::string>(json)));
         }
         throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
     } catch (const Nln::Exception & e) {

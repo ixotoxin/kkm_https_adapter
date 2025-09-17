@@ -7,7 +7,9 @@
 #include <string_view>
 
 namespace Server::Static {
-    constexpr const DateTime::OffsetValue c_fileCacheLifeTime { 43'200 }; // Секунды
+    using namespace std::chrono_literals;
+
+    constexpr const DateTime::Offset c_fileCacheLifeTime { 43'200s }; // Секунды
     constexpr const bool c_enableStatic { false };
     constexpr const std::wstring_view c_staticDirectory { L"static" };
     constexpr const std::string_view c_indexFile { "index.html" };

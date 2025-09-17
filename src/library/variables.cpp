@@ -55,8 +55,7 @@ namespace Log {
 }
 
 namespace Kkm {
-    const DateTime::SleepUnit c_sleep { DateTime::c_defaultSleep }; // Миллисекунды
-    const DateTime::SleepUnit c_sleepQuantum { DateTime::c_defaultSleepQuantum }; // Миллисекунды
+    const DateTime::SleepUnit c_sleepQuantum { DateTime::c_basicSleepQuantum }; // Миллисекунды
     const std::wstring_view c_connParamsSeparator { L"," };
     const wchar_t c_separatorChar { L'-' };
     std::wstring s_dbDirectory { L"conf\\kkm" };
@@ -66,9 +65,9 @@ namespace Kkm {
     size_t s_defaultLineLength { 42 };
     TimeZone s_timeZone { TimeZone::Device };
     bool s_timeZoneConfigured { false };
-    const DateTime::SleepUnit c_minDocumentClosingTimeout { DateTime::c_defaultSleepQuantum }; // Миллисекунды
-    const DateTime::SleepUnit c_maxDocumentClosingTimeout { 10 * DateTime::c_defaultSleep }; // Миллисекунды
-    DateTime::SleepUnit s_documentClosingTimeout { DateTime::c_defaultSleep }; // Миллисекунды
+    const DateTime::SleepUnit c_minDocumentClosingTimeout { DateTime::c_basicSleepQuantum }; // Миллисекунды
+    const DateTime::SleepUnit c_maxDocumentClosingTimeout { 10 * DateTime::c_basicSleep }; // Миллисекунды
+    DateTime::SleepUnit s_documentClosingTimeout { DateTime::c_basicSleep }; // Миллисекунды
     std::wstring s_cliOperatorName { L"Оператор" };
     std::wstring s_cliOperatorInn {};
     std::wstring s_customerAccountField { L"Лицевой счёт (идентификатор для оплаты):" };

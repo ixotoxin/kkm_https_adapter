@@ -6,6 +6,8 @@
 #include <lib/datetime.h>
 
 namespace Server::KkmOp {
-    constexpr const DateTime::OffsetValue c_reportCacheLifeTime { 5 }; // Секунды
-    constexpr const DateTime::OffsetValue c_receiptCacheLifeTime { 345'600 }; // Секунды
+    using namespace std::chrono_literals;
+
+    constexpr const DateTime::Offset c_reportCacheLifeTime { 5s }; // Секунды
+    constexpr const DateTime::Offset c_receiptCacheLifeTime { 345'600s }; // Секунды
 }

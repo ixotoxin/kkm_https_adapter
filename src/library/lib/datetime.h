@@ -4,6 +4,8 @@
 #pragma once
 
 #include "meta.h"
+#include "except.h"
+#include <algorithm>
 #include <chrono>
 #include <format>
 #include <ostream>
@@ -27,6 +29,8 @@ namespace Meta {
 }
 
 namespace DateTime {
+    using namespace std::chrono_literals;
+
     namespace Wcs {
         constexpr const std::wstring_view c_timestamp { L"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
     }
@@ -35,14 +39,15 @@ namespace DateTime {
         constexpr const std::string_view c_timestamp { "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
     }
 
+    using Basic::DataError;
+
     using Clock = std::chrono::system_clock;
     using Point = decltype(Clock::now());
     using Offset = std::chrono::seconds;
-    using OffsetValue = Offset::rep;
-    using SleepUnit = std::chrono::milliseconds::rep;
+    using SleepUnit = std::chrono::milliseconds;
 
-    const SleepUnit c_defaultSleep { 1'000 };
-    const SleepUnit c_defaultSleepQuantum { 200 };
+    constexpr SleepUnit c_basicSleep { 1'000ms };
+    constexpr SleepUnit c_basicSleepQuantum { 200ms };
 
     [[nodiscard, maybe_unused]] int64_t windows();
     [[nodiscard, maybe_unused]] int64_t unix();
@@ -78,4 +83,50 @@ namespace DateTime {
     inline auto cast(const U & timePoint) {
         return std::chrono::clock_cast<typename T::clock>(timePoint);
     }
+
+    template<Meta::fromTemplate<std::chrono::duration> T>
+    [[nodiscard, maybe_unused]]
+    inline auto clamp(T min, T max) {
+        return [min, max] (const T value) -> T { return std::clamp(value, min, max); };
+    }
+
+    template<Meta::fromTemplate<std::chrono::duration> T>
+    [[nodiscard, maybe_unused]]
+    inline auto min(T min) {
+        return
+            [min] (const T value) -> T {
+                if (value < min) {
+                    throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                }
+                return value;
+            };
+    }
+
+    template<Meta::fromTemplate<std::chrono::duration> T>
+    [[nodiscard, maybe_unused]]
+    inline auto max(T max) {
+        return
+            [max] (const T value) -> T {
+                if (value > max) {
+                    throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                }
+                return value;
+            };
+    }
+
+    template<Meta::fromTemplate<std::chrono::duration> T>
+    [[nodiscard, maybe_unused]]
+    inline auto between(T min, T max) {
+        return
+            [min, max] (const T value) -> T {
+                if (value < min || value > max) {
+                    throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
+                }
+                return value;
+            };
+    }
+}
+
+inline void Sleep(const DateTime::SleepUnit & duration) {
+    ::Sleep(static_cast<::DWORD>(duration.count()));
 }

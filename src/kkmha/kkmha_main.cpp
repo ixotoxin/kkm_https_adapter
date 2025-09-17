@@ -96,33 +96,33 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
                 if (command == L"install") {
                     Service::Control::install(std::format(L"\"{}\" service", Main::s_file.c_str()));
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
 
                 if (command == L"uninstall") {
                     Service::Control::uninstall();
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
 
                 if (command == L"start") {
                     Service::Control::start();
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
 
                 if (command == L"stop") {
                     Service::Control::stop();
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
 
                 if (command == L"restart") {
                     Service::Control::stop();
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     Service::Control::start();
-                    ::Sleep(DateTime::c_defaultSleep);
+                    ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
             }

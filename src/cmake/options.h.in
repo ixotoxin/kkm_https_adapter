@@ -4,7 +4,7 @@
 #pragma once
 
 #cmakedefine01 BUILD_SEPARATED
-#cmakedefine01 ENABLE_MEMORY_PROFILING
-#cmakedefine01 ENABLE_MEMORY_LEAKS
 #cmakedefine01 ENABLE_HACKS
 #cmakedefine01 STD_STRING_INVASIVE_ACCESS
+#cmakedefine01 ENABLE_MEMORY_PROFILING
+#cmakedefine01 ENABLE_MEMORY_LEAKS

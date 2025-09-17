@@ -26,7 +26,7 @@ namespace Server::Cache {
     void store(const Key & key, Entry && entry) {
         std::scoped_lock cacheLock(s_cacheMutex);
         entry.m_cachedAt = DateTime::Clock::now();
-        s_cache[key] = std::move(entry);
+        s_cache[key] = std::forward<Entry>(entry);
     }
 
     [[maybe_unused]]

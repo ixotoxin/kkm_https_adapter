@@ -9,6 +9,18 @@
 #include <string>
 
 namespace Meta {
+    #define classTplt template<typename ...> class
+
+    template<classTplt, classTplt> struct templatesComparing : std::false_type {};
+    template<classTplt T> struct templatesComparing<T, T> : std::true_type {};
+
+    template<classTplt T, classTplt U>
+    [[maybe_unused]]
+    inline constexpr bool isSameTemplate = templatesComparing<T, U>::value;
+
+    template<class T, classTplt U>
+    concept fromTemplate = requires(T t) { [] <typename ... V>(U<V ...> &) {} (t); };
+
     template<typename>
     struct ArrayElement {};
 
