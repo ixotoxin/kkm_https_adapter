@@ -36,6 +36,11 @@ target_link_libraries(test_lib_json PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(test_lib_json PRIVATE tests_lib)
 add_test(NAME test_lib_json COMMAND test_lib_json)
 
+add_executable(test_lib_path lib_path.cpp)
+target_compile_definitions(test_lib_path PUBLIC ${TESTS_PUB_DEFS})
+target_link_libraries(test_lib_path PRIVATE Catch2::Catch2WithMain)
+add_test(NAME test_lib_path COMMAND test_lib_path)
+
 add_executable(test_lib_utils lib_utils.cpp)
 target_compile_definitions(test_lib_utils PUBLIC ${TESTS_PUB_DEFS})
 target_link_libraries(test_lib_utils PRIVATE Catch2::Catch2WithMain)

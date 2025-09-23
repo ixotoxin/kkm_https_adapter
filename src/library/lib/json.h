@@ -113,6 +113,17 @@ namespace Json {
         throw DataError(e); // NOLINT(*-exception-baseclass)
     }
 
+    template<std::same_as<std::filesystem::path> T>
+    [[nodiscard, maybe_unused]]
+    inline T cast(const Nln::Json & json) try {
+        if (json.is_string()) {
+            return T(Text::convert(static_cast<std::string>(json)));
+        }
+        throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
+    } catch (const Nln::Exception & e) {
+        throw DataError(e); // NOLINT(*-exception-baseclass)
+    }
+
     [[maybe_unused]]
     inline bool handle(
         const Nln::Json & json,

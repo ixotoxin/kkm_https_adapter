@@ -4,6 +4,7 @@
 #include "server_variables.h"
 #include <lib/numeric.h>
 #include <lib/text.h>
+#include <lib/path.h>
 #include <string>
 
 namespace Server {
@@ -29,13 +30,13 @@ namespace Server {
                 Json::handleKey(
                     json, "certificateChainFile",
                     Server::s_certificateChainFile,
-                    Text::Mbs::noEmpty(Text::Mbs::trim()),
+                    Path::existsFile(Path::absolute(Path::noEmpty())),
                     path
                 );
                 Json::handleKey(
                     json, "privateKeyFile",
                     Server::s_privateKeyFile,
-                    Text::Mbs::noEmpty(Text::Mbs::trim()),
+                    Path::existsFile(Path::absolute(Path::noEmpty())),
                     path
                 );
                 Json::handleKey(json, "privateKeyPassword", Server::s_privateKeyPassword, path);
@@ -63,8 +64,8 @@ namespace Server {
             L"[CFG] server.concurrencyLimit = " << s_concurrencyLimit << L"\n"
             L"[CFG] server.enableLegacyTls = " << Text::Wcs::yesNo(s_enableLegacyTls) << L"\n"
             L"[CFG] server.securityLevel = " << securityLevel << L"\n"
-            L"[CFG] server.certificateChainFile = \"" << Text::convert(s_certificateChainFile) << L"\"\n"
-            L"[CFG] server.privateKeyFile = \"" << Text::convert(s_privateKeyFile) << L"\"\n"
+            L"[CFG] server.certificateChainFile = \"" << s_certificateChainFile.c_str() << L"\"\n"
+            L"[CFG] server.privateKeyFile = \"" << s_privateKeyFile.c_str() << L"\"\n"
             L"[CFG] server.privateKeyPassword = \"" << Text::convert(s_privateKeyPassword) << L"\"\n"
             L"[CFG] server.secret = \"" << Text::convert(s_secret) << L"\"\n"
             L"[CFG] server.loopbackWithoutSecret = " << Text::Wcs::yesNo(s_loopbackWithoutSecret) << L"\n";

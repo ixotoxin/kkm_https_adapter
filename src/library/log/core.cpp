@@ -13,10 +13,12 @@
 #include <filesystem>
 
 namespace Log {
+    static bool isForegroundProcess { true };
+
     namespace Console {
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return Meta::toUnderlying(level) >= s_level;
+            return isForegroundProcess && Meta::toUnderlying(level) >= s_level;
         }
 
         [[maybe_unused]]
@@ -32,7 +34,7 @@ namespace Log {
             }
             output << message << std::endl;
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 
@@ -58,7 +60,7 @@ namespace Log {
             if (!std::filesystem::is_directory(filePath)) {
                 std::filesystem::create_directories(filePath);
                 if (!std::filesystem::is_directory(filePath)) {
-                    std::wclog << Wcs::c_loggingError << std::endl;
+                    fallbackLog();
                     return false;
                 }
             }
@@ -75,7 +77,7 @@ namespace Log {
             }
             return s_file.is_open() && s_file.good();
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
             return false;
         }
 
@@ -85,12 +87,15 @@ namespace Log {
                 s_file.close();
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return Meta::toUnderlying(level) >= s_level && open();
+            if (Meta::toUnderlying(level) < (isForegroundProcess ? s_fgLevel : s_bgLevel)) {
+                return false;
+            }
+            return open();
         }
 
         [[maybe_unused]]
@@ -99,7 +104,7 @@ namespace Log {
             assert(ready(level));
             s_file << DateTime::iso << L": " << Wcs::c_levelLabels.at(level) << L": " << message << std::endl;
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 
@@ -114,27 +119,27 @@ namespace Log {
         static HANDLE s_sourceHandle { nullptr };
 
         [[maybe_unused]]
-        void open() noexcept try {
+        bool open() noexcept {
             if (!s_sourceHandle) {
                 s_sourceHandle = ::RegisterEventSourceW(nullptr, c_eventSource);
             }
-        } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            return static_cast<bool>(s_sourceHandle);
         }
 
         [[maybe_unused]]
-        void close() noexcept try {
+        void close() noexcept {
             if (s_sourceHandle) {
                 ::DeregisterEventSource(s_sourceHandle);
                 s_sourceHandle = nullptr;
             }
-        } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
         }
 
         [[nodiscard, maybe_unused]]
         bool ready(Level level) noexcept {
-            return Meta::toUnderlying(level) >= s_level && s_sourceHandle;
+            if (Meta::toUnderlying(level) < (isForegroundProcess ? s_fgLevel : s_bgLevel)) {
+                return false;
+            }
+            return open();
         }
 
         [[maybe_unused]]
@@ -159,11 +164,40 @@ namespace Log {
                 nullptr             // No binary data
             );
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 
-    std::wstring levelLabel(int level) {
+    EXECUTE_BEFORE_MAIN(closeLogChannels) {
+        std::atexit([] {
+            File::close();
+            EventLog::close();
+        });
+    }
+
+    void fallbackLog() noexcept try {
+        if (isForegroundProcess) {
+            std::wclog << Wcs::c_loggingError << std::endl;
+        }
+    } catch (...) {}
+
+    void reconfig() noexcept try {
+        File::close();
+        EventLog::close();
+    } catch (...) {}
+
+    [[maybe_unused]]
+    void asForegroundProcess() noexcept {
+        isForegroundProcess = true;
+    }
+
+    [[maybe_unused]]
+    void asBackgroundProcess() noexcept {
+        isForegroundProcess = false;
+    }
+
+    [[maybe_unused]]
+    std::wstring levelLabel(LevelUnderlying level) {
         assert(level >= c_levelDebug && level <= c_levelNone);
         if (level == c_levelNone) {
             return L"none";
@@ -172,17 +206,5 @@ namespace Log {
             return Text::lowered(Wcs::c_levelLabels.at(static_cast<Level>(level)));
         }
         return Basic::Wcs::c_fallbackErrorMessage;
-    }
-
-    void completeConsoleConfig() {
-        if (s_consToConsOnly) {
-            File::s_level = c_levelNone;
-            EventLog::s_level = c_levelNone;
-        } else {
-            std::atexit([] {
-                File::close();
-                EventLog::close();
-            });
-        }
     }
 }

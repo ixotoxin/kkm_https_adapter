@@ -4,41 +4,31 @@
 #include "server_static_varop.h"
 #include "server_static_variables.h"
 #include "server_static_strings.h"
+#include <lib/path.h>
 
 namespace Server::Static {
     using namespace std::string_literals;
-    using namespace std::string_view_literals;
 
     using Basic::Failure;
-    using Basic::DataError;
-
-    std::string filterFileName(const std::string & fileName) {
-        std::string result { /*Text::trimmed(*/fileName/*)*/ };
-        if (
-            result.find_first_of(
-                "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
-                "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
-                "<>:\"/\\|?*"sv
-            ) != std::string_view::npos
-            || result.empty()
-            || result.starts_with("."sv)
-            || result.ends_with("."sv)
-            || result.starts_with(" "sv)
-            || result.ends_with(" "sv)
-        ) {
-            throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
-        }
-        return result;
-    }
 
     void setVars(const Nln::Json & json) {
         Json::handleKey(
             json, "server",
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
                 Json::handleKey(json, "enableStatic", s_enable, path);
-                Json::handleKey(json, "staticDirectory", s_directory, path);
-                Json::handleKey(json, "indexFile", s_indexFile, filterFileName, path);
-                Json::handleKey(json, "mimeMap", s_mimeMapFile, Text::Wcs::noEmpty(), path);
+                Json::handleKey(
+                    json, "staticDirectory",
+                    s_directory,
+                    Path::testDir(s_enable, Path::absolute(Path::noEmpty())),
+                    path
+                );
+                Json::handleKey(json, "indexFile", s_indexFile, Path::Mbs::goodFileName(), path);
+                Json::handleKey(
+                    json, "mimeMap",
+                    s_mimeMapFile,
+                    Path::testFile(s_enable, Path::absolute(Path::noEmpty())),
+                    path
+                );
                 Json::handleKey(json, "enableUnknownType", s_enableUnknownType, path);
                 return true;
             }
@@ -72,9 +62,9 @@ namespace Server::Static {
     std::wostream & vars(std::wostream & stream) {
         stream
             << L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(s_enable) << L"\n"
-            L"[CFG] server.staticDirectory = \"" << s_directory << L"\"\n"
+            L"[CFG] server.staticDirectory = \"" << s_directory.c_str() << L"\"\n"
             L"[CFG] server.indexFile = \"" << Text::convert(s_indexFile) << L"\"\n"
-            L"[CFG] server.mimeMapFile = \"" << s_mimeMapFile << L"\"\n"
+            L"[CFG] server.mimeMapFile = \"" << s_mimeMapFile.c_str() << L"\"\n"
             L"[CFG] server.enableUnknownType = " << Text::Wcs::yesNo(s_enableUnknownType) << L"\n";
 
         return stream;

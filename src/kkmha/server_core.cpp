@@ -80,8 +80,9 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(std::unique_ptr<Counter> counter, auto && socket, Asio::SslContext & sslContext) {
-        if (counter->invalid()) {
+    asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
+        Counter counter {};
+        if (counter.exceeded()) {
             tsLogError(Wcs::c_maximumIsExceeded);
             co_return;
         }
@@ -235,8 +236,9 @@ namespace Server {
             }
 
             sslContext.set_password_callback([] (auto, auto) { return s_privateKeyPassword; });
-            sslContext.use_certificate_chain_file(s_certificateChainFile);
-            sslContext.use_private_key_file(s_privateKeyFile, Asio::SslContext::pem);
+            // TODO: Облагородить способ установки ключа и сертификатов.
+            sslContext.use_certificate_chain_file(Text::convert(s_certificateChainFile.c_str()));
+            sslContext.use_private_key_file(Text::convert(s_privateKeyFile.c_str()), Asio::SslContext::pem);
             sslContext.set_verify_mode(asio::ssl::verify_none);
 
             auto executor = co_await asio::this_coro::executor;
@@ -256,11 +258,7 @@ namespace Server {
                         tsLogError(Wcs::c_socketOpeningError);
                         tsLogError(Wcs::c_servicingFailed);
                     } else {
-                        asio::co_spawn(
-                            executor,
-                            accept(std::make_unique<Counter>(), std::move(socket), sslContext),
-                            asio::detached
-                        );
+                        asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                     }
                 } while (s_state.load() == State::Running);
             }

@@ -63,7 +63,6 @@ namespace Http {
                    );
         }
 
-        // [[maybe_unused]]
         inline void fail(
             const Status status,
             const std::string_view message,

@@ -12,6 +12,8 @@ namespace Basic {
         LIB_WCSTR(c_somethingWrong, L"Что-то пошло не так!");
         LIB_WCSTR(c_fallbackErrorMessage, L"[ error ]");
         LIB_WSTR(c_inFile, L"в файле");
+        LIB_WSTR(c_directoryNotFound, L"Директория '{}' не найдена");
+        LIB_WSTR(c_fileNotFound, L"Файл '{}' не найден");
     }
 
     namespace Mbs {

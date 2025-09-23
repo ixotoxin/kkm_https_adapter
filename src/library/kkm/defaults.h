@@ -11,7 +11,7 @@ namespace Kkm {
     KKM_CONST(DateTime::SleepUnit, c_sleepQuantum, DateTime::c_basicSleepQuantum); // Миллисекунды
     KKM_CONST(std::wstring_view, c_connParamsSeparator, L",");
     KKM_CONST(wchar_t, c_separatorChar, L'-');
-    KKM_DEF(std::wstring_view, c_defDbDirectory, L"conf\\kkm");
+    KKM_DEF(std::wstring_view, c_defDbDirectory, L"kkm");
     KKM_DEF(std::wstring_view, c_defBaudRate, L"115200");
     KKM_CONST(size_t, c_minLineLength, 24);
     KKM_CONST(size_t, c_maxLineLength, 192);

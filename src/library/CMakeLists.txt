@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION 3.27)
 
 include(../library.cmake)
 
-add_library(xtxn_lib OBJECT ${LIB_SOURCE_FILES} ${LOG_SOURCE_FILES} ${KKM_SOURCE_FILES} ${CONFIG_SOURCE_FILES})
+add_library(
+    xtxn_lib
+    OBJECT
+        ${LIB_SOURCE_FILES}
+        ${MAIN_SOURCE_FILES}
+        ${LOG_SOURCE_FILES}
+        ${KKM_SOURCE_FILES}
+        ${CONFIG_SOURCE_FILES}
+)
 
 if (BUILD_SEPARATED)
     target_sources(xtxn_lib PRIVATE variables.cpp)

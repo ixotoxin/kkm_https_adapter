@@ -10,7 +10,7 @@
 #include <cstdio>
 
 namespace Basic {
-    EXECUTE_BEFORE_MAIN(setup_console_output) {
+    EXECUTE_BEFORE_MAIN(setupConsoleOutput) {
         ::_setmode(::_fileno(stdout), _O_U16TEXT);
         ::_setmode(::_fileno(stderr), _O_U16TEXT);
     }

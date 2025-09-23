@@ -8,13 +8,19 @@
 #include "device.h"
 #include <lib/numeric.h>
 #include <lib/text.h>
+#include <lib/path.h>
 
 namespace Kkm {
     void setVars(const Nln::Json & json) {
         Json::handleKey(
             json, "kkm",
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "dbDirectory", s_dbDirectory, Text::Wcs::trim());
+                Json::handleKey(
+                    json, "dbDirectory",
+                    s_dbDirectory,
+                    Path::touchDir(Path::absolute(Path::noEmpty())),
+                    path
+                );
                 Json::handleKey(json, "defaultBaudRate", s_defaultBaudRate, Wcs::c_allowedBaudRate, path);
                 Json::handleKey(
                     json, "defaultLineLength",
@@ -24,8 +30,8 @@ namespace Kkm {
                 );
                 Json::handleKey(
                     json, "timeZone",
-                    s_timeZone, Mbs::c_timeZoneMap,
-                    [] (auto value) { s_timeZoneConfigured = true; return value; },
+                    s_timeZone,
+                    Mbs::c_timeZoneMap, [] (auto value) { s_timeZoneConfigured = true; return value; },
                     path
                 );
                 Json::handleKey(
@@ -69,7 +75,7 @@ namespace Kkm {
 
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"[CFG] kkm.dbDirectory = \"" << s_dbDirectory << L"\"\n"
+            << L"[CFG] kkm.dbDirectory = \"" << s_dbDirectory.c_str() << L"\"\n"
             L"[CFG] kkm.defaultBaudRate = " << s_defaultBaudRate << L"\n"
             L"[CFG] kkm.defaultLineLength = " << s_defaultLineLength << L"\n"
             L"[CFG] kkm.timeZone = tz" << Meta::toUnderlying(s_timeZone) << L"\n"

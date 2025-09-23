@@ -32,21 +32,22 @@ namespace Log {
     const ::WORD c_eventCategory { 0 };
 
     namespace Console {
-        int s_level { c_levelDebug };
+        LevelUnderlying s_level { c_levelDebug };
         bool s_outputTimestamp { false };
         bool s_outputLevel { true };
     }
 
     namespace File {
-        int s_level { c_levelDebug };
-        std::wstring s_directory { L"logs" };
+        LevelUnderlying s_bgLevel { c_levelNone };
+        LevelUnderlying s_fgLevel { c_levelInfo };
+        std::filesystem::path s_directory { L"logs" };
     }
 
     namespace EventLog {
-        int s_level { c_levelInfo };
+        LevelUnderlying s_bgLevel { c_levelNone };
+        LevelUnderlying s_fgLevel { c_levelInfo };
     }
 
-    bool s_consToConsOnly { true };
 #ifdef DEBUG
     bool s_appendLocation { true };
 #else
@@ -58,7 +59,7 @@ namespace Kkm {
     const DateTime::SleepUnit c_sleepQuantum { DateTime::c_basicSleepQuantum }; // Миллисекунды
     const std::wstring_view c_connParamsSeparator { L"," };
     const wchar_t c_separatorChar { L'-' };
-    std::wstring s_dbDirectory { L"conf\\kkm" };
+    std::filesystem::path s_dbDirectory { L"kkm" };
     std::wstring s_defaultBaudRate { L"115200" };
     const size_t c_minLineLength { 24 };
     const size_t c_maxLineLength { 192 };

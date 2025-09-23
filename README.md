@@ -17,8 +17,9 @@
 
 После запуска `kkmha.exe` рабочей директорией устанавливается директория, в которой находится `kkmha.exe`. Все
 относительные пути вычисляются относительно рабочей директории (далее `{work-dir}`). Если не установлена переменная
-окружения `KKMHA_CONF_DIR` конфигурационный файл `kkmha.json` ищется в директории `{work-fir}\conf`. Пример
-конфигурационного файла:
+окружения `KKMHA_CONF_DIR` конфигурационный файл `kkmha.json` ищется в директории `{work-fir}\conf`. Все
+относительные пути в конфигурационном файле вычисляются относительно директории с основным конфигурационным файлом,
+кроме опции `log.file.directory`. Она вычисляется относительно рабочей директории. Пример конфигурационного файла:
 
 ```json
 {
@@ -29,13 +30,18 @@
             "outputLevel": true
         },
         "file": {
-            "level": "debug",
+            "level": {
+                "foreground": "none",
+                "background": "debug"
+            },
             "directory": "logs"
         },
         "eventLog": {
-            "level": "none"
+            "level": {
+                "foreground": "none",
+                "background": "info"
+            }
         },
-        "consToConsOnly": true,
         "appendLocation": false
     },
     "server": {
@@ -44,19 +50,19 @@
         "concurrencyLimit": 10,
         "enableLegacyTls": "no",
         "securityLevel": 5,
-        "certificateChainFile": "conf\\kkmha.crt",
-        "privateKeyFile": "conf\\kkmha.key",
+        "certificateChainFile": "kkmha.crt",
+        "privateKeyFile": "kkmha.key",
         "privateKeyPassword": "",
         "secret": "lorem.ipsum.dolor.sit.amet",
         "loopbackWithoutSecret": false,
         "enableStatic": false,
-        "staticDirectory": "static",
+        "staticDirectory": "..\\static",
         "indexFile": "index.html",
-        "mimeMap": "conf\\mime.json",
+        "mimeMap": "mime.json",
         "enableUnknownType": false
     },
     "kkm": {
-        "dbDirectory": "conf\\kkm",
+        "dbDirectory": "kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
         "timeZone": "device",
@@ -72,41 +78,42 @@
 }
 ```
 
-| Опция                          | Описание                                                                                                     |
-|--------------------------------|--------------------------------------------------------------------------------------------------------------|
-| `log.console.level`            | Уровень логирования в консоль                                                                                |
-| `log.console.outputTimestamp`  | Включить/выключить вывод даты и времени в консоль                                                            |
-| `log.console.outputLevel`      | Включить/выключить вывод уровня сообщений в консоль                                                          |
-| `log.file.level`               | Уровень логирования в файл                                                                                   |
-| `log.file.directory`           | Директория, в которую будет происходить логирование                                                          |
-| `log.eventLog.level`           | Уровень логирования в журнал событий Windows                                                                 |
-| `log.consToConsOnly`           | Включить/выключить логирование консольных команд в каналы помимо консоли                                     |
-| `log.appendLocation`           | Включить/выключить вывод точки происхождения сообщения в исходных файлах                                     |
-| `server.ipv4Only`              | Включить/выключить поддержку IPv6                                                                            |
-| `server.port`                  | Порт, который будет слушать сервер                                                                           |
-| `server.concurrencyLimit`      | Ограничение максимального количества одновременных соединений                                                |
-| `server.enableLegacyTls`       | Разрешить/запретить поддержку TLS 1.0 и TLS 1.1                                                              |
-| `server.securityLevel`         | Уровень безопасности устанавливаемый в библиотеке OpenSSL (0 - 5)                                            |
-| `server.certificateChainFile`  | Путь к файлу сертификата                                                                                     |
-| `server.privateKeyFile`        | Путь к файлу ключа                                                                                           |
-| `server.privateKeyPassword`    | Пароль от ключа                                                                                              |
-| `server.secret`                | Access-токен                                                                                                 |
-| `server.loopbackWithoutSecret` | Разрешить/запретить локальные запросы без access-токена                                                      | 
-| `server.enableStatic`          | Разрешить/запретить обработку запросов `https://127.0.0.1:5757/static/{file-path}`                           |
-| `server.staticDirectory`       | Путь к директории, содержимое которой будет отдаваться для запросов `/static/{file-path}`                    |
-| `server.indexFile`             | Имя индексного файла (на этот файл происходит перенаправление, если запрашиваемый путь является директорией) |
-| `server.mimeMap`               | Путь к файлу с описанием типа содержимого                                                                    |
-| `server.enableUnknownType`     | Разрешить/запретить отдавать файлы с расширениями не представленными в файле `mime.json`                     |
-| `kkm.dbDirectory`              | Путь к директории, в которой будет формироваться БД известных ККМ                                            |
-| `kkm.defaultBaudRate`          | Скорость COM-порта по-умолчанию                                                                              |
-| `kkm.defaultLineLength`        | Ширина чековой ленты по-умолчанию. Используется, если данное свойство не удается получить опросом ККМ        |
-| `kkm.timeZone`                 | Временная зона передаваемая ОФД при регистрации чека                                                         |
-| `kkm.documentClosingTimeout`   | Таймаут проверки корректности закрытия документа                                                             |
-| `kkm.cliOperator.name`         | Имя оператора для консольных команд требующих логина оператора ККМ                                           |
-| `kkm.customerAccountField`     | Заголовок поля с номером лицевого счета клиента                                                              |
-| `kkm.maxCashInOut`             | Максимальная сумма для внесения или выплаты                                                                  |
-| `kkm.maxPrice`                 | Максимальная цена товара/услуги в чеке                                                                       |
-| `kkm.maxQuantity`              | Максимальное количество товара/услуги в чеке                                                                 |
+| Опция                           | Описание                                                                                                     |
+|---------------------------------|--------------------------------------------------------------------------------------------------------------|
+| `log.console.level`             | Уровень логирования в консоль                                                                                |
+| `log.console.outputTimestamp`   | Включить/выключить вывод даты и времени в консоль                                                            |
+| `log.console.outputLevel`       | Включить/выключить вывод уровня сообщений в консоль                                                          |
+| `log.file.level.foreground`     | Уровень логирования в файл для foreground-процесса                                                           |
+| `log.file.level.background`     | Уровень логирования в файл для background-процесса                                                           |
+| `log.file.directory`            | Директория, в которую будет происходить логирование                                                          |
+| `log.eventLog.level.foreground` | Уровень логирования в журнал событий Windows для foreground-процесса                                         |
+| `log.eventLog.level.background` | Уровень логирования в журнал событий Windows для background-процесса                                         |
+| `log.appendLocation`            | Включить/выключить вывод точки происхождения сообщения в исходных файлах                                     |
+| `server.ipv4Only`               | Включить/выключить поддержку IPv6                                                                            |
+| `server.port`                   | Порт, который будет слушать сервер                                                                           |
+| `server.concurrencyLimit`       | Ограничение максимального количества одновременных соединений                                                |
+| `server.enableLegacyTls`        | Разрешить/запретить поддержку TLS 1.0 и TLS 1.1                                                              |
+| `server.securityLevel`          | Уровень безопасности устанавливаемый в библиотеке OpenSSL (0 - 5)                                            |
+| `server.certificateChainFile`   | Путь к файлу сертификата                                                                                     |
+| `server.privateKeyFile`         | Путь к файлу ключа                                                                                           |
+| `server.privateKeyPassword`     | Пароль от ключа                                                                                              |
+| `server.secret`                 | Access-токен                                                                                                 |
+| `server.loopbackWithoutSecret`  | Разрешить/запретить локальные запросы без access-токена                                                      | 
+| `server.enableStatic`           | Разрешить/запретить обработку запросов `https://127.0.0.1:5757/static/{file-path}`                           |
+| `server.staticDirectory`        | Путь к директории, содержимое которой будет отдаваться для запросов `/static/{file-path}`                    |
+| `server.indexFile`              | Имя индексного файла (на этот файл происходит перенаправление, если запрашиваемый путь является директорией) |
+| `server.mimeMap`                | Путь к файлу с описанием типа содержимого                                                                    |
+| `server.enableUnknownType`      | Разрешить/запретить отдавать файлы с расширениями не представленными в файле `mime.json`                     |
+| `kkm.dbDirectory`               | Путь к директории, в которой будет формироваться БД известных ККМ                                            |
+| `kkm.defaultBaudRate`           | Скорость COM-порта по-умолчанию                                                                              |
+| `kkm.defaultLineLength`         | Ширина чековой ленты по-умолчанию. Используется, если данное свойство не удается получить опросом ККМ        |
+| `kkm.timeZone`                  | Временная зона передаваемая ОФД при регистрации чека                                                         |
+| `kkm.documentClosingTimeout`    | Таймаут проверки корректности закрытия документа                                                             |
+| `kkm.cliOperator.name`          | Имя оператора для консольных команд требующих логина оператора ККМ                                           |
+| `kkm.customerAccountField`      | Заголовок поля с номером лицевого счета клиента                                                              |
+| `kkm.maxCashInOut`              | Максимальная сумма для внесения или выплаты                                                                  |
+| `kkm.maxPrice`                  | Максимальная цена товара/услуги в чеке                                                                       |
+| `kkm.maxQuantity`               | Максимальное количество товара/услуги в чеке                                                                 |
 
 ***Сертификат и ключ никак не проверяются***, поэтому можно использовать самоподписанный сертификат.
 <!-- Создать его можно например так:

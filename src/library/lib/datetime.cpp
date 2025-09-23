@@ -18,8 +18,8 @@ namespace DateTime {
 
     [[nodiscard, maybe_unused]]
     int64_t unix() {
-        constexpr int64_t unixTimeStart = 0x019db1ded53e8000;
-        constexpr int64_t ticksPerSecond = 10000000;
+        constexpr int64_t unixTimeStart = 0x019d'b1de'd53e'8000;
+        constexpr int64_t ticksPerSecond = 10'000'000;
         ::FILETIME time;
         ::GetSystemTimeAsFileTime(&time);
         ::LARGE_INTEGER time64 {

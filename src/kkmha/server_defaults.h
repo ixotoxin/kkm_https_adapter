@@ -17,8 +17,8 @@ namespace Server {
     constexpr const int64_t c_minConcurrencyLimit { 2 };
     constexpr const int64_t c_maxConcurrencyLimit { 2'000 };
     constexpr const int64_t c_defConcurrencyLimit { 10 };
-    constexpr const std::string_view c_defCertificateChainFile { "conf\\kkmha.crt" };
-    constexpr const std::string_view c_defPrivateKeyFile { "conf\\kkmha.key" };
+    constexpr const std::wstring_view c_defCertificateChainFile { L"kkmha.crt" };
+    constexpr const std::wstring_view c_defPrivateKeyFile { L"kkmha.key" };
     constexpr const size_t c_cacheCleanUpThreshold { 200 };
     constexpr const std::string_view c_defSecret { "!!! don't forget to change me !!!" };
     constexpr const bool c_loopbackWithoutSecret { true };

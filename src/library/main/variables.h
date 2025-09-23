@@ -6,7 +6,7 @@
 #include "macro.h"
 #include <filesystem>
 
-namespace Config {
-    CONFIG_VAR(std::filesystem::path, s_directory, );
-    CONFIG_VAR(std::filesystem::path, s_file, );
+namespace Main {
+    MAIN_VAR(std::filesystem::path, s_file, );
+    MAIN_VAR(std::filesystem::path, s_directory, );
 }

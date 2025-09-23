@@ -12,25 +12,25 @@
 
 namespace Log {
     namespace Console {
-        LOG_VAR(int, s_level, c_levelDebug);
+        LOG_VAR(LevelUnderlying, s_level, c_levelDebug);
         LOG_VAR(bool, s_outputTimestamp, c_outputTimestamp);
         LOG_VAR(bool, s_outputLevel, c_outputLevel);
     }
 
     namespace File {
-        LOG_VAR(int, s_level, c_levelDebug);
-        LOG_VAR(std::wstring, s_directory, c_directory);
+        LOG_VAR(LevelUnderlying, s_fgLevel, c_levelNone);
+        LOG_VAR(LevelUnderlying, s_bgLevel, c_levelInfo);
+        LOG_VAR(std::filesystem::path, s_directory, c_directory);
     }
 
     namespace EventLog {
-        LOG_VAR(int, s_level, c_levelInfo);
+        LOG_VAR(LevelUnderlying, s_fgLevel, c_levelNone);
+        LOG_VAR(LevelUnderlying, s_bgLevel, c_levelInfo);
     }
 
     namespace Ts {
         inline std::mutex s_logMutex;
     }
-
-    LOG_VAR(bool, s_consToConsOnly, true);
 
 #ifdef EXTERNAL_LOG_VARIABLES
     extern bool s_appendLocation;

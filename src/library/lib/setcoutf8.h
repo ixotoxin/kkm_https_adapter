@@ -8,7 +8,7 @@
 #include <clocale>
 
 namespace Basic {
-    EXECUTE_BEFORE_MAIN(setup_console_output) {
+    EXECUTE_BEFORE_MAIN(setupConsoleOutput) {
         ::SetConsoleOutputCP(CP_UTF8);
         ::SetConsoleCP(CP_UTF8);
         ::setlocale(LC_ALL, ".UTF8");

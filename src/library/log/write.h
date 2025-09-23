@@ -19,19 +19,6 @@
 #define tsLogWarning(x, ...) do { Log::Ts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__); } while (false)
 #define tsLogError(x, ...) do { Log::Ts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__); } while (false)
 
-#define cliMsgDebug(x) \
-    do { \
-        if (Log::Console::ready(Log::Level::Debug)) Log::Console::write(Log::Level::Debug, x); \
-    } while (false)
-
-#define cliMsgInfo(x) \
-    do { \
-        if (Log::Console::ready(Log::Level::Info)) Log::Console::write(Log::Level::Info, x); \
-    } while (false)
-
-#define cliMsgWarning(x) do { Log::Console::write(Log::Level::Warning, x); } while (false)
-#define cliMsgError(x) do { Log::Console::write(Log::Level::Error, x); } while (false)
-
 namespace Log {
     namespace Nts {
         [[maybe_unused]]
@@ -65,7 +52,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<Meta::View Fmt, typename ... Args>
@@ -100,7 +87,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<Meta::Char Fmt, typename ... Args>
@@ -152,7 +139,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[maybe_unused]]
@@ -173,7 +160,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<class T>
@@ -209,7 +196,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 
@@ -219,7 +206,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, message);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[maybe_unused]]
@@ -227,7 +214,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, message);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<Meta::View Fmt, typename ... Args>
@@ -236,7 +223,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, fmt, arg1, args...);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<Meta::Char Fmt, typename ... Args>
@@ -245,7 +232,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<Meta::String Fmt, typename ... Args>
@@ -254,7 +241,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[maybe_unused]]
@@ -262,7 +249,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[maybe_unused]]
@@ -270,7 +257,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         [[maybe_unused]]
@@ -278,7 +265,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
 
         template<class T>
@@ -288,7 +275,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, func);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 }

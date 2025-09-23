@@ -4,9 +4,12 @@
 #pragma once
 
 #include "defaults.h"
+#include "variables.h"
 #include "strings.h"
 #include <lib/except.h>
 #include <lib/json.h>
+#include <lib/path.h>
+#include <main/variables.h>
 #include <log/write.h>
 #include <concepts>
 #include <fstream>
@@ -26,8 +29,10 @@ namespace Config {
             throw Failure(CONFIG_WFMT(Wcs::c_cantReadConfig, file.c_str())); // NOLINT(*-exception-baseclass)
         }
         try {
+            std::filesystem::current_path(Config::s_directory);
             Nln::Json json(Nln::Json::parse(std::ifstream(file)));
             (setters(json), ...);
+            std::filesystem::current_path(Main::s_directory);
             return; /** Не удаляй, смотри дальше. **/
         } catch (const Failure & e) {
             ntsLogWarning(e);

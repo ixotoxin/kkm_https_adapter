@@ -525,7 +525,6 @@ namespace Kkm {
         FfdVersion m_fnFfdVersion { FfdVersion::Unknown };
         FfdVersion m_fnMaxFfdVersion { FfdVersion::Unknown };
         FfdVersion m_ffdVersion { FfdVersion::Unknown };
-        // unsigned int m_kktVersion {};
 
     public:
         FfdVersionResult() = default;

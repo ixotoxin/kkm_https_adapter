@@ -66,7 +66,7 @@ namespace Log {
                 }
             }
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 
@@ -77,7 +77,7 @@ namespace Log {
             std::scoped_lock logLock(s_logMutex);
             Nts::dump(args...);
         } catch (...) {
-            std::wclog << Wcs::c_loggingError << std::endl;
+            fallbackLog();
         }
     }
 }

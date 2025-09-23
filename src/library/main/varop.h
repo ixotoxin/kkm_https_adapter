@@ -5,6 +5,6 @@
 
 #include <iostream>
 
-namespace Config {
+namespace Main {
     std::wostream & vars(std::wostream &);
 }

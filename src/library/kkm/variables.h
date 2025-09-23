@@ -9,7 +9,7 @@
 #include <string>
 
 namespace Kkm {
-    KKM_VAR(std::wstring, s_dbDirectory, c_defDbDirectory);
+    KKM_VAR(std::filesystem::path, s_dbDirectory, c_defDbDirectory);
     KKM_VAR(std::wstring, s_defaultBaudRate, c_defBaudRate);
     KKM_VAR(size_t, s_defaultLineLength, c_defLineLength);
     KKM_VAR(TimeZone, s_timeZone, TimeZone::Device);

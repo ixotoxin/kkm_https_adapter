@@ -10,34 +10,30 @@
 namespace Server {
     class Counter {
         inline static std::atomic<int64_t> s_counter { 0 };
+        bool m_exceeded;
 
     public:
-        Counter() {
-            assert(s_counter >= 0);
-            ++s_counter;
-        }
-
-        ~Counter() {
-            --s_counter;
-            assert(s_counter >= 0);
-        }
+        Counter() : m_exceeded { s_counter.fetch_add(1, std::memory_order_acquire) >= s_concurrencyLimit } {}
 
         Counter(const Counter &) = delete;
-        Counter(Counter &&) = default;
+        Counter(Counter &&) = delete;
+
+        ~Counter() {
+            s_counter.fetch_sub(1, std::memory_order_release);
+            assert(s_counter >= 0);
+        }
 
         Counter & operator=(const Counter &) = delete;
         Counter & operator=(Counter &&) = delete;
 
         [[nodiscard]]
-        bool invalid() { // NOLINT(*-convert-member-functions-to-static)
-            assert(s_counter >= 0);
-            return s_counter > s_concurrencyLimit;
+        bool exceeded() const { // NOLINT(*-convert-member-functions-to-static)
+            return m_exceeded;
         }
 
         [[nodiscard]]
         static int64_t value() {
-            assert(s_counter >= 0);
-            return s_counter;
+            return s_counter.load();
         }
     };
 }

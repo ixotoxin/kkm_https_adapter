@@ -60,13 +60,13 @@ namespace DateTime {
         if constexpr (Meta::isWide<T>) {
             return
                 std::format(
-                    Wcs::c_timestamp, dateTime.tm_year + 1900, dateTime.tm_mon + 1, dateTime.tm_mday,
+                    Wcs::c_timestamp, dateTime.tm_year + 1'900, dateTime.tm_mon + 1, dateTime.tm_mday,
                     dateTime.tm_hour, dateTime.tm_min, dateTime.tm_sec
                 );
         } else {
             return
                 std::format(
-                    Mbs::c_timestamp, dateTime.tm_year + 1900, dateTime.tm_mon + 1, dateTime.tm_mday,
+                    Mbs::c_timestamp, dateTime.tm_year + 1'900, dateTime.tm_mon + 1, dateTime.tm_mday,
                     dateTime.tm_hour, dateTime.tm_min, dateTime.tm_sec
                 );
         }

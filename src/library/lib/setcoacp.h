@@ -8,7 +8,7 @@
 #include <clocale>
 
 namespace Basic {
-    EXECUTE_BEFORE_MAIN(setup_console_output) {
+    EXECUTE_BEFORE_MAIN(setupConsoleOutput) {
         ::SetConsoleOutputCP(CP_ACP);
         ::SetConsoleCP(CP_ACP);
         ::setlocale(LC_ALL, ".ACP");

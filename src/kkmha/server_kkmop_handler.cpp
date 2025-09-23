@@ -222,7 +222,7 @@ namespace Server::KkmOp {
                 &Device::getFndtErrors
             );
         }
-        payload.m_expiresAfter = /*Http::*/c_reportCacheLifeTime;
+        payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void fullStatus(Payload & payload) {

@@ -4,6 +4,8 @@
 #include <cmake/options.h>
 #include <cmake/variables.h>
 #include <lib/setcou16.h>
+#include <main/variables.h>
+#include <main/varop.h>
 #include <log/write.h>
 #include <log/varop.h>
 #include <debug/memprof.h>
@@ -43,10 +45,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
             Config::setBaseVars(envp);
             Config::readJson(Config::s_file, Log::setVars, Kkm::setVars);
-            Log::completeConsoleConfig();
 
             if (argc == 2 && command == L"show-config") {
-                std::wcout << L'\n' << Main::vars << Log::vars << Kkm::vars << std::endl;
+                std::wcout << L'\n' << Main::vars << Config::vars << Log::vars << Kkm::vars << std::endl;
                 return EXIT_SUCCESS;
             }
 

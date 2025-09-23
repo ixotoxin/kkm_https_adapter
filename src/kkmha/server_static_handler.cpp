@@ -10,6 +10,7 @@
 #include "server_cache_core.h"
 #include <lib/except.h>
 #include <lib/utils.h>
+#include <lib/path.h>
 #include <fstream>
 
 namespace Server::Static {
@@ -41,7 +42,7 @@ namespace Server::Static {
         if (request.m_method != Http::Method::Get) {
             return request.fail(Http::Status::MethodNotAllowed, Http::Mbs::c_methodNotAllowed);
         }
-        if (request.m_path.size() < 3 || !System::isGoodPath(request.m_path) || !request.m_path.starts_with('/')) {
+        if (request.m_path.size() < 3 || !Path::isGood(request.m_path) || !request.m_path.starts_with('/')) {
             return request.fail(Http::Status::BadRequest, Http::Mbs::c_badPath);
         }
 

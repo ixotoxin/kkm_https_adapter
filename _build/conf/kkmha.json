@@ -6,13 +6,18 @@
             "outputLevel": true
         },
         "file": {
-            "level": "debug",
+            "level": {
+                "foreground": "none",
+                "background": "debug"
+            },
             "directory": "logs"
         },
         "eventLog": {
-            "level": "none"
+            "level": {
+                "foreground": "none",
+                "background": "info"
+            }
         },
-        "consToConsOnly": true,
         "appendLocation": false
     },
     "server": {
@@ -21,19 +26,19 @@
         "concurrencyLimit": 10,
         "enableLegacyTls": "no",
         "securityLevel": 5,
-        "certificateChainFile": "conf\\kkmha.test.ss.crt",
-        "privateKeyFile": "conf\\kkmha.test.ss.key",
+        "certificateChainFile": "kkmha.test.ss.crt",
+        "privateKeyFile": "kkmha.test.ss.key",
         "privateKeyPassword": "",
         "secret": "lorem.ipsum.dolor.sit.amet",
         "loopbackWithoutSecret": false,
         "enableStatic": false,
-        "staticDirectory": "static",
+        "staticDirectory": "..\\static",
         "indexFile": "index.html",
-        "mimeMap": "conf\\mime.json",
+        "mimeMap": "mime.json",
         "enableUnknownType": false
     },
     "kkm": {
-        "dbDirectory": "conf\\kkm",
+        "dbDirectory": "kkm",
         "defaultBaudRate": 115200,
         "defaultLineLength": 42,
         "timeZone": "device",

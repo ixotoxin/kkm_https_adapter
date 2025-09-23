@@ -171,6 +171,6 @@ namespace Server {
         0xc3, 0x67, 0x17, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
         0x42, 0x60, 0x82
     };
-    inline constexpr const size_t c_favIconLength = 1947;
+    inline constexpr const size_t c_favIconLength = 1'947;
     inline constexpr const std::string_view c_favIconMime { "image/png" };
 }

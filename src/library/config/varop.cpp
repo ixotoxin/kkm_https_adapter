@@ -3,18 +3,12 @@
 
 #include "varop.h"
 #include "variables.h"
-#include <cmake/variables.h>
 #include <iostream>
 
-namespace Main {
+namespace Config {
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"[BLD] main.version = \"" << BUILD_VERSION << L"\"\n"
-            L"[BLD] main.buildTimestamp = \"" << BUILD_TIMESTAMP << L"\"\n"
-            L"[BLD] main.buildType = \"" << BUILD_TYPE << L"\"\n"
-            L"[RTM] main.binaryFile = \"" << s_file.c_str() << L"\"\n"
-            L"[RTM] main.workDirectory = \"" << s_directory.c_str() << L"\"\n"
-            L"[RTM] main.configDirectory = \"" << Config::s_directory.c_str() << L"\"\n"
+            << L"[RTM] main.configDirectory = \"" << Config::s_directory.c_str() << L"\"\n"
             L"[RTM] main.configFile = \"" << Config::s_file.c_str() << L"\"\n";
 
         return stream;

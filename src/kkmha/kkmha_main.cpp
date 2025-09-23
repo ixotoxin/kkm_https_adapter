@@ -5,6 +5,8 @@
 #include <cmake/variables.h>
 #include <lib/strings.h>
 #include <lib/setcou16.h>
+#include <main/variables.h>
+#include <main/varop.h>
 #include <log/write.h>
 #include <log/varop.h>
 #include <debug/memprof.h>
@@ -30,7 +32,12 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
     stream
         << L"\n"
         L"Версия: " << BUILD_VERSION << L"\n"
-        L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
+        L"Использование: " << path.filename().c_str()
+#if BUILD_SEPARATED
+        << L" команда\n"
+#else
+        << L" команда [аргумент ...]\n"
+#endif
         L"Команды:\n"
         L"    help                Вывести справку\n"
         L"    show-config         Вывести конфигурацию\n"
@@ -54,8 +61,11 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
     try {
         if (argc > 1) {
             const std::wstring command { Text::lowered(argv[1]) };
+            bool isService { command == L"service" };
 
-            if (argc == 2 && command == L"help") {
+            if (isService) {
+                Log::asBackgroundProcess();
+            } else if (argc == 2 && command == L"help") {
                 usage(std::wcout, argv[0]);
                 return EXIT_SUCCESS;
             }
@@ -67,24 +77,15 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 Config::readJson(Server::Static::s_mimeMapFile, Server::Static::setMimeMap);
             }
 
-            if (command == L"service") {
-                Log::Console::s_level = Log::c_levelNone;
-                std::atexit([] {
-                    Log::File::close();
-                    Log::EventLog::close();
-                });
-                Log::File::open();
-                Log::EventLog::open();
+            if (isService) {
                 Service::Worker::run();
                 return EXIT_SUCCESS;
             }
 
-            Log::completeConsoleConfig();
-
             if (argc == 2) {
                 if (command == L"show-config") {
                     std::wcout
-                        << L'\n' << Main::vars << Log::vars << Kkm::vars
+                        << L'\n' << Main::vars << Config::vars << Log::vars << Kkm::vars
                         << Server::vars << Server::Static::vars << Service::vars << std::endl;
                     return EXIT_SUCCESS;
                 }
