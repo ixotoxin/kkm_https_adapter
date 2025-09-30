@@ -83,7 +83,7 @@ namespace Server {
     asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
         Counter counter {};
         if (counter.exceeded()) {
-            tsLogError(Wcs::c_maximumIsExceeded);
+            LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
             co_return;
         }
 
@@ -130,7 +130,7 @@ namespace Server {
 
                 { /** Обрабатываем запрос **/
                     if (request.m_response.m_status == Http::Status::Ok) {
-                        tsLogInfo(
+                        LOG_INFO_TS(
                             [& request] {
                                 std::string message {
                                     std::format(
@@ -153,7 +153,7 @@ namespace Server {
                         if (it == request.m_header.end() || it->second.empty() || it->second != s_secret) {
                             request.m_response.m_status = Http::Status::Forbidden;
                             request.m_response.m_data.emplace<1>(Mbs::c_forbidden);
-                            tsLogError(Wcs::c_forbidden, request.m_id);
+                            LOG_ERROR_TS(Wcs::c_forbidden, request.m_id);
                         }
                     }
 
@@ -173,33 +173,33 @@ namespace Server {
                     const auto & [writingError, writingSize] = co_await asio::async_write(stream, buffer);
                     if (writingError) {
                         request.m_response.m_status = Http::Status::InternalServerError;
-                        tsLogError(writingError);
+                        LOG_ERROR_TS(writingError);
                     }
                 }
 
             } catch (const Failure & e) {
                 request.m_response.m_status = Http::Status::InternalServerError;
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (const std::exception & e) {
                 request.m_response.m_status = Http::Status::InternalServerError;
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (...) {
                 request.m_response.m_status = Http::Status::InternalServerError;
-                tsLogError(Basic::Wcs::c_somethingWrong);
+                LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
             }
 
             if (request.m_response.m_status < Http::Status::BadRequest) {
-                tsLogInfo(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
+                LOG_INFO_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
             } else {
-                tsLogError(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
+                LOG_ERROR_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
             }
 
         } catch (const Failure & e) {
-            tsLogError(e);
+            LOG_ERROR_TS(e);
         } catch (const std::exception & e) {
-            tsLogError(e);
+            LOG_ERROR_TS(e);
         } catch (...) {
-            tsLogError(Basic::Wcs::c_somethingWrong);
+            LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
         }
 
         co_return;
@@ -246,17 +246,17 @@ namespace Server {
             { /** Принимаем подключений **/
                 Asio::Acceptor acceptor(executor, endpoint);
 
-                tsLogInfo(Wcs::c_started);
+                LOG_INFO_TS(Wcs::c_started);
                 s_state.store(State::Running);
 
                 do {
                     auto [acceptingError, socket] = co_await acceptor.async_accept();
                     if (acceptingError) {
-                        tsLogError(acceptingError);
-                        tsLogError(Wcs::c_servicingFailed);
+                        LOG_ERROR_TS(acceptingError);
+                        LOG_ERROR_TS(Wcs::c_servicingFailed);
                     } else if (!socket.is_open()) {
-                        tsLogError(Wcs::c_socketOpeningError);
-                        tsLogError(Wcs::c_servicingFailed);
+                        LOG_ERROR_TS(Wcs::c_socketOpeningError);
+                        LOG_ERROR_TS(Wcs::c_servicingFailed);
                     } else {
                         asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                     }
@@ -272,11 +272,11 @@ namespace Server {
                 }
             }
         } catch (const Failure & e) {
-            tsLogError(e);
+            LOG_ERROR_TS(e);
         } catch (const std::exception & e) {
-            tsLogError(e);
+            LOG_ERROR_TS(e);
         } catch (...) {
-            tsLogError(Basic::Wcs::c_somethingWrong);
+            LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
         }
 
         co_return;
@@ -285,13 +285,13 @@ namespace Server {
     inline void logError() noexcept {
         switch (s_state.load()) {
             case State::Starting:
-                tsLogError(Wcs::c_startingFailed);
+                LOG_ERROR_TS(Wcs::c_startingFailed);
                 break;
             case State::Stopping:
-                tsLogError(Wcs::c_stoppingFailed);
+                LOG_ERROR_TS(Wcs::c_stoppingFailed);
                 break;
             default:
-                tsLogError(Wcs::c_servicingFailed);
+                LOG_ERROR_TS(Wcs::c_servicingFailed);
         }
     }
 
@@ -301,7 +301,7 @@ namespace Server {
         //     return;
         // }
 
-        tsLogDebug(Wcs::c_starting);
+        LOG_DEBUG_TS(Wcs::c_starting);
         s_state.store(State::Starting);
 
         try {
@@ -315,7 +315,7 @@ namespace Server {
                 s_hitman.cancelOrder();
             }
 
-            tsLogInfo(Wcs::c_stopped);
+            LOG_INFO_TS(Wcs::c_stopped);
             s_shutdownSync.arrive_and_wait();
         } catch (...) {
             logError();
@@ -339,7 +339,7 @@ namespace Server {
         //     return;
         // }
 
-        tsLogDebug(Wcs::c_stopping);
+        LOG_DEBUG_TS(Wcs::c_stopping);
         s_state.store(State::Shutdown);
         s_hitman.await(c_controlTimeout, [] { return Counter::value() > 0; });
         s_state.store(State::Stopping);

@@ -1,67 +1,39 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
-#include <cmake/options.h>
 #include <cmake/variables.h>
 #include <lib/setcou16.h>
-#include <main/variables.h>
-#include <main/varop.h>
-#include <log/write.h>
 #include <log/varop.h>
 #include <debug/memprof.h>
 #include <kkm/varop.h>
 #include <config/variables.h>
 #include <config/core.h>
-#include <config/varop.h>
 #include <cstdlib>
 #include <iostream>
-
-void usage(std::wostream & stream, const std::filesystem::path & path) {
-    stream
-        << L"\n!! Не реализовано !!\n\n"
-        L"Версия: " << BUILD_VERSION << L"\n"
-        L"Использование: " << path.filename().c_str() << L" команда [аргумент ...]\n"
-        L"Команды:\n"
-        L"    help                Вывести справку\n"
-        L"    show-config         Вывести конфигурацию\n"
-        L"    ...\n"
-        L"\n";
-}
+#include "kkmjl_core.h"
 
 int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
     START_MEMORY_PROFILING;
-    FORCE_MEMORY_LEAK;
 
     try {
-        if (argc > 1) {
-            std::wstring command { Text::lowered(argv[1]) };
-
-            if (argc == 2 && command == L"help") {
-                usage(std::wcout, argv[0]);
-                return EXIT_SUCCESS;
-            }
-
+        if (argc == 3) {
             Config::setBaseVars(envp);
             Config::readJson(Config::s_file, Log::setVars, Kkm::setVars);
-
-            if (argc == 2 && command == L"show-config") {
-                std::wcout << L'\n' << Main::vars << Config::vars << Log::vars << Kkm::vars << std::endl;
-                return EXIT_SUCCESS;
-            }
-
-            ntsLogError(L"Утилита исполнения команды описанной json-файлом будет реализована позже");
-
-            return EXIT_FAILURE;
+            return KkmJsonLoader::exec(argv[1], argv[2]);
         }
-
-        usage(std::wcerr, argv[0]);
-
+        std::wcerr
+            << L"{\n"
+            L"    \"" << Text::convert(Json::Mbs::c_successKey) << L"\": false,\n"
+            L"    \"" << Text::convert(Json::Mbs::c_messageKey) << L"\": \"Неверное использование\",\n"
+            L"    \"!version\": \"" << BUILD_VERSION << L"\",\n"
+            L"    \"!usage\": \"" << argv[0] << L" <serial-number> <json-file>\"\n"
+            L"}\n";
     } catch (const Basic::Failure & e) {
-        ntsLogError(e);
+        KkmJsonLoader::printError(e.explain(Log::s_appendLocation));
     } catch (const std::exception & e) {
-        ntsLogError(e);
+        KkmJsonLoader::printError(Text::convert(e.what()));
     } catch (...) {
-        ntsLogError(Basic::Wcs::c_somethingWrong);
+        KkmJsonLoader::printError(Basic::Wcs::c_somethingWrong);
     }
 
     return EXIT_FAILURE;

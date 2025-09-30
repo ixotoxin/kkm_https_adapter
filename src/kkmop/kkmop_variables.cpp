@@ -6,5 +6,5 @@
 
 namespace Log {
     const std::wstring_view c_logFileFormat { L"kkmop-{:04d}-{:02d}.log" };
-    const wchar_t * c_eventSource { L"KKMOP" };
+    const wchar_t * c_eventSource { L"KKM Operator" };
 }

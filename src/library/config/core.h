@@ -35,11 +35,11 @@ namespace Config {
             std::filesystem::current_path(Main::s_directory);
             return; /** Не удаляй, смотри дальше. **/
         } catch (const Failure & e) {
-            ntsLogWarning(e);
+            LOG_WARNING_NTS(e);
         } catch (const std::exception & e) {
-            ntsLogWarning(e);
+            LOG_WARNING_NTS(e);
         } catch (...) {
-            ntsLogWarning(Basic::Wcs::c_somethingWrong);
+            LOG_WARNING_NTS(Basic::Wcs::c_somethingWrong);
         }
         throw Failure(Wcs::c_invalidConfig); // NOLINT(*-exception-baseclass)
     }

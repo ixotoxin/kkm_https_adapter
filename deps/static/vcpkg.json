@@ -1,6 +1,6 @@
 {
     "name": "kkm-https-adapter",
-    "version": "1.6",
+    "version": "1.7",
     "dependencies": [
         {
             "name": "asio",

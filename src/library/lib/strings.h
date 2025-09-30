@@ -14,6 +14,8 @@ namespace Basic {
         LIB_WSTR(c_inFile, L"в файле");
         LIB_WSTR(c_directoryNotFound, L"Директория '{}' не найдена");
         LIB_WSTR(c_fileNotFound, L"Файл '{}' не найден");
+        LIB_WSTR(c_couldntReadFile, L"Не удалось прочитать файл '{}'");
+        LIB_WSTR(c_couldntWriteFile, L"Не удалось записать файл '{}'");
     }
 
     namespace Mbs {

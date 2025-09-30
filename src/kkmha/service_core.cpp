@@ -47,11 +47,11 @@ namespace Service {
                 setStatus(SERVICE_RUNNING);
                 return; /** Не удаляй, смотри дальше. **/
             } catch (const Failure & e) {
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (const std::exception & e) {
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (...) {
-                tsLogError(Wcs::c_startingFailed);
+                LOG_ERROR_TS(Wcs::c_startingFailed);
             }
 
             setStatus(SERVICE_STOPPED, NO_ERROR);
@@ -66,11 +66,11 @@ namespace Service {
                 setStatus(SERVICE_STOPPED);
                 return; /** Не удаляй, смотри дальше. **/
             } catch (const Failure & e) {
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (const std::exception & e) {
-                tsLogError(e);
+                LOG_ERROR_TS(e);
             } catch (...) {
-                tsLogError(Wcs::c_startingFailed);
+                LOG_ERROR_TS(Wcs::c_startingFailed);
             }
 
             setStatus(originalState);
@@ -87,7 +87,7 @@ namespace Service {
             if (s_statusHandle) {
                 start();
             } else {
-                tsLogError(System::explainError());
+                LOG_ERROR_TS(System::explainError());
             }
         }
 
@@ -136,7 +136,7 @@ namespace Service {
             auto ticks = initialTicks;
 
             do {
-                cliMsgDebug(message);
+                LOG_DEBUG_CLI(message);
                 ::Sleep(c_sleepQuantum);
                 queryStatus(service, status);
                 auto currTicks = ::GetTickCount();
@@ -199,7 +199,7 @@ namespace Service {
                 throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
             if (state != SERVICE_STOPPED) {
-                cliMsgWarning(Wcs::c_alreadyStarted);
+                LOG_WARNING_CLI(Wcs::c_alreadyStarted);
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace Service {
                 throw Failure(Wcs::c_startingFailed); // NOLINT(*-exception-baseclass)
             }
 
-            cliMsgInfo(Wcs::c_started);
+            LOG_INFO_CLI(Wcs::c_started);
         }
 
         inline void stop(::SC_HANDLE & service, bool logAlreadyStopped = true) {
@@ -222,7 +222,7 @@ namespace Service {
 
             if (status.dwCurrentState == SERVICE_STOPPED) {
                 if (logAlreadyStopped) {
-                    cliMsgWarning(Wcs::c_alreadyStopped);
+                    LOG_WARNING_CLI(Wcs::c_alreadyStopped);
                 }
                 return;
             }
@@ -241,7 +241,7 @@ namespace Service {
                 throw Failure(Wcs::c_stoppingTimeout); // NOLINT(*-exception-baseclass)
             }
 
-            cliMsgInfo(Wcs::c_stopped);
+            LOG_INFO_CLI(Wcs::c_stopped);
         }
 
         void stop() {
@@ -316,7 +316,7 @@ namespace Service {
                 throw Failure(System::explainError(L"CreateServiceW(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            cliMsgInfo(Wcs::c_installed);
+            LOG_INFO_CLI(Wcs::c_installed);
         }
 
         void uninstall() {
@@ -352,7 +352,7 @@ namespace Service {
                 throw Failure(System::explainError(L"DeleteService(...)")); // NOLINT(*-exception-baseclass)
             }
 
-            cliMsgInfo(Wcs::c_uninstalled);
+            LOG_INFO_CLI(Wcs::c_uninstalled);
         }
     }
 }

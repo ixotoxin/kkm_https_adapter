@@ -203,15 +203,30 @@ namespace Meta {
     template<typename T>
     constexpr bool isWide = CalcIsWide<std::remove_cvref_t<T>>::value;
 
+    struct RuYesNo {};
     struct YesNo {};
     struct EnaDis {};
     struct TrueFalse {};
 
     template<typename T>
-    concept BooleanLabels = std::is_same_v<T, YesNo> || std::is_same_v<T, EnaDis> || std::is_same_v<T, TrueFalse>;
+    concept BooleanLabels
+        = std::is_same_v<T, RuYesNo> || std::is_same_v<T, YesNo>
+          || std::is_same_v<T, EnaDis> || std::is_same_v<T, TrueFalse>;
 
     template<View, BooleanLabels>
     struct BoolLabels {};
+
+    template<>
+    struct BoolLabels<std::wstring_view, RuYesNo> {
+        static constexpr const std::wstring_view c_true [[maybe_unused]] { L"Да" };
+        static constexpr const std::wstring_view c_false [[maybe_unused]] { L"Нет" };
+    };
+
+    template<>
+    struct BoolLabels<std::string_view, RuYesNo> {
+        static constexpr const std::string_view c_true [[maybe_unused]] { "Да" };
+        static constexpr const std::string_view c_false [[maybe_unused]] { "Нет" };
+    };
 
     template<>
     struct BoolLabels<std::wstring_view, YesNo> {

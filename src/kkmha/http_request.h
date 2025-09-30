@@ -75,7 +75,7 @@ namespace Http {
             if (Log::s_appendLocation) {
                 message2 += location;
             }
-            tsLogError(Mbs::c_prefixedText, m_id, message2);
+            LOG_ERROR_TS(Mbs::c_prefixedText, m_id, message2);
         }
     };
 }

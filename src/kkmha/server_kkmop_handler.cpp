@@ -12,17 +12,14 @@
 #include <debug/memprof.h>
 #include <kkm/strings.h>
 #include <kkm/device.h>
+#include <kkm/callhelpers.h>
 #include <cassert>
 #include <utility>
 #include <memory>
 #include <unordered_map>
 
 namespace Server::KkmOp {
-    using Basic::Failure;
-    using Device = Kkm::Device;
-    using NewConnParams = Kkm::Device::NewConnParams;
-    using KnownConnParams = Kkm::Device::KnownConnParams;
-    using Call = Kkm::Device::Call;
+    using namespace Kkm;
 
     static std::unordered_map<std::wstring, std::shared_ptr<KnownConnParams>> s_connParamsRegistry {};
     static std::mutex s_registryMutex {};
@@ -71,7 +68,7 @@ namespace Server::KkmOp {
             if (Log::s_appendLocation) {
                 message2 += location;
             }
-            tsLogWarning(Http::Mbs::c_prefixedText, m_requestId, message2);
+            LOG_WARNING_TS(Http::Mbs::c_prefixedText, m_requestId, message2);
         }
     };
 
@@ -85,16 +82,13 @@ namespace Server::KkmOp {
         std::scoped_lock registryLock(s_registryMutex);
         if (s_connParamsRegistry.contains(wcSerialNumber)) {
             auto & params { s_connParamsRegistry.at(wcSerialNumber) };
-            tsLogDebug(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*params));
+            LOG_DEBUG_TS(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*params));
             return params;
         } else {
             auto [it, insert]
-                = s_connParamsRegistry.try_emplace(
-                    wcSerialNumber,
-                    std::make_shared<KnownConnParams>(wcSerialNumber.c_str())
-                );
+                = s_connParamsRegistry.try_emplace(wcSerialNumber, std::make_shared<KnownConnParams>(wcSerialNumber));
             if (insert) {
-                tsLogDebug(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*(it->second)));
+                LOG_DEBUG_TS(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*(it->second)));
                 return it->second;
             }
         }
@@ -105,49 +99,26 @@ namespace Server::KkmOp {
         return nullptr;
     }
 
-    template<class ResultType>
+    template<class R>
     [[maybe_unused]]
-    inline void callMethod(
-        Kkm::UndetailedMethod<ResultType> method,
-        Payload & payload
-    ) {
-        auto connParams = resolveConnParams(payload);
-        if (connParams) {
-            Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
-            ResultType result {};
-            (kkm.*method)(result);
-            result.exportTo(payload.m_result);
+    inline void callMethod(UndetailedMethod<R> method, Payload & payload) {
+        if (auto connParams = resolveConnParams(payload); connParams) {
+            callMethod(
+                Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
+                method, payload.m_result
+            );
         }
     }
 
-    template<class ResultType, class DetailsType, typename ... AdditionalDetailsArgs>
+    template<class R, class D>
     [[maybe_unused]]
-    inline void callMethod(
-        Kkm::DetailedMethod<ResultType, DetailsType> method,
-        Payload & payload,
-        AdditionalDetailsArgs ... args
-    ) {
-        if (payload.m_serialNumber.empty()) {
-            return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+    inline void callMethod(DetailedMethod<R, D> method, Payload & payload) {
+        if (auto connParams = resolveConnParams(payload); connParams) {
+            callMethod(
+                Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
+                method, payload.m_details, payload.m_result
+            );
         }
-        auto connParams = resolveConnParams(payload);
-        if (connParams) {
-            Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
-            DetailsType details { payload.m_details, args... };
-            Call::Result result {};
-            (kkm.*method)(details, result);
-            result.exportTo(payload.m_result);
-        }
-    }
-
-    template<std::derived_from<Call::Details> DetailsType, typename ... AdditionalDetailsArgs>
-    [[maybe_unused]]
-    inline void callMethod(
-        Kkm::DetailedMethod<Call::Result, DetailsType> method,
-        Payload & payload,
-        AdditionalDetailsArgs ... args
-    ) {
-        callMethod<Call::Result, DetailsType, AdditionalDetailsArgs...>(method, payload, args...);
     }
 
     void learn(Payload & payload) {
@@ -156,34 +127,31 @@ namespace Server::KkmOp {
         }
 
         std::wstring connString;
-        if (!Json::handleKey(payload.m_details, "connParams", connString)) {
+        bool found = Json::handleKey(payload.m_details, "connParams", connString);
+        if (!found) {
             return payload.fail(Http::Status::BadRequest, KKM_FMT(Kkm::Mbs::c_requiresProperty, "connParams"));
         }
 
-        std::wstring serialNumber;
+        NewConnParams connParams { connString };
+        Device kkm { connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
+        std::wstring serialNumber { kkm.serialNumber() };
+        LOG_DEBUG_TS(Wcs::c_getKkmInfo, payload.m_requestId, serialNumber);
+        connParams.save(serialNumber);
 
         {
-            NewConnParams connParams { connString };
-            Device kkm { connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
-            serialNumber.assign(kkm.serialNumber());
-            tsLogDebug(Wcs::c_getKkmInfo, payload.m_requestId, serialNumber);
-
-            {
-                std::scoped_lock registryLock(s_registryMutex);
-                s_connParamsRegistry.insert_or_assign(
-                    serialNumber,
-                    std::make_shared<KnownConnParams>(connParams, serialNumber.c_str())
-                );
-            }
-
-            Call::StatusResult result;
-            kkm.getStatus(result);
-            kkm.printHello();
-            connParams.save(serialNumber);
-            result.exportTo(payload.m_result);
+            std::scoped_lock registryLock(s_registryMutex);
+            s_connParamsRegistry.insert_or_assign(
+                serialNumber,
+                std::make_shared<KnownConnParams>(connParams, serialNumber.c_str())
+            );
         }
 
-        tsLogInfo(Wcs::c_connParamsSaved, payload.m_requestId, serialNumber);
+        StatusResult result;
+        kkm.getStatus(result);
+        kkm.printHello();
+        payload.m_result << result;
+
+        LOG_INFO_TS(Wcs::c_connParamsSaved, payload.m_requestId, serialNumber);
     }
 
     void resetRegistry(Payload & payload) {
@@ -197,7 +165,7 @@ namespace Server::KkmOp {
 
     void baseStatus(Payload & payload) {
         FORCE_MEMORY_LEAK;
-        callMethod<Call::StatusResult>(&Device::getStatus, payload);
+        callMethod(&Device::getStatus, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
@@ -206,12 +174,11 @@ namespace Server::KkmOp {
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
         }
-
         auto connParams = resolveConnParams(payload);
         if (connParams) {
-            Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
             collectDataFromMethods(
-                payload.m_result, kkm,
+                payload.m_result,
+                Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
                 &Device::getStatus,
                 &Device::getShiftState,
                 &Device::getReceiptState,
@@ -230,12 +197,11 @@ namespace Server::KkmOp {
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
         }
-
         auto connParams = resolveConnParams(payload);
         if (connParams) {
-            Device kkm { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) };
             collectDataFromMethods(
-                payload.m_result, kkm,
+                payload.m_result,
+                Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
                 &Device::getStatus,
                 &Device::getShiftState,
                 &Device::getReceiptState,
@@ -255,78 +221,78 @@ namespace Server::KkmOp {
     }
 
     void printDemo(Payload & payload) {
-        callMethod<Call::Result>(&Device::printDemo, payload);
+        callMethod(&Device::printDemo, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printNonFiscalDocument(Payload & payload) {
-        callMethod<Call::PrintDetails>(&Device::printNonFiscalDocument, payload);
+        callMethod(&Device::printNonFiscalDocument, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printInfo(Payload & payload) {
-        callMethod<Call::Result>(&Device::printInfo, payload);
+        callMethod(&Device::printInfo, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printFnRegistrations(Payload & payload) {
-        callMethod<Call::Result>(&Device::printFnRegistrations, payload);
+        callMethod(&Device::printFnRegistrations, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printOfdExchangeStatus(Payload & payload) {
-        callMethod<Call::Result>(&Device::printOfdExchangeStatus, payload);
+        callMethod(&Device::printOfdExchangeStatus, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printOfdTest(Payload & payload) {
-        callMethod<Call::Result>(&Device::printOfdTest, payload);
+        callMethod(&Device::printOfdTest, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printCloseShiftReports(Payload & payload) {
-        callMethod<Call::Result>(&Device::printCloseShiftReports, payload);
+        callMethod(&Device::printCloseShiftReports, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void printLastDocument(Payload & payload) {
-        callMethod<Call::Result>(&Device::printLastDocument, payload);
+        callMethod(&Device::printLastDocument, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void cashStat(Payload & payload) {
-        callMethod<Call::CashStatResult>(&Device::getCashStat, payload);
+        callMethod(&Device::getCashStat, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void cashIn(Payload & payload) {
-        callMethod<Call::CashDetails>(&Device::registerCashIn, payload);
+        callMethod(&Device::registerCashIn, payload);
     }
 
     void cashOut(Payload & payload) {
-        callMethod<Call::CashDetails>(&Device::registerCashOut, payload);
+        callMethod(&Device::registerCashOut, payload);
     }
 
     void sell(Payload & payload) {
-        callMethod<Call::ReceiptDetails>(&Device::registerSell, payload);
+        callMethod(&Device::registerSell, payload);
     }
 
     void sellReturn(Payload & payload) {
-        callMethod<Call::ReceiptDetails>(&Device::registerSellReturn, payload);
+        callMethod(&Device::registerSellReturn, payload);
     }
 
     void closeShift(Payload & payload) {
-        callMethod<Call::CloseDetails>(&Device::closeShift, payload);
+        callMethod(&Device::closeShift, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void reportX(Payload & payload) {
-        callMethod<Call::CloseDetails>(&Device::reportX, payload);
+        callMethod(&Device::reportX, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
     void resetState(Payload & payload) {
-        callMethod<Call::CloseDetails>(&Device::resetState, payload);
+        callMethod(&Device::resetState, payload);
         payload.m_expiresAfter = c_reportCacheLifeTime;
     }
 
@@ -419,7 +385,7 @@ namespace Server::KkmOp {
             if (cacheEntry) {
                 request.m_response.m_status = cacheEntry->m_status;
                 request.m_response.m_data = cacheEntry->m_data;
-                tsLogDebug(Cache::Wcs::c_fromCache, request.m_id);
+                LOG_DEBUG_TS(Cache::Wcs::c_fromCache, request.m_id);
                 return;
             }
         }
@@ -467,7 +433,7 @@ namespace Server::KkmOp {
             request.m_response.m_data = std::move(response);
         }
 
-    } catch (Failure & e) {
+    } catch (Basic::Failure & e) {
         request.fail(Http::Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (std::exception & e) {
         request.fail(Http::Status::InternalServerError, e.what());

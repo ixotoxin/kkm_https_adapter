@@ -6,211 +6,331 @@
 #include "kkmop_strings.h"
 #include <log/write.h>
 #include <kkm/variables.h>
+#include <kkm/strings.h>
 #include <kkm/device.h>
+#include <kkm/callhelpers.h>
 #include <cstdlib>
 #include <iostream>
 #include <optional>
 
-inline std::optional<int> learnCmd(int argc, wchar_t ** argv) {
-    if (argc < 3) {
-        return std::nullopt;
+namespace KkmOperator {
+    using namespace Kkm;
+
+    [[nodiscard]]
+    inline int learn(int connParamCount, wchar_t ** connParamItems) {
+        assert(connParamCount > 0);
+        Log::Console::ScopeLevelDown scopeLevel { Log::Level::Info };
+
+        for (int i = 0, n = 1; i < connParamCount; ++i, ++n) {
+            try {
+                NewConnParams connParams { std::wstring { connParamItems[i] } };
+                Device kkm { connParams, std::format(Wcs::c_commandPrefix, n) };
+                std::wstring serialNumber { kkm.serialNumber() };
+                LOG_DEBUG_NTS(Wcs::c_getKkmInfo, n, serialNumber);
+                connParams.save(serialNumber);
+                kkm.printHello();
+                LOG_INFO_NTS(Wcs::c_connParamsSaved, n, serialNumber);
+            } catch (const Failure & e) {
+                LOG_WARNING_NTS(std::format(Wcs::c_prefixedText, n, e.explain(Log::s_appendLocation)));
+            }
+        }
+
+        return EXIT_SUCCESS;
     }
 
-    for (int i = 2, n = 1; i < argc; ++i, ++n) {
-        try {
-            std::wstring serialNumber;
-
-            {
-                Kkm::Device::NewConnParams connParams { std::wstring { argv[i] } };
-                Kkm::Device kkm { connParams, std::format(Main::Wcs::c_commandPrefix, n) };
-                serialNumber.assign(kkm.serialNumber());
-                ntsLogDebug(Main::Wcs::c_getKkmInfo, n, serialNumber);
-                kkm.printHello();
-                connParams.save(serialNumber);
-            }
-
-            ntsLogInfo(Main::Wcs::c_connParamsSaved, n, serialNumber);
-        } catch (const Kkm::Failure & e) {
-            ntsLogWarning(std::format(Main::Wcs::c_prefixedText, n, e.explain(Log::s_appendLocation)));
+    template<class R, class K>
+    requires std::derived_from<std::remove_cvref_t<K>, Device>
+    [[maybe_unused]]
+    inline void callMethod(K && kkm, UndetailedMethod<R> method) {
+        R result {};
+        (kkm.*method)(result);
+        if (result.m_success) {
+            LOG_INFO_CLI(L"Done");
+        } else {
+            throw Basic::Failure(result.m_message); // NOLINT(*-exception-baseclass)
         }
     }
 
-    return EXIT_SUCCESS;
-}
-
-inline std::optional<int> deviceCmd(const std::wstring & command, wchar_t * serial) try {
-    Log::Console::s_level = Log::c_levelNone;
-
-    if (command == L"base-status") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial }};
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::getStatus, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
+    template<class R, class D, class K>
+    requires std::derived_from<std::remove_cvref_t<K>, Device>
+    [[maybe_unused]]
+    inline void callMethod(K && kkm, DetailedMethod<R, D> method, D && details) {
+        R result {};
+        (kkm.*method)(details, result);
+        if (result.m_success) {
+            LOG_INFO_CLI(L"Done");
+        } else {
+            throw Basic::Failure(result.m_message); // NOLINT(*-exception-baseclass)
+        }
     }
 
-    if (command == L"status") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial }};
-        Kkm::collectDataFromMethods(
-            json, kkm,
-            &Kkm::Device::getStatus,
-            &Kkm::Device::getShiftState,
-            &Kkm::Device::getReceiptState,
-            &Kkm::Device::getCashStat,
-            &Kkm::Device::getFndtOfdExchangeStatus,
-            &Kkm::Device::getFndtLastReceipt,
-            &Kkm::Device::getFndtLastDocument,
-            &Kkm::Device::getFndtErrors
-        );
-        std::wcout << json;
+    [[nodiscard]]
+    inline std::optional<int> exec(const std::wstring & operation, wchar_t * serialNumber) {
+        Log::Console::ScopeLevelDown scopeLevel { Log::Level::Info };
+        std::wstring serial { serialNumber };
+
+        if (operation == L"status") {
+            Device kkm { KnownConnParams { serial } };
+
+            StatusResult statusResult {};
+            kkm.getStatus(statusResult);
+            if (!statusResult.m_success) {
+                throw Basic::Failure(statusResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            ShiftStateResult shiftStateResult {};
+            kkm.getShiftState(shiftStateResult);
+            if (!shiftStateResult.m_success) {
+                throw Basic::Failure(shiftStateResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            /*ReceiptStateResult receiptStateResult {};
+            kkm.getReceiptState(receiptStateResult);
+            if (!receiptStateResult.m_success) {
+                throw Basic::Failure(receiptStateResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            CashStatResult cashStatResult {};
+            kkm.getCashStat(cashStatResult);
+            if (!cashStatResult.m_success) {
+                throw Basic::Failure(cashStatResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            FndtOfdExchangeStatusResult fndtOfdExchangeStatusResult {};
+            kkm.getFndtOfdExchangeStatus(fndtOfdExchangeStatusResult);
+            if (!fndtOfdExchangeStatusResult.m_success) {
+                throw Basic::Failure(fndtOfdExchangeStatusResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            /*FndtFnInfoResult fndtFnInfoResult {};
+            kkm.getFndtFnInfo(fndtFnInfoResult);
+            if (!fndtFnInfoResult.m_success) {
+                throw Basic::Failure(fndtFnInfoResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            /*FndtRegistrationInfoResult fndtRegistrationInfoResult {};
+            kkm.getFndtRegistrationInfo(fndtRegistrationInfoResult);
+            if (!fndtRegistrationInfoResult.m_success) {
+                throw Basic::Failure(fndtRegistrationInfoResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            /*FndtLastRegistrationResult fndtLastRegistrationResult {};
+            kkm.getFndtLastRegistration(fndtLastRegistrationResult);
+            if (!fndtLastRegistrationResult.m_success) {
+                throw Basic::Failure(fndtLastRegistrationResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            /*FndtLastReceiptResult fndtLastReceiptResult {};
+            kkm.getFndtLastReceipt(fndtLastReceiptResult);
+            if (!fndtLastReceiptResult.m_success) {
+                throw Basic::Failure(fndtLastReceiptResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            /*FndtLastDocumentResult fndtLastDocumentResult {};
+            kkm.getFndtLastDocument(fndtLastDocumentResult);
+            if (!fndtLastDocumentResult.m_success) {
+                throw Basic::Failure(fndtLastDocumentResult.m_message); // NOLINT(*-exception-baseclass)
+            }*/
+
+            FndtErrorsResult fndtErrorsResult {};
+            kkm.getFndtErrors(fndtErrorsResult);
+            if (!fndtErrorsResult.m_success) {
+                throw Basic::Failure(fndtErrorsResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            FfdVersionResult ffdVersionResult {};
+            kkm.getFfdVersion(ffdVersionResult);
+            if (!ffdVersionResult.m_success) {
+                throw Basic::Failure(ffdVersionResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            FwVersionResult fwVersionResult {};
+            kkm.getFwVersion(fwVersionResult);
+            if (!fwVersionResult.m_success) {
+                throw Basic::Failure(fwVersionResult.m_message); // NOLINT(*-exception-baseclass)
+            }
+
+            LOG_INFO_CLI(std::format(Wcs::c_fmtModel, statusResult.m_modelName)); // wcsSafeGet(Mbs::c_models, statusResult.m_model)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtSerialNumber, statusResult.m_serialNumber));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtBlocked, Text::Wcs::ruYesNo(statusResult.m_blocked)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtLogicalNumber, statusResult.m_logicalNumber));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtDateTime, DateTime::cast<std::wstring>(statusResult.m_dateTime)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFnPresent, Text::Wcs::ruYesNo(statusResult.m_fnPresent)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFnFiscal, Text::Wcs::ruYesNo(statusResult.m_fnFiscal)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtInvalidFn, Text::Wcs::ruYesNo(statusResult.m_invalidFn)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFiscal, Text::Wcs::ruYesNo(statusResult.m_fiscal)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashDrawerOpened, Text::Wcs::ruYesNo(statusResult.m_cashDrawerOpened)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCoverOpened, Text::Wcs::ruYesNo(statusResult.m_coverOpened)));
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtReceiptPaperPresent, Text::Wcs::ruYesNo(statusResult.m_receiptPaperPresent))
+            );
+            LOG_INFO_CLI(std::format(Wcs::c_fmtPaperNearEnd, Text::Wcs::ruYesNo(statusResult.m_paperNearEnd)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCutError, Text::Wcs::ruYesNo(statusResult.m_cutError)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtPrinterOverheat, Text::Wcs::ruYesNo(statusResult.m_printerOverheat)));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtReceiptLineLength, statusResult.m_receiptLineLength));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtReceiptLineLengthPix, statusResult.m_receiptLineLengthPix));
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtShiftState, wcsSafeGet(Mbs::c_shiftStateLabels, shiftStateResult.m_shiftState))
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtShiftExpiration,
+                    DateTime::cast<std::wstring>(shiftStateResult.m_expirationDateTime)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtReceiptType, wcsSafeGet(Mbs::c_receiptTypeLabels, statusResult.m_receiptType))
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtDocumentType, wcsSafeGet(Mbs::c_documentTypeLabels, statusResult.m_documentType))
+            );
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashInCount, cashStatResult.m_cashInCount));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashInSum, cashStatResult.m_cashInSum));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashOutCount, cashStatResult.m_cashOutCount));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashOutSum, cashStatResult.m_cashOutSum));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtSellCashSum, cashStatResult.m_sellCashSum));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtSellReturnCashSum, cashStatResult.m_sellReturnCashSum));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCashSum, cashStatResult.m_cashSum));
+            LOG_INFO_CLI(Wcs::c_ofdExchangeStatus);
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit0,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0000'0001)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit1,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0000'0010)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit2,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0000'0100)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit3,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0000'1000)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit4,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0001'0000)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOfdExSBit5,
+                    Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_exchangeStatus & 0b0010'0000)
+                )
+            );
+            LOG_INFO_CLI(std::format(Wcs::c_fmtUnsentCount, fndtOfdExchangeStatusResult.m_unsentCount));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFirstUnsentNumber, fndtOfdExchangeStatusResult.m_firstUnsentNumber));
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtFirstUnsentDateTime,
+                    DateTime::cast<std::wstring>(fndtOfdExchangeStatusResult.m_firstUnsentDateTime)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtOkpDateTime,
+                    DateTime::cast<std::wstring>(fndtOfdExchangeStatusResult.m_okpDateTime)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtOfdMessageRead, Text::Wcs::ruYesNo(fndtOfdExchangeStatusResult.m_ofdMessageRead))
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtLastSentDateTime,
+                    DateTime::cast<std::wstring>(fndtOfdExchangeStatusResult.m_lastSentDateTime)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtSuccessDateTime, DateTime::cast<std::wstring>(fndtErrorsResult.m_successDateTime))
+            );
+            LOG_INFO_CLI(std::format(Wcs::c_fmtNetworkError, fndtErrorsResult.m_networkError));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtNetworkErrorText, fndtErrorsResult.m_networkErrorText));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtOfdError, fndtErrorsResult.m_ofdError));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtOfdErrorText, fndtErrorsResult.m_ofdErrorText));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFnError, fndtErrorsResult.m_fnError));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFnErrorText, fndtErrorsResult.m_fnErrorText));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtDocumentNumber, fndtErrorsResult.m_documentNumber));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtCommandCode, fndtErrorsResult.m_commandCode));
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtDataForSendIsEmpty, Text::Wcs::ruYesNo(fndtErrorsResult.m_dataForSendIsEmpty))
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtDeviceFfdVersion,
+                    wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_deviceFfdVersion)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtDevMinFfdVersion,
+                    wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_devMinFfdVersion)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtDevMaxFfdVersion,
+                    wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_devMaxFfdVersion)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtFnFfdVersion, wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_fnFfdVersion))
+            );
+            LOG_INFO_CLI(
+                std::format(
+                    Wcs::c_fmtFnMaxFfdVersion,
+                    wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_fnMaxFfdVersion)
+                )
+            );
+            LOG_INFO_CLI(
+                std::format(Wcs::c_fmtFfdVersion, wcsSafeGet(Mbs::c_ffdVersions, ffdVersionResult.m_ffdVersion))
+            );
+            LOG_INFO_CLI(std::format(Wcs::c_fmtFirmwareVersion, fwVersionResult.m_firmwareVersion));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtConfigurationVersion, fwVersionResult.m_configurationVersion));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtReleaseVersion, fwVersionResult.m_releaseVersion));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtTemplatesVersion, fwVersionResult.m_templatesVersion));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtControlUnitVersion, fwVersionResult.m_controlUnitVersion));
+            LOG_INFO_CLI(std::format(Wcs::c_fmtBootVersion, fwVersionResult.m_bootVersion));
+        } else if (operation == L"demo-print") {
+            callMethod(Device { KnownConnParams { serial } }, &Device::printDemo);
+        } else if (operation == L"ofd-test") {
+            callMethod(Device { KnownConnParams { serial } }, &Device::printOfdTest);
+        } else if (operation == L"shift-reports") {
+            callMethod(Device { KnownConnParams { serial } }, &Device::printCloseShiftReports);
+        } else if (operation == L"last-document") {
+            callMethod(Device { KnownConnParams { serial } }, &Device::printLastDocument);
+        } else if (operation == L"report-x") {
+            callMethod(
+                Device { KnownConnParams { serial } },
+                &Device::reportX,
+                { s_cliOperatorName, s_cliOperatorInn, false, false }
+            );
+        } else if (operation == L"close-shift") {
+            callMethod(
+                Device { KnownConnParams { serial } },
+                &Device::closeShift,
+                { s_cliOperatorName, s_cliOperatorInn, true, false }
+            );
+        } else if (operation == L"reset-state") {
+            callMethod(
+                Device { KnownConnParams { serial } },
+                &Device::resetState,
+                { s_cliOperatorName, s_cliOperatorInn, true, true }
+            );
+        } else {
+            return std::nullopt;
+        }
+
         return EXIT_SUCCESS;
     }
-
-    if (command == L"full-status") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::collectDataFromMethods(
-            json, kkm,
-            &Kkm::Device::getStatus,
-            &Kkm::Device::getShiftState,
-            &Kkm::Device::getReceiptState,
-            &Kkm::Device::getCashStat,
-            &Kkm::Device::getFndtOfdExchangeStatus,
-            &Kkm::Device::getFndtFnInfo,
-            &Kkm::Device::getFndtRegistrationInfo,
-            &Kkm::Device::getFndtLastRegistration,
-            &Kkm::Device::getFndtLastReceipt,
-            &Kkm::Device::getFndtLastDocument,
-            &Kkm::Device::getFndtErrors,
-            &Kkm::Device::getFfdVersion,
-            &Kkm::Device::getFwVersion
-        );
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"cash-stat") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::getCashStat, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"demo-print") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printDemo, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"info") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printInfo, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"fn-regs") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printFnRegistrations, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"ofd-status") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printOfdExchangeStatus, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"ofd-test") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printOfdTest, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"shift-reports") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printCloseShiftReports, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"last-document") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callUndetailedMethod(kkm, &Kkm::Device::printLastDocument, json);
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"report-x") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callDetailedMethod(
-            kkm, &Kkm::Device::reportX,
-            { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, false, false },
-            json
-        );
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"close-shift") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callDetailedMethod(
-            kkm, &Kkm::Device::closeShift,
-            { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, true, false },
-            json
-        );
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    if (command == L"reset-state") {
-        Nln::Json json(Nln::EmptyJsonObject);
-        Kkm::Device kkm { Kkm::Device::KnownConnParams { serial } };
-        Kkm::callDetailedMethod(
-            kkm, &Kkm::Device::resetState,
-            { Kkm::s_cliOperatorName, Kkm::s_cliOperatorInn, true, true },
-            json
-        );
-        std::wcout << json;
-        return EXIT_SUCCESS;
-    }
-
-    return std::nullopt;
-
-} catch (const Basic::Failure & e) {
-    std::wcout
-        << Nln::Json::object({
-            { Json::Mbs::c_successKey, false },
-            { Json::Mbs::c_messageKey, Text::convert(e.explain(Log::s_appendLocation)) }
-        });
-    return EXIT_FAILURE;
-} catch (const std::exception & e) {
-    std::wcout
-        << Nln::Json::object({
-            { Json::Mbs::c_successKey, false },
-            { Json::Mbs::c_messageKey, e.what() }
-        });
-    return EXIT_FAILURE;
-} catch (...) {
-    std::wcout
-        << Nln::Json::object({
-            { Json::Mbs::c_successKey, false },
-            { Json::Mbs::c_messageKey, Basic::Mbs::c_somethingWrong }
-        });
-    return EXIT_FAILURE;
 }

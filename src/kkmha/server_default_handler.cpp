@@ -26,7 +26,7 @@ namespace Server::Default {
             if (Static::s_enable && request.m_hint.size() < 2) {
                 request.m_response.m_status = Http::Status::MovedTemporarily;
                 request.m_response.m_data = std::make_shared<Http::SolidResponse>(Mbs::c_redirectToStaticResponse);
-                tsLogDebug(Http::Wcs::c_redirectToStatic, request.m_id);
+                LOG_DEBUG_TS(Http::Wcs::c_redirectToStatic, request.m_id);
             } else if (request.m_hint.size() == 2 && request.m_hint[1] == "favicon.ico") {
                 request.m_response.m_data
                     = std::make_shared<Http::BinaryResponse<Http::Regular>>(

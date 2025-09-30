@@ -9,7 +9,6 @@
 #include "server_cache_strings.h"
 #include "server_cache_core.h"
 #include <lib/except.h>
-#include <lib/utils.h>
 #include <lib/path.h>
 #include <fstream>
 
@@ -96,7 +95,7 @@ namespace Server::Static {
             if (DateTime::cast<DateTime::Point>(fileTime) <= cacheEntry->m_cachedAt) {
                 request.m_response.m_status = cacheEntry->m_status;
                 request.m_response.m_data = cacheEntry->m_data;
-                tsLogDebug(Cache::Wcs::c_fromCache, request.m_id);
+                LOG_DEBUG_TS(Cache::Wcs::c_fromCache, request.m_id);
                 return;
             }
         }

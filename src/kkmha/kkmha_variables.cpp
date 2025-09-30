@@ -6,5 +6,5 @@
 
 namespace Log {
     const std::wstring_view c_logFileFormat { L"kkmha-{:04d}-{:02d}.log" };
-    const wchar_t * c_eventSource { L"KKMHA Service" };
+    const wchar_t * c_eventSource { L"KKM HTTPS Adapter" };
 }

@@ -5,9 +5,13 @@
 
 #include <lib/except.h>
 #include <string_view>
+#include <unordered_map>
 #include <fptr10.h>
 
 namespace Kkm {
+    using namespace std::string_literals;
+    using namespace std::string_view_literals;
+
     namespace Atol = Atol::Fptr;
 
     class Device;
@@ -156,4 +160,16 @@ namespace Kkm {
         Pre = Atol::LIBFPTR_DEFER_PRE,
         Post = Atol::LIBFPTR_DEFER_POST
     };
+
+    template<typename T>
+    requires std::is_scalar_v<T>
+    std::string_view safeGet(const std::unordered_map<T, std::string_view> & dictionary, const T key) {
+        return dictionary.contains(key) ? dictionary.at(key) : ""sv;
+    }
+
+    template<typename T>
+    requires std::is_scalar_v<T>
+    std::wstring wcsSafeGet(const std::unordered_map<T, std::string_view> & dictionary, const T key) {
+        return dictionary.contains(key) ? Text::convert(dictionary.at(key)) : L""s;
+    }
 }

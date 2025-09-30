@@ -17,17 +17,13 @@ namespace Server::Static {
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
                 Json::handleKey(json, "enableStatic", s_enable, path);
                 Json::handleKey(
-                    json, "staticDirectory",
-                    s_directory,
-                    Path::testDir(s_enable, Path::absolute(Path::noEmpty())),
-                    path
+                    json, "staticDirectory", s_directory,
+                    Path::testDir(s_enable, Path::absolute(Path::noEmpty())), path
                 );
                 Json::handleKey(json, "indexFile", s_indexFile, Path::Mbs::goodFileName(), path);
                 Json::handleKey(
-                    json, "mimeMap",
-                    s_mimeMapFile,
-                    Path::testFile(s_enable, Path::absolute(Path::noEmpty())),
-                    path
+                    json, "mimeMap", s_mimeMapFile,
+                    Path::testFile(s_enable, Path::absolute(Path::noEmpty())), path
                 );
                 Json::handleKey(json, "enableUnknownType", s_enableUnknownType, path);
                 return true;
@@ -61,11 +57,11 @@ namespace Server::Static {
 
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"[CFG] server.enableStatic = " << Text::Wcs::yesNo(s_enable) << L"\n"
-            L"[CFG] server.staticDirectory = \"" << s_directory.c_str() << L"\"\n"
-            L"[CFG] server.indexFile = \"" << Text::convert(s_indexFile) << L"\"\n"
-            L"[CFG] server.mimeMapFile = \"" << s_mimeMapFile.c_str() << L"\"\n"
-            L"[CFG] server.enableUnknownType = " << Text::Wcs::yesNo(s_enableUnknownType) << L"\n";
+            << L"CFG: server.enableStatic = " << Text::Wcs::yesNo(s_enable) << L"\n"
+            L"CFG: server.staticDirectory = \"" << s_directory.c_str() << L"\"\n"
+            L"CFG: server.indexFile = \"" << Text::convert(s_indexFile) << L"\"\n"
+            L"CFG: server.mimeMapFile = \"" << s_mimeMapFile.c_str() << L"\"\n"
+            L"CFG: server.enableUnknownType = " << Text::Wcs::yesNo(s_enableUnknownType) << L"\n";
 
         return stream;
     }

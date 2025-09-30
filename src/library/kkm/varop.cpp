@@ -16,29 +16,21 @@ namespace Kkm {
             json, "kkm",
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
                 Json::handleKey(
-                    json, "dbDirectory",
-                    s_dbDirectory,
-                    Path::touchDir(Path::absolute(Path::noEmpty())),
-                    path
+                    json, "dbDirectory", s_dbDirectory,
+                    Path::touchDir(Path::absolute(Path::noEmpty())), path
                 );
                 Json::handleKey(json, "defaultBaudRate", s_defaultBaudRate, Wcs::c_allowedBaudRate, path);
                 Json::handleKey(
-                    json, "defaultLineLength",
-                    s_defaultLineLength,
-                    Numeric::between(c_minLineLength, c_maxLineLength),
-                    path
+                    json, "defaultLineLength", s_defaultLineLength,
+                    Numeric::between(c_minLineLength, c_maxLineLength), path
                 );
                 Json::handleKey(
-                    json, "timeZone",
-                    s_timeZone,
-                    Mbs::c_timeZoneMap, [] (auto value) { s_timeZoneConfigured = true; return value; },
-                    path
+                    json, "timeZone", s_timeZone,
+                    Mbs::c_timeZoneMap, [] (auto value) { s_timeZoneConfigured = true; return value; }, path
                 );
                 Json::handleKey(
-                    json, "documentClosingTimeout",
-                    s_documentClosingTimeout,
-                    DateTime::between(c_minDocumentClosingTimeout, c_maxDocumentClosingTimeout),
-                    path
+                    json, "documentClosingTimeout", s_documentClosingTimeout,
+                    DateTime::between(c_minDocumentClosingTimeout, c_maxDocumentClosingTimeout), path
                 );
                 Json::handleKey(
                     json, "cliOperator",
@@ -51,22 +43,16 @@ namespace Kkm {
                 );
                 Json::handleKey(json, "customerAccountField", s_customerAccountField, path);
                 Json::handleKey(
-                    json, "maxCashInOut",
-                    s_maxCashInOut,
-                    Numeric::between(c_minMaxCashInOut, c_maxMaxCashInOut),
-                    path
+                    json, "maxCashInOut", s_maxCashInOut,
+                    Numeric::between(c_minMaxCashInOut, c_maxMaxCashInOut), path
                 );
                 Json::handleKey(
-                    json, "maxPrice",
-                    s_maxPrice,
-                    Numeric::between(c_minMaxPrice, c_maxMaxPrice),
-                    path
+                    json, "maxPrice", s_maxPrice,
+                    Numeric::between(c_minMaxPrice, c_maxMaxPrice), path
                 );
                 Json::handleKey(
-                    json, "maxQuantity",
-                    s_maxQuantity,
-                    Numeric::between(c_minMaxQuantity, c_maxMaxQuantity),
-                    path
+                    json, "maxQuantity", s_maxQuantity,
+                    Numeric::between(c_minMaxQuantity, c_maxMaxQuantity), path
                 );
                 return true;
             }
@@ -75,18 +61,18 @@ namespace Kkm {
 
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"[CFG] kkm.dbDirectory = \"" << s_dbDirectory.c_str() << L"\"\n"
-            L"[CFG] kkm.defaultBaudRate = " << s_defaultBaudRate << L"\n"
-            L"[CFG] kkm.defaultLineLength = " << s_defaultLineLength << L"\n"
-            L"[CFG] kkm.timeZone = tz" << Meta::toUnderlying(s_timeZone) << L"\n"
-            L"[CFG] kkm.documentClosingTimeout = " << s_documentClosingTimeout << L"\n"
-            L"[CFG] kkm.cliOperator.name = \"" << s_cliOperatorName << L"\"\n"
-            L"[CFG] kkm.cliOperator.inn = \"" << s_cliOperatorInn << L"\"\n"
-            L"[CFG] kkm.customerAccountField = \"" << s_customerAccountField << L"\"\n"
-            L"[CFG] kkm.maxCashInOut = " << s_maxCashInOut << L"\n"
-            L"[CFG] kkm.maxPrice = " << s_maxPrice << L"\n"
-            L"[CFG] kkm.maxQuantity = " << s_maxQuantity << L"\n"
-            L"[LRN] kkm.connParams = {\n";
+            << L"CFG: kkm.dbDirectory = \"" << s_dbDirectory.c_str() << L"\"\n"
+            L"CFG: kkm.defaultBaudRate = " << s_defaultBaudRate << L"\n"
+            L"CFG: kkm.defaultLineLength = " << s_defaultLineLength << L"\n"
+            L"CFG: kkm.timeZone = tz" << Meta::toUnderlying(s_timeZone) << L"\n"
+            L"CFG: kkm.documentClosingTimeout = " << s_documentClosingTimeout << L"\n"
+            L"CFG: kkm.cliOperator.name = \"" << s_cliOperatorName << L"\"\n"
+            L"CFG: kkm.cliOperator.inn = \"" << s_cliOperatorInn << L"\"\n"
+            L"CFG: kkm.customerAccountField = \"" << s_customerAccountField << L"\"\n"
+            L"CFG: kkm.maxCashInOut = " << s_maxCashInOut << L"\n"
+            L"CFG: kkm.maxPrice = " << s_maxPrice << L"\n"
+            L"CFG: kkm.maxQuantity = " << s_maxQuantity << L"\n"
+            L"LRN: kkm.connParams = {\n";
 
         try {
             std::filesystem::path directory { s_dbDirectory };
@@ -99,20 +85,20 @@ namespace Kkm {
                     if (fileExt != L".json") {
                         continue;
                     }
-                    Device::KnownConnParams connParams { entry.path() };
+                    KnownConnParams connParams { entry.path() };
                     if (nonFirst) {
                         stream << L",\n";
                     } else {
                         nonFirst = true;
                     }
                     stream
-                        << L"            \"" << connParams.serialNumber()
+                        << L"LRN:     \"" << connParams.serialNumber()
                         << L"\": \"" << static_cast<std::wstring>(connParams) << L'"';
                 }
             }
         } catch (...) {}
 
-        stream << L"\n      }\n";
+        stream << L"\nLRN: }\n";
 
         return stream;
     }

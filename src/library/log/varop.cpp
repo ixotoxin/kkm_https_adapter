@@ -59,10 +59,8 @@ namespace Log {
                             path
                         );
                         Json::handleKey(
-                            json, "directory",
-                            File::s_directory,
-                            Path::touchDir(Path::absolute(Main::s_directory, Path::noEmpty())),
-                            path
+                            json, "directory", File::s_directory,
+                            Path::touchDir(Path::absolute(Main::s_directory, Path::noEmpty())), path
                         );
                         return true;
                     },
@@ -76,21 +74,20 @@ namespace Log {
                             [] (const Nln::Json & json, const std::wstring & path) -> bool {
                                 if (json.is_object()) {
                                     Json::handleKey(
-                                        json, "foreground",
-                                        EventLog::s_fgLevel,
-                                        Wcs::c_levelCastMap, Numeric::min(c_levelInfo),
-                                        path
+                                        json, "foreground", EventLog::s_fgLevel,
+                                        Wcs::c_levelCastMap, Numeric::min(c_levelInfo), path
                                     );
                                     Json::handleKey(
-                                        json, "background",
-                                        EventLog::s_bgLevel,
-                                        Wcs::c_levelCastMap, Numeric::min(c_levelInfo),
-                                        path
+                                        json, "background", EventLog::s_bgLevel,
+                                        Wcs::c_levelCastMap, Numeric::min(c_levelInfo), path
                                     );
                                 } else {
                                     LevelUnderlying level { Log::c_levelNone };
                                     auto found
-                                        = Json::handle(json, level, Wcs::c_levelCastMap, Numeric::min(c_levelInfo), path);
+                                        = Json::handle(
+                                            json, level, Wcs::c_levelCastMap,
+                                            Numeric::min(c_levelInfo), path
+                                        );
                                     if (found) {
                                         EventLog::s_fgLevel = level;
                                         EventLog::s_bgLevel = level;
@@ -115,16 +112,16 @@ namespace Log {
 
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"[CFG] log.console.level.foreground = " << levelLabel(Console::s_level) << L"\n"
-            L"[CFG] log.console.outputTimestamp = " << Text::Wcs::yesNo(Console::s_outputTimestamp) << L"\n"
-            L"[CFG] log.console.outputLevel = " << Text::Wcs::yesNo(Console::s_outputLevel) << L"\n"
-            L"[CFG] log.file.level.foreground = " << levelLabel(File::s_fgLevel) << L"\n"
-            L"[CFG] log.file.level.background = " << levelLabel(File::s_bgLevel) << L"\n"
-            L"[CFG] log.file.directory = \"" << File::s_directory.c_str() << L"\"\n"
-            L"[CFG] log.eventLog.level.foreground = " << levelLabel(EventLog::s_fgLevel) << L"\n"
-            L"[CFG] log.eventLog.level.background = " << levelLabel(EventLog::s_bgLevel) << L"\n"
-            L"[DEF] log.eventLog.source = \"" << c_eventSource << L"\"\n"
-            L"[CFG] log.appendLocation = " << Text::Wcs::yesNo(s_appendLocation) << L"\n";
+            << L"CFG: log.console.level.foreground = " << levelLabel(Console::s_level) << L"\n"
+            L"CFG: log.console.outputTimestamp = " << Text::Wcs::yesNo(Console::s_outputTimestamp) << L"\n"
+            L"CFG: log.console.outputLevel = " << Text::Wcs::yesNo(Console::s_outputLevel) << L"\n"
+            L"CFG: log.file.level.foreground = " << levelLabel(File::s_fgLevel) << L"\n"
+            L"CFG: log.file.level.background = " << levelLabel(File::s_bgLevel) << L"\n"
+            L"CFG: log.file.directory = \"" << File::s_directory.c_str() << L"\"\n"
+            L"CFG: log.eventLog.level.foreground = " << levelLabel(EventLog::s_fgLevel) << L"\n"
+            L"CFG: log.eventLog.level.background = " << levelLabel(EventLog::s_bgLevel) << L"\n"
+            L"DEF: log.eventLog.source = \"" << c_eventSource << L"\"\n"
+            L"CFG: log.appendLocation = " << Text::Wcs::yesNo(s_appendLocation) << L"\n";
 
         return stream;
     }

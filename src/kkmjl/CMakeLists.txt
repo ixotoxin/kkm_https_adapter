@@ -16,6 +16,6 @@ install(
     DESTINATION .
 )
 
-if (BUILD_TESTS)
-    add_test(NAME test_kkmjl COMMAND kkmjl help)
-endif ()
+#if (BUILD_TESTS)
+#    add_test(NAME test_kkmjl COMMAND kkmjl help)
+#endif ()
