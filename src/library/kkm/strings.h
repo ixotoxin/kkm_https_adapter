@@ -8,7 +8,6 @@
 #include <lib/meta.h>
 #include <string_view>
 #include <array>
-#include <unordered_map>
 
 namespace Kkm {
     namespace Wcs {

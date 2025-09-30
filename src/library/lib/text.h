@@ -666,6 +666,14 @@ namespace Text {
 
     template<Meta::Wideness T>
     [[nodiscard, maybe_unused]]
+    inline typename T::View ruYesNo(bool value) {
+        return static_cast<bool>(value)
+           ? Meta::BoolLabels<typename T::View, Meta::RuYesNo>::c_true
+           : Meta::BoolLabels<typename T::View, Meta::RuYesNo>::c_false;
+    }
+
+    template<Meta::Wideness T>
+    [[nodiscard, maybe_unused]]
     inline typename T::View yesNo(bool value) {
         return static_cast<bool>(value)
            ? Meta::BoolLabels<typename T::View, Meta::YesNo>::c_true
@@ -791,6 +799,13 @@ namespace Text {
                     }
                     return filtered;
                 };
+        }
+
+        [[nodiscard, maybe_unused]]
+        inline std::wstring_view ruYesNo(bool value) {
+            return static_cast<bool>(value)
+                ? Meta::BoolLabels<std::wstring_view, Meta::RuYesNo>::c_true
+                : Meta::BoolLabels<std::wstring_view, Meta::RuYesNo>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
@@ -921,10 +936,17 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
+        inline std::string_view ruYesNo(bool value) {
+            return static_cast<bool>(value)
+                ? Meta::BoolLabels<std::string_view, Meta::RuYesNo>::c_true
+                : Meta::BoolLabels<std::string_view, Meta::RuYesNo>::c_false;
+        }
+
+        [[nodiscard, maybe_unused]]
         inline std::string_view yesNo(bool value) {
             return static_cast<bool>(value)
-                ? Meta::BoolLabels<std::string_view, Meta::YesNo>::c_true
-                : Meta::BoolLabels<std::string_view, Meta::YesNo>::c_false;
+               ? Meta::BoolLabels<std::string_view, Meta::YesNo>::c_true
+               : Meta::BoolLabels<std::string_view, Meta::YesNo>::c_false;
         }
 
         [[nodiscard, maybe_unused]]

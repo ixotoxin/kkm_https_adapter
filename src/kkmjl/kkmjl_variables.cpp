@@ -6,5 +6,5 @@
 
 namespace Log {
     const std::wstring_view c_logFileFormat { L"kkmjl-{:04d}-{:02d}.log" };
-    const wchar_t * c_eventSource { L"KKMJL" };
+    const wchar_t * c_eventSource { L"KKM JSON Loader" };
 }

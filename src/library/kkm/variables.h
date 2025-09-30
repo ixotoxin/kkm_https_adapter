@@ -7,6 +7,7 @@
 #include "types.h"
 #include "defaults.h"
 #include <string>
+#include <filesystem>
 
 namespace Kkm {
     KKM_VAR(std::filesystem::path, s_dbDirectory, c_defDbDirectory);

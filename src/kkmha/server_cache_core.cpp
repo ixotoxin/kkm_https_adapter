@@ -64,7 +64,7 @@ namespace Server::Cache {
                 s_cache,
                 [] (const auto & item) { return item.second.m_expiredAt < DateTime::Clock::now(); }
             );
-            tsLogDebug(Wcs::c_cacheMaintain, oldSize, s_cache.size());
+            LOG_DEBUG_TS(Wcs::c_cacheMaintain, oldSize, s_cache.size());
             s_counter = 0;
         }
     }

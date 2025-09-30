@@ -1,0 +1,7 @@
+﻿{
+    "!id": "00106308755095",
+    "!query": "reset-state",
+    "operator": { "name": "Оператор" },
+    "closeShift": true,
+    "cashOut": true
+}

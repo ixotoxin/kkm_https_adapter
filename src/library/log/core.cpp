@@ -2,7 +2,6 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include "core.h"
-#include "variables.h"
 #include "strings.h"
 #include <lib/meta.h>
 #include <lib/winapi.h>

@@ -16,7 +16,6 @@
 #include <config/varop.h>
 #include <cstdlib>
 #include <iostream>
-#include "server_variables.h"
 #include "server_core.h"
 #include "server_varop.h"
 #include "server_static_variables.h"
@@ -25,7 +24,10 @@
 #include "service_varop.h"
 
 #if !BUILD_SEPARATED
+#   include <kkmop_strings.h>
 #   include <kkmop_core.h>
+#   include <kkmjl_strings.h>
+#   include <kkmjl_core.h>
 #endif
 
 void usage(std::wostream & stream, const std::filesystem::path & path) {
@@ -50,7 +52,12 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
 #if BUILD_SEPARATED
         L"\n";
 #else
-        << Main::Wcs::c_kkmopUsage << L"\n";
+        << KkmOperator::Wcs::c_usage1
+        << KkmJsonLoader::Wcs::c_usage1
+        << L"где\n"
+        << KkmOperator::Wcs::c_usage2
+        << KkmJsonLoader::Wcs::c_usage2
+        << L"\n";
 #endif
 }
 
@@ -129,15 +136,15 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             }
 
 #if !BUILD_SEPARATED
-            if (command == L"learn") {
+            if (argc > 2 && command == L"learn") {
                 FORCE_MEMORY_LEAK;
-                if (auto result = learnCmd(argc, argv); result) {
-                    return *result;
-                }
+                return KkmOperator::learn(argc - 2, &argv[2]);
             } else if (argc == 3) {
-                if (auto result = deviceCmd(command, argv[2]); result) {
+                if (auto result = KkmOperator::exec(command, argv[2]); result) {
                     return *result;
                 }
+            } else if (argc == 4 && command == L"exec") {
+                return KkmJsonLoader::safeExec(argv[2], argv[3]);
             }
 #endif
         }
@@ -145,11 +152,11 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         usage(std::wcerr, argv[0]);
 
     } catch (const Basic::Failure & e) {
-        ntsLogError(e);
+        LOG_ERROR_NTS(e);
     } catch (const std::exception & e) {
-        ntsLogError(e);
+        LOG_ERROR_NTS(e);
     } catch (...) {
-        ntsLogError(Basic::Wcs::c_somethingWrong);
+        LOG_ERROR_NTS(Basic::Wcs::c_somethingWrong);
     }
 
     return EXIT_FAILURE;

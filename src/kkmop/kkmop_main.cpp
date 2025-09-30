@@ -1,7 +1,6 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
-#include <cmake/options.h>
 #include <cmake/variables.h>
 #include <lib/setcou16.h>
 #include <main/variables.h>
@@ -26,7 +25,9 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
         L"Команды:\n"
         L"    help                Вывести справку\n"
         L"    show-config         Вывести конфигурацию\n"
-        << Main::Wcs::c_kkmopUsage
+        << KkmOperator::Wcs::c_usage1
+        << L"где\n"
+        << KkmOperator::Wcs::c_usage2
         << L"\n";
 }
 
@@ -51,13 +52,11 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 return EXIT_SUCCESS;
             }
 
-            if (command == L"learn") {
+            if (argc > 2 && command == L"learn") {
                 FORCE_MEMORY_LEAK;
-                if (auto result = learnCmd(argc, argv); result) {
-                    return *result;
-                }
+                return KkmOperator::learn(argc - 2, &argv[2]);
             } else if (argc == 3) {
-                if (auto result = deviceCmd(command, argv[2]); result) {
+                if (auto result = KkmOperator::exec(command, argv[2]); result) {
                     return *result;
                 }
             }
@@ -66,11 +65,11 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         usage(std::wcerr, argv[0]);
 
     } catch (const Basic::Failure & e) {
-        ntsLogError(e);
+        LOG_ERROR_NTS(e);
     } catch (const std::exception & e) {
-        ntsLogError(e);
+        LOG_ERROR_NTS(e);
     } catch (...) {
-        ntsLogError(Basic::Wcs::c_somethingWrong);
+        LOG_ERROR_NTS(Basic::Wcs::c_somethingWrong);
     }
 
     return EXIT_FAILURE;

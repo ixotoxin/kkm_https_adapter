@@ -1,0 +1,12 @@
+﻿{
+    "!id": "00106308755095",
+    "!query": "print-non-fiscal-doc",
+    "cliche": true,
+    "footer": true,
+    "document": [{
+        "content": "Текст нефискального документа",
+        "center": true,
+        "magnified": false,
+        "separated": false
+    }]
+}
