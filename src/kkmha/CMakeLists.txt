@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.28)
 
 include(../library.cmake)
 
@@ -23,24 +23,12 @@ if (BUILD_SEPARATED)
     target_sources(kkmha PRIVATE kkmha_variables.cpp)
 endif ()
 
-#target_link_libraries(kkmha PRIVATE clang_rt.asan_dynamic-x86_64 clang_rt.asan_dynamic_runtime_thunk-x86_64)
-#target_link_libraries(kkmha PRIVATE clang_rt.asan_dynamic-x86_64)
-#target_link_libraries(kkmha PRIVATE clang_rt.ubsan_standalone_cxx-x86_64)
-
 target_compile_definitions(kkmha PUBLIC ${XTXN_PUB_DEFS} PRIVATE ${XTXN_PRI_DEFS})
 target_link_libraries(kkmha PRIVATE xtxn_lib)
 target_link_libraries(kkmha PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(kkmha PRIVATE asio::asio)
 target_link_libraries(kkmha PRIVATE nlohmann_json::nlohmann_json)
 #target_link_libraries(kkmha INTERFACE <threads>)
-
-if (WITH_ASAN)
-    add_custom_command(
-        TARGET kkmha
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CLANG_SANLIB_DIR}/${CLANG_ASAN_LIB}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-    )
-endif ()
 
 if (BUILD_STATIC)
     #target_link_libraries(kkmha PRIVATE Advapi32.lib)
@@ -55,6 +43,8 @@ if (BUILD_STATIC)
         DESTINATION .
     )
 else ()
+    #target_link_libraries(kkmha PRIVATE DbgHelp.lib)
+    #target_link_libraries(kkmha PRIVATE Crypt32.lib)
     add_custom_command(
         TARGET kkmha
         POST_BUILD

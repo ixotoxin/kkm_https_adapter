@@ -5,21 +5,17 @@
 
 #include "types.h"
 #include "variables.h"
-#include <lib/utils.h>
+#include <lib/defer.h>
 #include <string>
 
 #define LOG_DEBUG_CLI(x) \
-    do { \
-        if (Log::Console::ready(Log::Level::Debug)) Log::Console::write(Log::Level::Debug, x); \
-    } while (false)
+    do { if (Log::Console::ready(Log::Level::Debug)) Log::Console::write(Log::Level::Debug, x); } while (false)
 
 #define LOG_INFO_CLI(x) \
-    do { \
-        if (Log::Console::ready(Log::Level::Info)) Log::Console::write(Log::Level::Info, x); \
-    } while (false)
+    do { if (Log::Console::ready(Log::Level::Info)) Log::Console::write(Log::Level::Info, x); } while (false)
 
-#define LOG_WARNING_CLI(x) do { Log::Console::write(Log::Level::Warning, x); } while (false)
-#define LOG_ERROR_CLI(x) do { Log::Console::write(Log::Level::Error, x); } while (false)
+#define LOG_WARNING_CLI(x) Log::Console::write(Log::Level::Warning, x)
+#define LOG_ERROR_CLI(x) Log::Console::write(Log::Level::Error, x)
 
 namespace Log {
     namespace Console {
@@ -54,7 +50,7 @@ namespace Log {
             return [prevLevel = levelUp(level)] { levelDown(prevLevel); };
         }
 
-        class ScopeLevelDown : protected Deferred::Exec<decltype(postLevelDownRestorer(Level::Debug))> {
+        class ScopeLevelDown : public Deferred::Exec<decltype(postLevelDownRestorer(Level::Debug))> {
         public:
             ScopeLevelDown() = delete;
             ScopeLevelDown(const ScopeLevelDown &) = delete;
@@ -64,12 +60,9 @@ namespace Log {
 
             ScopeLevelDown & operator=(const ScopeLevelDown &) = delete;
             ScopeLevelDown & operator=(ScopeLevelDown &&) = delete;
-
-            using Exec::perform;
-            using Exec::cancel;
         };
 
-        class ScopeLevelUp : protected Deferred::Exec<decltype(postLevelUpRestorer(Level::Debug))> {
+        class ScopeLevelUp : public Deferred::Exec<decltype(postLevelUpRestorer(Level::Debug))> {
         public:
             ScopeLevelUp() = delete;
             ScopeLevelUp(const ScopeLevelUp &) = delete;
@@ -79,9 +72,6 @@ namespace Log {
 
             ScopeLevelUp & operator=(const ScopeLevelUp &) = delete;
             ScopeLevelUp & operator=(ScopeLevelUp &&) = delete;
-
-            using Exec::perform;
-            using Exec::cancel;
         };
     }
 

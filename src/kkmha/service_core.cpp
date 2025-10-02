@@ -6,8 +6,8 @@
 #include "service_core.h"
 #include "server_defaults.h"
 #include "server_core.h"
+#include <lib/errexp.h>
 #include <lib/except.h>
-#include <lib/utils.h>
 #include <log/write.h>
 #include <optional>
 #include <winsvc.h>

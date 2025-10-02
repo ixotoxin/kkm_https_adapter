@@ -9,15 +9,15 @@
 #include <lib/text.h>
 #include <iostream>
 
-#define LOG_DEBUG_NTS(x, ...) do { Log::Nts::write(Log::Level::Debug, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_INFO_NTS(x, ...) do { Log::Nts::write(Log::Level::Info, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_WARNING_NTS(x, ...) do { Log::Nts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_ERROR_NTS(x, ...) do { Log::Nts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__); } while (false)
+#define LOG_DEBUG_NTS(x, ...) Log::Nts::write(Log::Level::Debug, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_INFO_NTS(x, ...) Log::Nts::write(Log::Level::Info, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_WARNING_NTS(x, ...) Log::Nts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_ERROR_NTS(x, ...) Log::Nts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__)
 
-#define LOG_DEBUG_TS(x, ...) do { Log::Ts::write(Log::Level::Debug, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_INFO_TS(x, ...) do { Log::Ts::write(Log::Level::Info, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_WARNING_TS(x, ...) do { Log::Ts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__); } while (false)
-#define LOG_ERROR_TS(x, ...) do { Log::Ts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__); } while (false)
+#define LOG_DEBUG_TS(x, ...) Log::Ts::write(Log::Level::Debug, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_INFO_TS(x, ...) Log::Ts::write(Log::Level::Info, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_WARNING_TS(x, ...) Log::Ts::write(Log::Level::Warning, x __VA_OPT__(,) __VA_ARGS__)
+#define LOG_ERROR_TS(x, ...) Log::Ts::write(Log::Level::Error, x __VA_OPT__(,) __VA_ARGS__)
 
 namespace Log {
     namespace Nts {

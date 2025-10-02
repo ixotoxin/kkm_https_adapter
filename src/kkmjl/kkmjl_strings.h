@@ -11,13 +11,13 @@ namespace KkmJsonLoader {
 
         constexpr Csv c_usage1 {
     #if !BUILD_SEPARATED
-            L"    exec <сн> <file>    Выполнить операцию описанную в файле (json)\n"
+            L"    exec {сн} {вф}      Выполнить операцию описанную в файле (json)\n"
     #endif
         };
 
         constexpr Csv c_usage2 {
     #if !BUILD_SEPARATED
-            L"    <file>              Входной файл в JSON-формате\n"
+            L"    {вф}                Входной файл в JSON-формате\n"
             L"    (json)              Вывод в JSON-формате\n"
     #endif
         };

@@ -8,6 +8,7 @@
 #include "numeric.h"
 #include "datetime.h"
 #include "text.h"
+#include "path.h"
 #include <ostream>
 #include <nlohmann/json.hpp>
 
