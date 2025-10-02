@@ -45,7 +45,7 @@ namespace Basic {
 [[maybe_unused]]
 inline std::string & operator+=(std::string & message, const std::source_location & location) noexcept {
     message.append(" (");
-    message.append(Basic::Mbs::c_inFile);
+    message.append(Basic::Mbs::c_source);
     message.append(" ");
     Basic::append(message, location);
     message.append(")");
@@ -69,7 +69,7 @@ inline std::string operator+(const std::string_view message, const std::source_l
 [[maybe_unused]]
 inline std::wstring & operator+=(std::wstring & message, const std::source_location & location) {
     message.append(L" (");
-    message.append(Basic::Wcs::c_inFile);
+    message.append(Basic::Wcs::c_source);
     message.append(L" ");
     Basic::append(message, location);
     message.append(L")");

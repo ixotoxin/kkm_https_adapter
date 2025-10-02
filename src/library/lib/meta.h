@@ -186,81 +186,33 @@ namespace Meta {
     concept ViewRelying = View<std::remove_cvref_t<T>>;
 
     template<typename>
-    struct CalcIsWide : std::false_type {};
+    struct WideTypes : std::false_type {};
 
     template<>
-    struct CalcIsWide<wchar_t> : std::true_type {};
+    struct WideTypes<wchar_t> : std::true_type {};
 
     template<>
-    struct CalcIsWide<wchar_t *> : std::true_type {};
+    struct WideTypes<wchar_t *> : std::true_type {};
 
     template<>
-    struct CalcIsWide<std::wstring> : std::true_type {};
+    struct WideTypes<std::wstring> : std::true_type {};
 
     template<>
-    struct CalcIsWide<std::wstring_view> : std::true_type {};
+    struct WideTypes<std::wstring_view> : std::true_type {};
 
     template<typename T>
-    constexpr bool isWide = CalcIsWide<std::remove_cvref_t<T>>::value;
+    constexpr bool isWide = WideTypes<std::remove_cvref_t<T>>::value;
 
-    struct RuYesNo {};
+    struct DaNet {};
     struct YesNo {};
     struct EnaDis {};
     struct TrueFalse {};
 
     template<typename T>
     concept BooleanLabels
-        = std::is_same_v<T, RuYesNo> || std::is_same_v<T, YesNo>
+        = std::is_same_v<T, DaNet> || std::is_same_v<T, YesNo>
           || std::is_same_v<T, EnaDis> || std::is_same_v<T, TrueFalse>;
 
     template<View, BooleanLabels>
     struct BoolLabels {};
-
-    template<>
-    struct BoolLabels<std::wstring_view, RuYesNo> {
-        static constexpr const std::wstring_view c_true [[maybe_unused]] { L"Да" };
-        static constexpr const std::wstring_view c_false [[maybe_unused]] { L"Нет" };
-    };
-
-    template<>
-    struct BoolLabels<std::string_view, RuYesNo> {
-        static constexpr const std::string_view c_true [[maybe_unused]] { "Да" };
-        static constexpr const std::string_view c_false [[maybe_unused]] { "Нет" };
-    };
-
-    template<>
-    struct BoolLabels<std::wstring_view, YesNo> {
-        static constexpr const std::wstring_view c_true [[maybe_unused]] { L"yes" };
-        static constexpr const std::wstring_view c_false [[maybe_unused]] { L"no" };
-    };
-
-    template<>
-    struct BoolLabels<std::string_view, YesNo> {
-        static constexpr const std::string_view c_true [[maybe_unused]] { "yes" };
-        static constexpr const std::string_view c_false [[maybe_unused]] { "no" };
-    };
-
-    template<>
-    struct BoolLabels<std::wstring_view, EnaDis> {
-        static constexpr const std::wstring_view c_true [[maybe_unused]] { L"enable" };
-        static constexpr const std::wstring_view c_false [[maybe_unused]] { L"disable" };
-    };
-
-    template<>
-    struct BoolLabels<std::string_view, EnaDis> {
-        static constexpr const std::string_view c_true [[maybe_unused]] { "enable" };
-        static constexpr const std::string_view c_false [[maybe_unused]] { "disable" };
-    };
-
-    template<>
-    struct BoolLabels<std::wstring_view, TrueFalse> {
-        static constexpr const std::wstring_view c_true [[maybe_unused]] { L"true" };
-        static constexpr const std::wstring_view c_false [[maybe_unused]] { L"false" };
-    };
-
-    template<>
-    struct BoolLabels<std::string_view, TrueFalse> {
-        static constexpr const std::string_view c_true [[maybe_unused]] { "true" };
-        static constexpr const std::string_view c_false [[maybe_unused]] { "false" };
-    };
 }

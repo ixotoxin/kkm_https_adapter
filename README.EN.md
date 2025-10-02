@@ -33,7 +33,7 @@ are located in the `.\_msvc` and `.\_clang` directories, respectively.
 | `config_env.cmd`           | Sets environment variables and runs the necessary bootstrap scripts. It is called from the scripts listed below                                        |
 | `install_dynamic_deps.cmd` | Installs dynamic build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10` |
 | `install_static_deps.cmd`  | Installs static build dependencies and copies the necessary header files from `%programfiles%\ATOL\Drivers10\KKT\langs\cpp\fptr10` to `.\deps\fptr10`  |
-| `build_config.cmd`         | Sets build options                                                                                                                                     |
+| `config_build.cmd`         | Sets build options                                                                                                                                     |
 | `test.cmd`                 | Builds the debug version and runs unit tests                                                                                                           |
 | `build_debug.cmd`          | Builds the debug version                                                                                                                               |
 | `build_release.cmd`        | Builds the release version                                                                                                                             |
@@ -44,8 +44,8 @@ It is assumed that the required software is installed in the following directori
 |------------------------------------------------|---------------------------------------------------------|
 | ATOL Driver                                    | `%programfiles%\ATOL`                                   |
 | Microsoft Visual Studio 2022 Community Edition | `%programfiles%\Microsoft Visual Studio\2022\Community` |
-| Clang                                          | `C:\Devel\Platform\Clang\21.1.1-x86_64`                 |
-| CMake                                          | `C:\Devel\Platform\CMake\3.31.7-x86_64`                 |
+| Clang                                          | `C:\Devel\Platform\Clang\21.1.2-x86_64`                 |
+| CMake                                          | `C:\Devel\Platform\CMake\3.31.8-x86_64`                 |
 | Ninja                                          | `C:\Devel\Platform\Ninja\1.13.1`                        |
 
 The paths can be modified in the files `config_env.cmd` and `install_*_deps.cmd`. CMake and Ninja can be used from MSVS.

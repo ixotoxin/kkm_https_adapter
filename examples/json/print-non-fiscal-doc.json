@@ -3,10 +3,24 @@
     "!query": "print-non-fiscal-doc",
     "cliche": true,
     "footer": true,
-    "document": [{
-        "content": "Текст нефискального документа",
-        "center": true,
-        "magnified": false,
-        "separated": false
-    }]
+    "document": [
+        {
+            "content": "Строка 1",
+            "center": true,
+            "magnified": true,
+            "separated": false
+        },
+        {
+            "content": "Текст нефискального документа",
+            "center": true,
+            "magnified": false,
+            "separated": false
+        },
+        {
+            "content": "Строка 3",
+            "center": false,
+            "magnified": false,
+            "separated": true
+        }
+    ]
 }

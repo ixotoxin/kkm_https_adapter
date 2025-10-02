@@ -1,5 +1,5 @@
 set(LIB_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src/library/lib")
-set(LIB_SOURCE_FILES "${LIB_SOURCE_DIR}/datetime.cpp" "${LIB_SOURCE_DIR}/text.cpp" "${LIB_SOURCE_DIR}/utils.cpp")
+set(LIB_SOURCE_FILES "${LIB_SOURCE_DIR}/errexp.cpp" "${LIB_SOURCE_DIR}/datetime.cpp" "${LIB_SOURCE_DIR}/text.cpp")
 
 set(MAIN_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src/library/main")
 set(MAIN_SOURCE_FILES "${MAIN_SOURCE_DIR}/varop.cpp")

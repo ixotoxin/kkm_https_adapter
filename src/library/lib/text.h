@@ -4,6 +4,7 @@
 #pragma once
 
 #include "meta.h"
+#include "strings.h"
 #include "except.h"
 #include <cassert>
 #include <algorithm>
@@ -189,7 +190,7 @@ namespace Meta {
     };
 
     template<>
-    struct CalcIsWide<Wcs> : std::true_type {};
+    struct WideTypes<Wcs> : std::true_type {};
 
     template<typename T>
     concept Wideness = std::is_same_v<T, Wcs> || std::is_same_v<T, Mbs>;
@@ -666,10 +667,10 @@ namespace Text {
 
     template<Meta::Wideness T>
     [[nodiscard, maybe_unused]]
-    inline typename T::View ruYesNo(bool value) {
+    inline typename T::View daNet(bool value) {
         return static_cast<bool>(value)
-           ? Meta::BoolLabels<typename T::View, Meta::RuYesNo>::c_true
-           : Meta::BoolLabels<typename T::View, Meta::RuYesNo>::c_false;
+           ? Meta::BoolLabels<typename T::View, Meta::DaNet>::c_true
+           : Meta::BoolLabels<typename T::View, Meta::DaNet>::c_false;
     }
 
     template<Meta::Wideness T>
@@ -802,10 +803,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline std::wstring_view ruYesNo(bool value) {
+        inline std::wstring_view daNet(bool value) {
             return static_cast<bool>(value)
-                ? Meta::BoolLabels<std::wstring_view, Meta::RuYesNo>::c_true
-                : Meta::BoolLabels<std::wstring_view, Meta::RuYesNo>::c_false;
+                ? Meta::BoolLabels<std::wstring_view, Meta::DaNet>::c_true
+                : Meta::BoolLabels<std::wstring_view, Meta::DaNet>::c_false;
         }
 
         [[nodiscard, maybe_unused]]
@@ -936,10 +937,10 @@ namespace Text {
         }
 
         [[nodiscard, maybe_unused]]
-        inline std::string_view ruYesNo(bool value) {
+        inline std::string_view daNet(bool value) {
             return static_cast<bool>(value)
-                ? Meta::BoolLabels<std::string_view, Meta::RuYesNo>::c_true
-                : Meta::BoolLabels<std::string_view, Meta::RuYesNo>::c_false;
+                ? Meta::BoolLabels<std::string_view, Meta::DaNet>::c_true
+                : Meta::BoolLabels<std::string_view, Meta::DaNet>::c_false;
         }
 
         [[nodiscard, maybe_unused]]

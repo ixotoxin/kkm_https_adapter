@@ -4,7 +4,7 @@
 #include "core.h"
 #include "variables.h"
 #include <lib/winapi.h>
-#include <lib/utils.h>
+#include <lib/errexp.h>
 #include <lib/path.h>
 #include <log/defaults.h>
 

@@ -2,5 +2,15 @@
     "!id": "00106308755095",
     "!query": "sell",
     "operator": { "name": "Оператор" },
-    "TODO": "описать тестовый запрос"
+    "tax": "vat20",
+    "items": [
+        { "title": "Огурец", "price": 234.56, "quantity": 1.3 },
+        { "title": "Томат", "price": 334.56, "quantity": 0.95 },
+        { "title": "Перец", "price": 434.56, "quantity": 0.3 },
+        { "title": "Сметана", "price": 60.56, "quantity": 1, "tax": "vat10" },
+        { "title": "Молоко", "price": 80.56, "quantity": 1, "tax": "vat10" }
+    ],
+    "headerText": { "content": "Здравствуйте!", "center": true, "magnified": true },
+    "footerText": { "content": "Спасибо!", "center": true, "magnified": true },
+    "payment": { "sum":  "auto", "type": "cash" }
 }
