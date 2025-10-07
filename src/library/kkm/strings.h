@@ -14,8 +14,9 @@ namespace Kkm {
         KKM_WSTR(c_requiresProperty, L"Требуется корректное свойство '{}'");
         KKM_WSTR(c_requiresProperty2, L"Требуется корректное свойство '{}.{}'");
 
-        KKM_WSTR(c_invalidConnParams, L"Ошибка параметров подключения");
-        KKM_WSTR(c_alreadyInitialized, L"Параметров подключения уже инициализированы");
+        KKM_WSTR(c_invalidSerialNumber, L"Недопустимый серийный номер");
+        KKM_WSTR(c_invalidFilePath, L"Не удалось загрузить параметры подключения");
+        KKM_WSTR(c_invalidConnParams, L"Недопустимые параметры подключения");
         KKM_WSTR(c_notImplemented, L"Не реализовано");
         KKM_WSTR(c_notAvailable, L"Недоступна");
         KKM_WSTR(c_invalidData, L"Ошибка данных");
@@ -29,12 +30,13 @@ namespace Kkm {
         KKM_WSTR(c_savingError, L"ККМ [{}]: Не удалось сохранить параметры подключения");
         KKM_WSTR(c_loaded, L"ККМ [{}]: Параметры подключения успешно загружены");
         KKM_WSTR(c_loadingError, L"ККМ [{}]: Не удалось загрузить параметры подключения");
+
         KKM_WSTR(c_cancelingError, L"{}ККМ [{}]: Ошибка отмены чека: {}");
         KKM_WSTR(c_closingError, L"{}ККМ [{}]: Ошибка закрытия документа: {}");
         KKM_WSTR(c_printingError, L"{}ККМ [{}]: Ошибка печати документа: {}");
-        KKM_WSTR(c_checkingError, L"Не удалось проверить закрытие документа");
         KKM_WSTR(c_shiftMismatch, L"{}ККМ [{}]: Номер смены в ККМ не совпадает с номером смены в ФН");
 
+        KKM_WSTR(c_checkingError, L"Не удалось проверить закрытие документа");
         KKM_WSTR(c_requiresItems, L"Не предоставлено ни одной позиции");
         KKM_WSTR(c_badOperator, L"Данные оператора некорректны");
         KKM_WSTR(c_badCustomer, L"Данные покупателя некорректны");

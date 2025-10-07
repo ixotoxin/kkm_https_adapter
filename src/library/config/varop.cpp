@@ -8,8 +8,8 @@
 namespace Config {
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"RTM: main.configDirectory = \"" << Config::s_directory.c_str() << L"\"\n"
-            L"RTM: main.configFile = \"" << Config::s_file.c_str() << L"\"\n";
+            << L"RTM: main.configDirectory = \"" << Config::s_directory.native() << L"\"\n"
+            L"RTM: main.configFile = \"" << Config::s_file.native() << L"\"\n";
 
         return stream;
     }

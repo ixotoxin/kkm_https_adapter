@@ -56,8 +56,8 @@ namespace Server {
             L"CFG: server.concurrencyLimit = " << s_concurrencyLimit << L"\n"
             L"CFG: server.enableLegacyTls = " << Text::Wcs::yesNo(s_enableLegacyTls) << L"\n"
             L"CFG: server.securityLevel = " << securityLevel << L"\n"
-            L"CFG: server.certificateChainFile = \"" << s_certificateChainFile.c_str() << L"\"\n"
-            L"CFG: server.privateKeyFile = \"" << s_privateKeyFile.c_str() << L"\"\n"
+            L"CFG: server.certificateChainFile = \"" << s_certificateChainFile.native() << L"\"\n"
+            L"CFG: server.privateKeyFile = \"" << s_privateKeyFile.native() << L"\"\n"
             L"CFG: server.privateKeyPassword = \"" << Text::convert(s_privateKeyPassword) << L"\"\n"
             L"CFG: server.secret = \"" << Text::convert(s_secret) << L"\"\n"
             L"CFG: server.loopbackWithoutSecret = " << Text::Wcs::yesNo(s_loopbackWithoutSecret) << L"\n";

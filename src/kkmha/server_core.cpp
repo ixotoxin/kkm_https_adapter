@@ -80,7 +80,7 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(auto && socket, Asio::SslContext & sslContext) {
+    asio::awaitable<void> accept(Asio::Socket && socket, Asio::SslContext & sslContext) {
         Counter counter {};
         if (counter.exceeded()) {
             LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
@@ -88,7 +88,7 @@ namespace Server {
         }
 
         try {
-            Asio::Stream stream { std::forward<decltype(socket)>(socket), sslContext };
+            Asio::Stream stream { std::forward<Asio::Socket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
 
             try {
@@ -237,8 +237,8 @@ namespace Server {
 
             sslContext.set_password_callback([] (auto, auto) { return s_privateKeyPassword; });
             // TODO: Облагородить способ установки ключа и сертификатов.
-            sslContext.use_certificate_chain_file(Text::convert(s_certificateChainFile.c_str()));
-            sslContext.use_private_key_file(Text::convert(s_privateKeyFile.c_str()), Asio::SslContext::pem);
+            sslContext.use_certificate_chain_file(Text::convert(s_certificateChainFile.native()));
+            sslContext.use_private_key_file(Text::convert(s_privateKeyFile.native()), Asio::SslContext::pem);
             sslContext.set_verify_mode(asio::ssl::verify_none);
 
             auto executor = co_await asio::this_coro::executor;

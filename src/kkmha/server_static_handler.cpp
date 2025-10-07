@@ -84,7 +84,7 @@ namespace Server::Static {
 
         Cache::maintain();
         Cache::Key cacheKey { "static::::" };
-        cacheKey.append(Text::convert(path.c_str()));
+        cacheKey.append(Text::convert(path.native()));
         auto cacheEntry = Cache::load(cacheKey);
 
         if (cacheEntry) {
@@ -116,7 +116,7 @@ namespace Server::Static {
         response->m_size = fileSize;
 
         {
-            auto ext = Text::lowered(Text::convert(path.extension().c_str()));
+            auto ext = Text::lowered(Text::convert(path.extension().native()));
             if (!ext.empty() && s_mimeMap.contains(ext)) {
                 response->m_mimeType = s_mimeMap[ext].get<std::string>();
             } else if (s_enableUnknownType) {

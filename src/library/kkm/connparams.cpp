@@ -11,6 +11,8 @@
 namespace Kkm {
     using namespace std::string_literals;
 
+    constexpr const std::wstring_view allowed { L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_" };
+
     ConnParams::ConnParams(const Container & params)
     : m_params { params } {}
 
@@ -142,20 +144,20 @@ namespace Kkm {
         assert(m_params.empty());
         std::ifstream file { path };
         if (!file.is_open() || !file.good()) {
-            throw Failure(LIB_WFMT(Basic::Wcs::c_couldntReadFile, path.c_str())); // NOLINT(*-exception-baseclass)
+            throw Failure(LIB_WFMT(Basic::Wcs::c_couldntReadFile, path.native())); // NOLINT(*-exception-baseclass)
         }
         Nln::Json json(Nln::Json::parse(std::ifstream(path)));
         Json::handle(json, m_params);
     }
 
-    KnownConnParams::KnownConnParams(std::wstring serial)
-    : ConnParams {}, m_serialNumber { std::move(serial) } {
-        load(filePath(m_serialNumber));
+    KnownConnParams::KnownConnParams(std::wstring serialNumber)
+    : ConnParams {}, m_serialNumber { filterSerialNumber(std::move(serialNumber)) } {
+        load(filterFilePath(filePath(m_serialNumber)));
     }
 
-    KnownConnParams::KnownConnParams(const std::filesystem::path & path)
-    : ConnParams {}, m_serialNumber { serialNumber(path) } {
-        load(path);
+    KnownConnParams::KnownConnParams(const std::filesystem::path & filePath)
+    : ConnParams {}, m_serialNumber { filterSerialNumber(serialNumber(filePath)) } {
+        load(filterFilePath(filePath));
     }
 
     [[nodiscard]]
@@ -174,9 +176,29 @@ namespace Kkm {
     std::filesystem::path KnownConnParams::filePath(const std::wstring & serialNumber) {
         std::filesystem::path path { s_dbDirectory };
         path /= serialNumber + L".json"s;
-        if (!std::filesystem::is_regular_file(path)) {
-            throw Failure(KKM_WFMT(Wcs::c_loadingError, serialNumber)); // NOLINT(*-exception-baseclass)
-        }
         return path;
+    }
+
+    [[nodiscard]]
+    std::wstring KnownConnParams::filterSerialNumber(std::wstring serialNumber) {
+        if (serialNumber.empty() || std::string::npos != serialNumber.find_first_not_of(allowed)) {
+            throw Failure(Wcs::c_invalidSerialNumber); // NOLINT(*-exception-baseclass)
+        }
+        return serialNumber;
+    }
+
+    [[nodiscard]]
+    std::filesystem::path KnownConnParams::filterFilePath(std::filesystem::path filePath) {
+        if (Text::lowered(filePath.extension().native()) != L".json") {
+            throw Failure(Wcs::c_invalidFilePath); // NOLINT(*-exception-baseclass)
+        }
+        auto stem { filePath.stem().native() };
+        if (stem.empty() || std::string::npos != stem.find_first_not_of(allowed)) {
+            throw Failure(Wcs::c_invalidFilePath); // NOLINT(*-exception-baseclass)
+        }
+        if (!std::filesystem::is_regular_file(filePath)) {
+            throw Failure(Wcs::c_invalidFilePath); // NOLINT(*-exception-baseclass)
+        }
+        return filePath;
     }
 }

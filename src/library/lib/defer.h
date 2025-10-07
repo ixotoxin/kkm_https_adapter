@@ -18,7 +18,7 @@ namespace Deferred {
         Exec() = delete;
         Exec(const Exec &) = delete;
         Exec(Exec &&) = delete;
-        [[maybe_unused]] explicit Exec(T & func) noexcept : m_func(func) {}
+        [[maybe_unused]] explicit Exec(const T & func) noexcept : m_func(func) {}
         [[maybe_unused]] explicit Exec(T && func) noexcept : m_func(std::forward<T>(func)) {}
 
         ~Exec() noexcept {

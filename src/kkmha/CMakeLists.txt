@@ -48,7 +48,8 @@ else ()
     add_custom_command(
         TARGET kkmha
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${KKMHA_DEPS_VCPKG_DLL}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        COMMAND ${CMAKE_COMMAND} -E
+            copy_directory_if_different "${KKMHA_DEPS_VCPKG_DLL}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     )
     install(
         TARGETS kkmha

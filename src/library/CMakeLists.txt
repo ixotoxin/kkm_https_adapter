@@ -9,7 +9,7 @@ add_library(
         ${MAIN_SOURCE_FILES}
         ${LOG_SOURCE_FILES}
         ${KKM_SOURCE_FILES}
-        ${CONFIG_SOURCE_FILES}
+        ${CONF_SOURCE_FILES}
 )
 
 if (BUILD_SEPARATED)

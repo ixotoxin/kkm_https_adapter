@@ -34,7 +34,7 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
     stream
         << L"\n"
         L"Версия: " << BUILD_VERSION << L"\n"
-        L"Использование: " << path.filename().c_str()
+        L"Использование: " << path.filename().native()
 #if BUILD_SEPARATED
         << L" команда\n"
 #else
@@ -103,7 +103,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
                 }
 
                 if (command == L"install") {
-                    Service::Control::install(std::format(L"\"{}\" service", Main::s_file.c_str()));
+                    Service::Control::install(std::format(L"\"{}\" service", Main::s_file.native()));
                     ::Sleep(DateTime::c_basicSleep);
                     return EXIT_SUCCESS;
                 }
