@@ -10,13 +10,13 @@ namespace UnitTests {
         using Catch::Matchers::Equals;
 
         int16_t i16 { -123 };
-        int16_t i32 { -456 };
-        int16_t i64 { -789 };
-        int16_t u16 { 123 };
-        int16_t u32 { 456 };
-        int16_t u64 { 789 };
+        int32_t i32 { -456 };
+        int64_t i64 { -789 };
+        uint16_t u16 { 123 };
+        uint32_t u32 { 456 };
+        uint64_t u64 { 789 };
         double pDouble { 123.456789 };
-        double nDouble { -123.456789 };
+        long double nDouble { -123.456789 };
         std::wstring wcStrNum;
 
         REQUIRE_THAT(Numeric::cast<std::string>(0), Equals("0"));

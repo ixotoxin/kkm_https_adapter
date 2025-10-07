@@ -8,6 +8,9 @@ namespace UnitTests {
     using namespace std::string_view_literals;
 
     TEST_CASE("wconv", "[convert]") {
+
+
+
         std::wstring wcString;
         std::string mbString;
 
@@ -31,8 +34,8 @@ namespace UnitTests {
         REQUIRE(Text::convert("Тестовая строка") == L"Тестовая строка"sv);
         REQUIRE(Text::convert(L"测试线") == "测试线"sv);
         REQUIRE(Text::convert("测试线") == L"测试线"sv);
-    REQUIRE(Text::convert(L"테스트 라인") == "테스트 라인"sv);
-    REQUIRE(Text::convert("테스트 라인") == L"테스트 라인"sv);
+        REQUIRE(Text::convert(L"테스트 라인") == "테스트 라인"sv);
+        REQUIRE(Text::convert("테스트 라인") == L"테스트 라인"sv);
 
         REQUIRE(
             Text::convert(L"Test string ** Тестовая строка ** 测试线 ** 테스트 라인")
