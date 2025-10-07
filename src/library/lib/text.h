@@ -232,7 +232,7 @@ namespace Text {
 
     template<Meta::Char T>
     [[nodiscard, maybe_unused]]
-    inline T * trim(T * text) {
+    inline T * trimmedChars(T * text) {
         using Trait = Meta::TextTrait<T>;
         if (text && *text) {
             while (Trait::trimPredicate(*text)) { ++text; }
@@ -274,8 +274,8 @@ namespace Text {
     }
 
     template<Meta::Char T>
-    [[maybe_unused]]
-    inline T * lower(T * text) {
+    [[nodiscard, maybe_unused]]
+    inline T * loweredChars(T * text) {
         using Trait = Meta::TextTrait<T>;
         if (text && *text) {
             std::transform(text, text + Trait::length(text), text, Trait::toLower);

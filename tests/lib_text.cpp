@@ -2,6 +2,7 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include <cwctype>
+#include <memory>
 #include <vector>
 #include <deque>
 #include <list>
@@ -53,31 +54,28 @@ namespace UnitTests {
                 { L"Text\r\n\t\n\v\f ", L"Text" }
             };
 
-            for (const auto & s : strings) {
-                {
-                    auto t = new wchar_t[s.first.size() + 1] {};
-                    if (!s.first.empty()) {
-                        std::wmemcpy(t, s.first.data(), s.first.size());
-                    }
-                    auto u = Text::trimmed<wchar_t>(t);
-                    auto v = Text::trimmed<std::wstring_view>(t);
-                    auto w = Text::trimmed<std::wstring>(t);
-                    auto r = Text::trim<wchar_t>(t);
-
-                    REQUIRE(s.second == u);
-                    REQUIRE(s.second == v);
-                    REQUIRE(s.second == w);
-                    REQUIRE(s.second == r);
-
-                    delete[] t;
+            for (const auto & source : strings) {
+                auto buffer = std::make_unique_for_overwrite<wchar_t[]>(source.first.size() + 1);
+                if (source.first.empty()) {
+                    buffer[0] = L'\0';
+                } else {
+                    std::wmemcpy(buffer.get(), source.first.data(), source.first.size());
+                    buffer[source.first.size()] = L'\0';
                 }
 
-                {
-                    std::wstring t { s.first };
-                    Text::trim<std::wstring>(t);
+                wchar_t * chStr { buffer.get() };
+                std::wstring stdStr { chStr };
+                std::wstring_view strView { chStr };
 
-                    REQUIRE(s.second == t);
-                }
+                REQUIRE(Text::trimmed/*<wchar_t>*/(chStr) == source.second);
+                REQUIRE(Text::trimmed/*<std::wstring>*/(stdStr) == source.second);
+                REQUIRE(Text::trimmed/*<std::wstring_view>*/(strView) == source.second);
+
+                auto trStr = Text::trimmedChars/*<wchar_t>*/(chStr);
+                REQUIRE(trStr == source.second);
+
+                Text::trim/*<std::wstring>*/(stdStr);
+                REQUIRE(stdStr == source.second);
             }
         }
 
@@ -97,121 +95,110 @@ namespace UnitTests {
                 { "Text\r\n\t\n\v\f ", "Text" }
             };
 
-            for (const auto & s : strings) {
-                {
-                    auto t = new char[s.first.size() + 1] {};
-                    if (!s.first.empty()) {
-                        std::memcpy(t, s.first.data(), s.first.size());
-                    }
-                    auto u = Text::trimmed<char>(t);
-                    auto v = Text::trimmed<std::string_view>(t);
-                    auto w = Text::trimmed<std::string>(t);
-                    auto r = Text::trim<char>(t);
-
-                    REQUIRE(s.second == u);
-                    REQUIRE(s.second == v);
-                    REQUIRE(s.second == w);
-                    REQUIRE(s.second == r);
-
-                    delete[] t;
+            for (const auto & source : strings) {
+                auto buffer = std::make_unique_for_overwrite<char[]>(source.first.size() + 1);
+                if (source.first.empty()) {
+                    buffer[0] = '\0';
+                } else {
+                    std::memcpy(buffer.get(), source.first.data(), source.first.size());
+                    buffer[source.first.size()] = '\0';
                 }
 
-                {
-                    std::string t { s.first };
-                    Text::trim<std::string>(t);
+                char * chStr { buffer.get() };
+                std::string stdStr { chStr };
+                std::string_view strView { chStr };
 
-                    REQUIRE(s.second == t);
-                }
+                REQUIRE(Text::trimmed/*<char>*/(chStr) == source.second);
+                REQUIRE(Text::trimmed/*<std::string>*/(stdStr) == source.second);
+                REQUIRE(Text::trimmed/*<std::string_view>*/(strView) == source.second);
+
+                auto trStr = Text::trimmedChars/*<char>*/(chStr);
+                REQUIRE(trStr == source.second);
+
+                Text::trim/*<std::string>*/(stdStr);
+                REQUIRE(stdStr == source.second);
             }
         }
     }
 
     TEST_CASE("text", "[lower]" ) {
         {
-            std::wstring_view sv {
-                L"\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
-                L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-                L"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+            std::unordered_map<std::wstring_view, std::wstring_view> strings {
+                { L"", L"" },
+                { L"  ", L"  " },
+                { L"\r\n\t\n\v\f !\"#$", L"\r\n\t\n\v\f !\"#$" },
+                { L"%&'()*+,-./01234567", L"%&'()*+,-./01234567" },
+                { L"89:;<=>?@[\\]^_`{|}~", L"89:;<=>?@[\\]^_`{|}~" },
+                { L"ABCDEFGHIJKLMNOPQRST", L"abcdefghijklmnopqrst" },
+                { L"UVWXYZabcdef", L"uvwxyzabcdef" },
+                { L"ghijklmnopqrstuvwxyz", L"ghijklmnopqrstuvwxyz" },
+                { L"АБВГДЕЁЖЗИЙКЛМНОПРСТ", L"АБВГДЕЁЖЗИЙКЛМНОПРСТ" },
+                { L"УФХЦЧШЩЪЫЬЭЮЯабвгдеёжзи", L"УФХЦЧШЩЪЫЬЭЮЯабвгдеёжзи" },
+                { L"йклмнопрстуфхцчшщъыьэюя", L"йклмнопрстуфхцчшщъыьэюя" }
             };
 
-            std::wstring_view lv {
-                L"\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
-                L"abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-                L"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-            };
+            for (const auto & source : strings) {
+                auto buffer = std::make_unique_for_overwrite<wchar_t[]>(source.first.size() + 1);
+                if (source.first.empty()) {
+                    buffer[0] = L'\0';
+                } else {
+                    std::wmemcpy(buffer.get(), source.first.data(), source.first.size());
+                    buffer[source.first.size()] = L'\0';
+                }
 
-            {
-                auto t = new wchar_t[sv.size() + 1] {};
-                std::wmemcpy(t, sv.data(), sv.size());
-                auto u = Text::lowered<wchar_t>(t);
-                auto v = Text::lowered<std::wstring_view>(t);
-                auto w = Text::lowered<std::wstring>(t);
-                auto r = Text::lower<wchar_t>(t);
+                wchar_t * chStr { buffer.get() };
+                std::wstring stdStr { chStr };
+                std::wstring_view strView { chStr };
 
-                REQUIRE(lv == u);
-                REQUIRE(lv == v);
-                REQUIRE(lv == w);
-                REQUIRE(lv == r);
+                REQUIRE(Text::lowered/*<wchar_t>*/(chStr) == source.second);
+                REQUIRE(Text::lowered/*<std::wstring>*/(stdStr) == source.second);
+                REQUIRE(Text::lowered/*<std::wstring_view>*/(strView) == source.second);
 
-                delete[] t;
-            }
+                auto lwrStr = Text::loweredChars/*<wchar_t>*/(chStr);
+                REQUIRE(lwrStr == source.second);
 
-            {
-                std::wstring t { sv };
-                Text::lower<std::wstring>(t);
-
-                REQUIRE(lv == t);
-            }
-
-            {
-                std::wstring t { L"Z" };
-                Text::lower<wchar_t>(const_cast<wchar_t *>(t.c_str()));
-
-                REQUIRE(t == L"z");
+                Text::lower/*<std::wstring>*/(stdStr);
+                REQUIRE(stdStr == source.second);
             }
         }
 
         {
-            std::string_view sv {
-                "\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-                "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+            std::unordered_map<std::string_view, std::string_view> strings {
+                { "", "" },
+                { "  ", "  " },
+                { "\r\n\t\n\v\f !\"#$", "\r\n\t\n\v\f !\"#$" },
+                { "%&'()*+,-./01234567", "%&'()*+,-./01234567" },
+                { "89:;<=>?@[\\]^_`{|}~", "89:;<=>?@[\\]^_`{|}~" },
+                { "ABCDEFGHIJKLMNOPQRST", "abcdefghijklmnopqrst" },
+                { "UVWXYZabcdef", "uvwxyzabcdef" },
+                { "ghijklmnopqrstuvwxyz", "ghijklmnopqrstuvwxyz" },
+                { "АБВГДЕЁЖЗИЙКЛМНОПРСТ", "АБВГДЕЁЖЗИЙКЛМНОПРСТ" },
+                { "УФХЦЧШЩЪЫЬЭЮЯабвгдеёжзи", "УФХЦЧШЩЪЫЬЭЮЯабвгдеёжзи" },
+                { "йклмнопрстуфхцчшщъыьэюя", "йклмнопрстуфхцчшщъыьэюя" }
             };
 
-            std::string_view lv {
-                "\r\n\t\n\v\f !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~"
-                "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-                "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-            };
+            for (const auto & source : strings) {
+                auto buffer = std::make_unique_for_overwrite<char[]>(source.first.size() + 1);
+                if (source.first.empty()) {
+                    buffer[0] = '\0';
+                } else {
+                    std::memcpy(buffer.get(), source.first.data(), source.first.size());
+                    buffer[source.first.size()] = '\0';
+                }
 
-            {
-                auto t = new char[sv.size() + 1] {};
-                std::memcpy(t, sv.data(), sv.size());
-                auto u = Text::lowered<char>(t);
-                auto v = Text::lowered<std::string_view>(t);
-                auto w = Text::lowered<std::string>(t);
-                auto r = Text::lower<char>(t);
+                char * chStr { buffer.get() };
+                std::string stdStr { chStr };
+                std::string_view strView { chStr };
 
-                REQUIRE(lv == u);
-                REQUIRE(lv == v);
-                REQUIRE(lv == w);
-                REQUIRE(lv == r);
+                REQUIRE(Text::lowered/*<char>*/(chStr) == source.second);
+                REQUIRE(Text::lowered/*<std::string>*/(stdStr) == source.second);
+                REQUIRE(Text::lowered/*<std::string_view>*/(strView) == source.second);
 
-                delete[] t;
-            }
+                auto lwrStr = Text::loweredChars/*<char>*/(chStr);
+                REQUIRE(lwrStr == source.second);
 
-            {
-                std::string t { sv };
-                Text::lower<std::string>(t);
-
-                REQUIRE(lv == t);
-            }
-
-            {
-                std::string t { "Z" };
-                Text::lower<char>(const_cast<char *>(t.c_str()));
-
-                REQUIRE(t == "z");
+                Text::lower/*<std::string>*/(stdStr);
+                REQUIRE(stdStr == source.second);
             }
         }
     }
@@ -593,7 +580,7 @@ namespace UnitTests {
                 Text::joinTo(d, std::move(c), L"A");
 
                 REQUIRE(d == L"BC"sv);
-                REQUIRE(c.empty());
+                REQUIRE(c.empty()); // NOLINT(*-use-after-move)
             }
         }
 
@@ -647,7 +634,7 @@ namespace UnitTests {
                 Text::joinTo(d, std::move(c), "A");
 
                 REQUIRE(d == "BC"sv);
-                REQUIRE(c.empty());
+                REQUIRE(c.empty()); // NOLINT(*-use-after-move)
             }
         }
     }
@@ -671,6 +658,15 @@ namespace UnitTests {
     }
 
     TEST_CASE("text", "[bool_to_str_cast]" ) {
+        REQUIRE(Text::Wcs::daNet(true) == L"Да"sv);
+        REQUIRE(Text::Mbs::daNet(true) == "Да"sv);
+        REQUIRE(Text::daNet<Meta::Wcs>(true) == L"Да"sv);
+        REQUIRE(Text::daNet<Meta::Mbs>(true) == "Да"sv);
+        REQUIRE(Text::Wcs::daNet(false) == L"Нет"sv);
+        REQUIRE(Text::Mbs::daNet(false) == "Нет"sv);
+        REQUIRE(Text::daNet<Meta::Wcs>(false) == L"Нет"sv);
+        REQUIRE(Text::daNet<Meta::Mbs>(false) == "Нет"sv);
+
         REQUIRE(Text::Wcs::yesNo(true) == L"yes"sv);
         REQUIRE(Text::Mbs::yesNo(true) == "yes"sv);
         REQUIRE(Text::yesNo<Meta::Wcs>(true) == L"yes"sv);
