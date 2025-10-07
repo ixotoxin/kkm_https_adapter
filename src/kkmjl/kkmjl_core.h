@@ -28,7 +28,7 @@ namespace KkmJsonLoader {
         const std::filesystem::path path { fileName };
         std::ifstream file { path };
         if (!file.is_open() || !file.good()) {
-            throw Basic::Failure(LIB_WFMT(Basic::Wcs::c_couldntReadFile, path.c_str())); // NOLINT(*-exception-baseclass)
+            throw Basic::Failure(LIB_WFMT(Basic::Wcs::c_couldntReadFile, path.native())); // NOLINT(*-exception-baseclass)
         }
 
         const Nln::Json details(Nln::Json::parse(file));
@@ -145,7 +145,7 @@ namespace KkmJsonLoader {
         std::wcerr
             << L"{\n"
             L"    \"" << Text::convert(Json::Mbs::c_successKey) << L"\": false,\n"
-            L"    \"" << Text::convert(Json::Mbs::c_messageKey) << L"\": \"" << error << "\"\n"
+            L"    \"" << Text::convert(Json::Mbs::c_messageKey) << L"\": \"" << error << L"\"\n"
             L"}\n";
     }
 

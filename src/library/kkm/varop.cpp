@@ -61,7 +61,7 @@ namespace Kkm {
 
     std::wostream & vars(std::wostream & stream) {
         stream
-            << L"CFG: kkm.dbDirectory = \"" << s_dbDirectory.c_str() << L"\"\n"
+            << L"CFG: kkm.dbDirectory = \"" << s_dbDirectory.native() << L"\"\n"
             L"CFG: kkm.defaultBaudRate = " << s_defaultBaudRate << L"\n"
             L"CFG: kkm.defaultLineLength = " << s_defaultLineLength << L"\n"
             L"CFG: kkm.timeZone = tz" << Meta::toUnderlying(s_timeZone) << L"\n"
@@ -80,7 +80,7 @@ namespace Kkm {
             for (auto const & entry: std::filesystem::directory_iterator { directory }) {
                 if (entry.is_regular_file()) {
                     const std::filesystem::path & filePath { entry.path() };
-                    std::wstring fileExt { filePath.extension().c_str() };
+                    std::wstring fileExt { filePath.extension().native() };
                     Text::lower(fileExt);
                     if (fileExt != L".json") {
                         continue;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(kkm_https_adapter VERSION 1.7.1 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.7.2 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -17,10 +17,10 @@ option(BUILD_SEPARATED "Build separated" OFF)
 option(BUILD_STATIC "Build static" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(ENABLE_HACKS "Enable questionable optimizations" OFF)
-option(ENABLE_MEMORY_PROFILING "Build with memory profiling" OFF)
-option(ENABLE_MEMORY_LEAKS "Build with memory leaks" OFF)
-option(WITH_ASAN "Build with AddressSanitizer" OFF)
-option(WITH_UBSAN "Build with UndefinedBehaviorSanitizer" OFF)
+#option(WITH_ASAN "Build with AddressSanitizer" OFF)
+#option(WITH_UBSAN "Build with UndefinedBehaviorSanitizer" OFF)
+option(WITH_CRTDBG "Build with memory profiling" OFF)
+option(WITH_LEAKS "Build with memory leaks" OFF)
 
 string(TIMESTAMP KKMHA_BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 set(KKMHA_BUILD_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
@@ -67,8 +67,7 @@ else ()
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     add_compile_options(
-        #-nostdlib -nodefaultlibs
-        -nostdlib
+        -nostdlib -nodefaultlibs
         -Werror -Wall -Wextra -Wpedantic
         -Wcast-align -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wenum-compare -Wfloat-equal
         -Wnon-virtual-dtor -Woverloaded-virtual -Wredundant-decls -Wsign-conversion -Wsign-promo

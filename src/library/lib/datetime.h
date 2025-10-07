@@ -42,7 +42,7 @@ namespace DateTime {
     using Basic::DataError;
 
     using Clock = std::chrono::system_clock;
-    using Point = decltype(Clock::now());
+    using Point = std::remove_cvref_t<decltype(Clock::now())>;
     using Offset = std::chrono::seconds;
     using SleepUnit = std::chrono::milliseconds;
 

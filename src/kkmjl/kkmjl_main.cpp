@@ -26,7 +26,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             L"    \"" << Text::convert(Json::Mbs::c_successKey) << L"\": false,\n"
             L"    \"" << Text::convert(Json::Mbs::c_messageKey) << L"\": \"Неверное использование\",\n"
             L"    \"!version\": \"" << BUILD_VERSION << L"\",\n"
-            L"    \"!usage\": \"" << argv[0] << L" <serial-number> <json-file>\"\n"
+            L"    \"!usage\": \"" << argv[0] << L" {сн} {вф}\"\n"
             L"}\n";
     } catch (const Basic::Failure & e) {
         KkmJsonLoader::printError(e.explain(Log::s_appendLocation));

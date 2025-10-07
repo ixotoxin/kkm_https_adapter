@@ -15,7 +15,3 @@ install(
     POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
     DESTINATION .
 )
-
-#if (BUILD_TESTS)
-#    add_test(NAME test_kkmjl COMMAND kkmjl help)
-#endif ()

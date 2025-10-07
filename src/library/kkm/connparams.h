@@ -4,6 +4,7 @@
 #pragma once
 
 #include "types.h"
+#include <concepts>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -76,5 +77,7 @@ namespace Kkm {
 
         [[nodiscard]] static std::wstring serialNumber(const std::filesystem::path &);
         [[nodiscard]] static std::filesystem::path filePath(const std::wstring &);
+        [[nodiscard]] static std::wstring filterSerialNumber(std::wstring);
+        [[nodiscard]] static std::filesystem::path filterFilePath(std::filesystem::path);
     };
 }

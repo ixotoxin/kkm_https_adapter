@@ -142,7 +142,7 @@ namespace Server::KkmOp {
             std::scoped_lock registryLock(s_registryMutex);
             s_connParamsRegistry.insert_or_assign(
                 serialNumber,
-                std::make_shared<KnownConnParams>(connParams, serialNumber.c_str())
+                std::make_shared<KnownConnParams>(connParams, serialNumber)
             );
         }
 
@@ -433,9 +433,9 @@ namespace Server::KkmOp {
             request.m_response.m_data = std::move(response);
         }
 
-    } catch (Basic::Failure & e) {
+    } catch (const Basic::Failure & e) {
         request.fail(Http::Status::InternalServerError, Text::convert(e.what()), e.where());
-    } catch (std::exception & e) {
+    } catch (const std::exception & e) {
         request.fail(Http::Status::InternalServerError, e.what());
     } catch (...) {
         request.fail(Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);

@@ -59,11 +59,21 @@ namespace Kkm {
 
     void Device::fail(Result & result, const std::wstring_view message, const std::source_location & location) {
         if (Log::s_appendLocation) {
-            std::wstring messageWithLocation { message };
-            messageWithLocation += location;
-            LOG_WARNING_TS(messageWithLocation);
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
         } else {
-            LOG_WARNING_TS(message);
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message));
+        }
+        if (result.m_success) {
+            result.m_success = false;
+            result.m_message = message;
+        }
+    }
+
+    void Device::fail(Result & result, const std::wstring & message, const std::source_location & location) {
+        if (Log::s_appendLocation) {
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
+        } else {
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message));
         }
         if (result.m_success) {
             result.m_success = false;
@@ -73,11 +83,9 @@ namespace Kkm {
 
     void Device::fail(Result & result, std::wstring && message, const std::source_location & location) {
         if (Log::s_appendLocation) {
-            std::wstring messageWithLocation { message };
-            messageWithLocation += location;
-            LOG_WARNING_TS(messageWithLocation);
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
         } else {
-            LOG_WARNING_TS(message);
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message));
         }
         if (result.m_success) {
             result.m_success = false;
@@ -88,11 +96,11 @@ namespace Kkm {
     void Device::fail(Result & result, const std::source_location & location) {
         std::wstring message { m_kkm.errorDescription() };
         m_kkm.resetError();
-        std::wstring logMessage { KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) };
         if (Log::s_appendLocation) {
-            logMessage += location;
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
+        } else {
+            LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message));
         }
-        LOG_WARNING_TS(logMessage);
         if (result.m_success) {
             result.m_success = false;
             result.m_message = std::move(message);
@@ -229,7 +237,7 @@ namespace Kkm {
         // ISSUE: Из документации не очень понятно как работать с методом checkDocumentClosed() - описания нет,
         //  приведенный пример выглядит странно и рассчитан скорее всего на интерактивное взаимодействие с ККМ.
         //  В нашем случае интерактивность невозможна. Будем ждать чуда. Если чуда не произойдет, отменяем чек.
-        decltype(s_documentClosingTimeout)::rep i;
+        DateTime::SleepUnit::rep i;
         for (i = s_documentClosingTimeout / c_sleepQuantum; m_kkm.checkDocumentClosed() < 0 && i; --i) {
             LOG_WARNING_TS(Wcs::c_closingError, m_logPrefix, m_serialNumber, m_kkm.errorDescription());
             std::this_thread::sleep_for(c_sleepQuantum);

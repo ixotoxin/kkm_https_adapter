@@ -25,7 +25,7 @@ namespace Kkm {
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
     inline void collectDataFromMethods(Nln::Json & result, K && kkm, METHODS ... method) {
-        (callMethod(std::forward<std::remove_cvref_t<K>>(kkm), method, result), ...);
+        (callMethod(std::forward<K>(kkm), method, result), ...);
     }
 
     template<std::derived_from<Result> R, std::derived_from<Details> D>
@@ -48,6 +48,6 @@ namespace Kkm {
         assert(details.is_object());
         D callDetails {};
         details >> callDetails;
-        callMethod(std::forward<std::remove_cvref_t<K>>(kkm), method, callDetails, result);
+        callMethod(std::forward<K>(kkm), method, callDetails, result);
     }
 }

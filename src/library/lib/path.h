@@ -100,10 +100,11 @@ namespace Path {
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto noEmpty(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto noEmpty(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (filtered.empty()) {
@@ -117,20 +118,21 @@ namespace Path {
     inline auto good() {
         return
             [] (const std::filesystem::path & value) -> std::filesystem::path {
-                if (isGood(value.c_str())) {
+                if (isGood(value.native())) {
                     return value;
                 }
                 throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto good(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto good(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
-                if (isGood(filtered.c_str())) {
+                if (isGood(filtered.native())) {
                     return filtered;
                 }
                 throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -149,11 +151,11 @@ namespace Path {
             };
     }
 
-    template<Meta::String T>
+    template<Meta::String T, Meta::Filter<T> F>
     [[nodiscard, maybe_unused]]
-    inline auto good(Meta::Filter<T> auto && subFilter0) {
+    inline auto good(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const T & value) -> T {
                 T filtered { subFilter(value) };
                 if (isGood(filtered)) {
@@ -167,20 +169,21 @@ namespace Path {
     inline auto goodFileName() {
         return
             [] (const std::filesystem::path & value) -> std::filesystem::path {
-                if (isGoodFileName(value.c_str())) {
+                if (isGoodFileName(value.native())) {
                     return value;
                 }
                 throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto goodFileName(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto goodFileName(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
-                if (isGoodFileName(filtered.c_str())) {
+                if (isGoodFileName(filtered.native())) {
                     return filtered;
                 }
                 throw DataError(Basic::Wcs::c_rangeError); // NOLINT(*-exception-baseclass)
@@ -199,11 +202,11 @@ namespace Path {
             };
     }
 
-    template<Meta::String T>
+    template<Meta::String T, Meta::Filter<T> F>
     [[nodiscard, maybe_unused]]
-    inline auto goodFileName(Meta::Filter<T> auto && subFilter0) {
+    inline auto goodFileName(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const T & value) -> T {
                 T filtered { subFilter(value) };
                 if (isGoodFileName(filtered)) {
@@ -221,10 +224,11 @@ namespace Path {
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto absolute(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto absolute(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 return std::filesystem::absolute(subFilter(value));
             };
@@ -242,10 +246,11 @@ namespace Path {
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto absolute(const std::filesystem::path & dir, Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto absolute(const std::filesystem::path & dir, F && subFilter0) {
         return
-            [dir, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [dir, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path current { std::filesystem::current_path() };
                 std::filesystem::current_path(dir);
@@ -260,20 +265,21 @@ namespace Path {
         return
             [] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (!std::filesystem::is_directory(value)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.native())); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto existsDir(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto existsDir(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (!std::filesystem::is_directory(filtered)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.native())); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
@@ -284,68 +290,71 @@ namespace Path {
         return
             [] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (!std::filesystem::is_regular_file(value)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, value.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, value.native())); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto existsFile(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto existsFile(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (!std::filesystem::is_regular_file(filtered)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, filtered.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, filtered.native())); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
     }
 
     [[nodiscard, maybe_unused]]
-    inline auto testDir(const bool & test) {
+    inline auto testDir(const bool & test) { //-V835
         return
             [& test] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (test && !std::filesystem::is_directory(value)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.native())); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto testDir(const bool & test, Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto testDir(const bool & test, F && subFilter0) { //-V835
         return
-            [& test, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [& test, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (test && !std::filesystem::is_directory(filtered)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.native())); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
     }
 
     [[nodiscard, maybe_unused]]
-    inline auto testFile(const bool & test) {
+    inline auto testFile(const bool & test) { //-V835
         return
             [& test] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (test && !std::filesystem::is_regular_file(value)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, value.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, value.native())); // NOLINT(*-exception-baseclass)
                 }
                 return value;
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto testFile(const bool & test, Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto testFile(const bool & test, F && subFilter0) { //-V835
         return
-            [& test, subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [& test, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (test && !std::filesystem::is_regular_file(filtered)) {
-                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, filtered.c_str())); // NOLINT(*-exception-baseclass)
+                    throw Failure(LIB_WFMT(Basic::Wcs::c_fileNotFound, filtered.native())); // NOLINT(*-exception-baseclass)
                 }
                 return filtered;
             };
@@ -358,23 +367,24 @@ namespace Path {
                 if (!std::filesystem::is_directory(value)) {
                     std::filesystem::create_directories(value);
                     if (!std::filesystem::is_directory(value)) {
-                        throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.c_str())); // NOLINT(*-exception-baseclass)
+                        throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, value.native())); // NOLINT(*-exception-baseclass)
                     }
                 }
                 return value;
             };
     }
 
+    template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto touchDir(Meta::Filter<std::filesystem::path> auto && subFilter0) {
+    inline auto touchDir(F && subFilter0) {
         return
-            [subFilter = std::forward<decltype(subFilter0)>(subFilter0)]
+            [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
                 std::filesystem::path filtered { subFilter(value) };
                 if (!std::filesystem::is_directory(filtered)) {
                     std::filesystem::create_directories(filtered);
                     if (!std::filesystem::is_directory(filtered)) {
-                        throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.c_str())); // NOLINT(*-exception-baseclass)
+                        throw Failure(LIB_WFMT(Basic::Wcs::c_directoryNotFound, filtered.native())); // NOLINT(*-exception-baseclass)
                     }
                 }
                 return filtered;
@@ -387,9 +397,10 @@ namespace Path {
             return ::Path::good<std::wstring>();
         }
 
+        template<Meta::Filter<std::wstring> F>
         [[nodiscard, maybe_unused]]
-        inline auto good(Meta::Filter<std::wstring> auto && subFilter) {
-            return ::Path::good<std::wstring>(std::forward<decltype(subFilter)>(subFilter));
+        inline auto good(F && subFilter) {
+            return ::Path::good<std::wstring>(std::forward<F>(subFilter));
         }
 
         [[nodiscard, maybe_unused]]
@@ -397,9 +408,10 @@ namespace Path {
             return ::Path::goodFileName<std::wstring>();
         }
 
+        template<Meta::Filter<std::wstring> F>
         [[nodiscard, maybe_unused]]
-        inline auto goodFileName(Meta::Filter<std::wstring> auto && subFilter) {
-            return ::Path::goodFileName<std::wstring>(std::forward<decltype(subFilter)>(subFilter));
+        inline auto goodFileName(F && subFilter) {
+            return ::Path::goodFileName<std::wstring>(std::forward<F>(subFilter));
         }
     }
 
@@ -409,9 +421,10 @@ namespace Path {
             return ::Path::good<std::string>();
         }
 
+        template<Meta::Filter<std::string> F>
         [[nodiscard, maybe_unused]]
-        inline auto good(Meta::Filter<std::string> auto && subFilter) {
-            return ::Path::good<std::string>(std::forward<decltype(subFilter)>(subFilter));
+        inline auto good(F && subFilter) {
+            return ::Path::good<std::string>(std::forward<F>(subFilter));
         }
 
         [[nodiscard, maybe_unused]]
@@ -419,9 +432,10 @@ namespace Path {
             return ::Path::goodFileName<std::string>();
         }
 
+        template<Meta::Filter<std::string> F>
         [[nodiscard, maybe_unused]]
-        inline auto goodFileName(Meta::Filter<std::string> auto && subFilter) {
-            return ::Path::goodFileName<std::string>(std::forward<decltype(subFilter)>(subFilter));
+        inline auto goodFileName(F && subFilter) {
+            return ::Path::goodFileName<std::string>(std::forward<F>(subFilter));
         }
     }
 }

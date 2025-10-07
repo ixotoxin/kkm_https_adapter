@@ -117,7 +117,7 @@ namespace Log {
             L"CFG: log.console.outputLevel = " << Text::Wcs::yesNo(Console::s_outputLevel) << L"\n"
             L"CFG: log.file.level.foreground = " << levelLabel(File::s_fgLevel) << L"\n"
             L"CFG: log.file.level.background = " << levelLabel(File::s_bgLevel) << L"\n"
-            L"CFG: log.file.directory = \"" << File::s_directory.c_str() << L"\"\n"
+            L"CFG: log.file.directory = \"" << File::s_directory.native() << L"\"\n"
             L"CFG: log.eventLog.level.foreground = " << levelLabel(EventLog::s_fgLevel) << L"\n"
             L"CFG: log.eventLog.level.background = " << levelLabel(EventLog::s_bgLevel) << L"\n"
             L"DEF: log.eventLog.source = \"" << c_eventSource << L"\"\n"

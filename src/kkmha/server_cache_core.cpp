@@ -38,7 +38,7 @@ namespace Server::Cache {
     ) {
         std::scoped_lock cacheLock(s_cacheMutex);
         s_cache[key] = {
-            .m_data = std::forward<std::shared_ptr<Http::ProtoResponse>>(data),
+            .m_data = std::move(data),
             .m_cachedAt = DateTime::Clock::now(),
             .m_expiredAt = expiredAt,
             .m_status = status

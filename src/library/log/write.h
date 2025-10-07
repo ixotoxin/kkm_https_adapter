@@ -171,7 +171,7 @@ namespace Log {
             bool fileReady { File::ready(level) };
             bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                if constexpr (Meta::isWide<decltype(func())>) {
+                if constexpr (Meta::isWide<std::remove_cvref_t<decltype(func())>>) {
                     std::wstring message { func() };
                     if (consoleReady) {
                         Console::write(level, message);

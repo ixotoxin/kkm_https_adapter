@@ -1,5 +1,4 @@
 ﻿{
-    "!id": "00106308755095",
     "!query": "close-shift",
     "operator": { "name": "Оператор" },
     "closeShift": true,
