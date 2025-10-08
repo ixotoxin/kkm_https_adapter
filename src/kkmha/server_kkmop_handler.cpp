@@ -68,7 +68,7 @@ namespace Server::KkmOp {
             if (Log::s_appendLocation) {
                 message2 += location;
             }
-            LOG_WARNING_TS(Http::Mbs::c_prefixedText, m_requestId, message2);
+            LOG_ERROR_TS(Http::Mbs::c_prefixedText, m_requestId, message2);
         }
     };
 

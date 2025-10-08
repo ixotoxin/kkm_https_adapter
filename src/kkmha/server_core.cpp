@@ -70,7 +70,7 @@ namespace Server {
             asio::async_compose<CompletionToken, void()>(
                 [& handler, & request] (auto && self) {
                     std::thread(
-                        [task = std::move(self), & handler, & request] () mutable {
+                        [task = std::move(self), & handler, & request] () mutable { // NOLINT(*-move-forwarding-reference)
                             handler(request);
                             task.complete();
                         }
@@ -80,15 +80,11 @@ namespace Server {
             );
     }
 
-    asio::awaitable<void> accept(Asio::Socket && socket, Asio::SslContext & sslContext) {
+    asio::awaitable<void> accept(Asio::TcpSocket && socket, Asio::SslContext & sslContext) {
         Counter counter {};
-        if (counter.exceeded()) {
-            LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
-            co_return;
-        }
 
         try {
-            Asio::Stream stream { std::forward<Asio::Socket>(socket), sslContext };
+            Asio::Stream stream { std::forward<Asio::TcpSocket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
 
             try {
@@ -177,6 +173,31 @@ namespace Server {
                     }
                 }
 
+                { /** Закрываем стрим и сокет **/
+                    if (stream.lowest_layer().is_open()) {
+                        Asio::Error error {};
+                        stream.shutdown(error); // NOLINT(*-unused-return-value)
+                        if (
+                            error
+                            && error != asio::ssl::error::stream_truncated  /* <= обязательно игнорируем */
+                            /*&& error != asio::error::eof*/
+                            && error != asio::error::connection_aborted     /* <= обязательно игнорируем */
+                            && error != asio::error::connection_refused
+                            && error != asio::error::connection_reset       /* <= обязательно игнорируем */
+                            && error != asio::error::not_connected
+                        ) {
+                            LOG_WARNING_TS(Mbs::c_streamShutdownStatus, request.m_id, error.message());
+                        }
+                    }
+                    if (stream.lowest_layer().is_open()) {
+                        Asio::Error error {};
+                        stream.lowest_layer().close(error); // NOLINT(*-unused-return-value)
+                        if (error) {
+                            LOG_WARNING_TS(Mbs::c_socketCloseStatus, request.m_id, error.message());
+                        }
+                    }
+                }
+
             } catch (const Failure & e) {
                 request.m_response.m_status = Http::Status::InternalServerError;
                 LOG_ERROR_TS(e);
@@ -210,8 +231,8 @@ namespace Server {
 
         try {
             auto port = static_cast<asio::ip::port_type>(s_port);
-            Asio::Endpoint endpoint(s_ipv4Only ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), port);
-            Asio::SslContext sslContext(Asio::SslContext::tls_server);
+            Asio::Endpoint endpoint { s_ipv4Only ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), port };
+            Asio::SslContext sslContext { Asio::SslContext::tls_server };
 
             constexpr auto alwaysClear
                 = Asio::SslContext::no_tlsv1_2 | Asio::SslContext::no_tlsv1_3;
@@ -244,7 +265,7 @@ namespace Server {
             auto executor = co_await asio::this_coro::executor;
 
             { /** Принимаем подключений **/
-                Asio::Acceptor acceptor(executor, endpoint);
+                Asio::Acceptor acceptor { executor, endpoint };
 
                 LOG_INFO_TS(Wcs::c_started);
                 s_state.store(State::Running);
@@ -252,19 +273,35 @@ namespace Server {
                 do {
                     auto [acceptingError, socket] = co_await acceptor.async_accept();
                     if (acceptingError) {
-                        LOG_ERROR_TS(acceptingError);
+                        LOG_ERROR_TS(Mbs::c_connectionAcceptStatus, acceptingError.message());
                         LOG_ERROR_TS(Wcs::c_servicingFailed);
                     } else if (!socket.is_open()) {
                         LOG_ERROR_TS(Wcs::c_socketOpeningError);
                         LOG_ERROR_TS(Wcs::c_servicingFailed);
+                    } else if (Counter::value() >= s_concurrencyLimit) {
+                        socket.cancel();
+                        socket.shutdown(Asio::TcpSocket::shutdown_both);
+                        socket.close();
+                        LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
                     } else {
                         asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                     }
                 } while (s_state.load() == State::Running);
+
+                Asio::Error error {};
+                acceptor.cancel(error); // NOLINT(*-unused-return-value)
+                if (error) {
+                    LOG_WARNING_TS(Mbs::c_acceptorCancelStatus, error.message());
+                }
+                error.clear();
+                acceptor.close(error); // NOLINT(*-unused-return-value)
+                if (error) {
+                    LOG_WARNING_TS(Mbs::c_acceptorCloseStatus, error.message());
+                }
             }
 
             { /** Ждем остановки обработчиков в корутинах **/
-                Asio::Timer timer(executor);
+                Asio::Timer timer { executor };
 
                 while (s_state.load() == State::Shutdown) {
                     timer.expires_after(c_sleepQuantum);
@@ -297,10 +334,6 @@ namespace Server {
 
     void run() {
         assert(s_state.load() == State::Initial);
-        // if (s_state.load() != State::Initial) {
-        //     return;
-        // }
-
         LOG_DEBUG_TS(Wcs::c_starting);
         s_state.store(State::Starting);
 
@@ -318,10 +351,10 @@ namespace Server {
             LOG_INFO_TS(Wcs::c_stopped);
             s_shutdownSync.arrive_and_wait();
         } catch (...) {
-            logError();
             s_hitman.cancelOrder();
             s_state.store(State::Stopping);
             s_shutdownSync.count_down();
+            logError();
             throw;
         }
     }
@@ -335,11 +368,8 @@ namespace Server {
 
     void stop() try {
         assert(s_state.load() == State::Running);
-        // if (s_state.load() != State::Running) {
-        //     return;
-        // }
-
         LOG_DEBUG_TS(Wcs::c_stopping);
+
         s_state.store(State::Shutdown);
         s_hitman.await(c_controlTimeout, [] { return Counter::value() > 0; });
         s_state.store(State::Stopping);
