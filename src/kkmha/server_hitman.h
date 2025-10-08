@@ -65,7 +65,7 @@ namespace Server {
         void cancelOrder() {
             std::scoped_lock lock { m_mutex };
             m_gun = [] {};
-            m_counter = -1;
+            m_counter.store(-1);
         }
 
         [[maybe_unused]]
@@ -110,10 +110,10 @@ namespace Server {
             m_counter.store(0);
         }
 
-        [[nodiscard, maybe_unused]]
-        bool awaiting() {
-            return m_counter.load() > 0;
-        }
+        // [[nodiscard, maybe_unused]]
+        // bool awaiting() {
+        //     return m_counter.load() > 0;
+        // }
 
         [[maybe_unused]]
         void completeOrder() {

@@ -72,7 +72,7 @@ namespace Http {
         if (field == "content-length") {
             m_expectedSize = Text::cast<size_t>(value);
             if (m_expectedSize > c_requestBodySizeLimit) {
-                LOG_WARNING_TS(Wcs::c_bodySizeLimitExceeded, m_request.m_id);
+                LOG_ERROR_TS(Wcs::c_bodySizeLimitExceeded, m_request.m_id);
                 m_expectedSize = 0;
                 m_request.m_response.m_status = Status::BadRequest;
                 m_request.m_response.m_data.emplace<1>(Mbs::c_bodySizeLimitExceeded);

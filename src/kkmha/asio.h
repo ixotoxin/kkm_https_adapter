@@ -15,8 +15,10 @@ namespace Asio {
     using StreamBuffer = asio::streambuf;
     using SslContext = asio::ssl::context;
     using DefaultToken = asio::as_tuple_t<asio::use_awaitable_t<>>;
-    using Acceptor = DefaultToken::as_default_on_t<asio::ip::tcp::acceptor>;
-    using Socket = DefaultToken::as_default_on_t<asio::ip::tcp::socket>;
+    using TcpAcceptor = asio::ip::tcp::acceptor;
+    using Acceptor = DefaultToken::as_default_on_t<TcpAcceptor>;
+    using TcpSocket = asio::ip::tcp::socket;
+    using Socket = DefaultToken::as_default_on_t<TcpSocket>;
     using Stream = asio::ssl::stream<Socket>;
     using Endpoint = asio::ip::tcp::endpoint;
 
