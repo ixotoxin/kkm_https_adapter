@@ -5,11 +5,10 @@
 
 #include "macro.h"
 #include "wconv.h"
-#include "slapp.h"
+#include "srcloc.h"
 #include <utility>
 #include <system_error>
 #include <string>
-#include <source_location>
 #include <format>
 
 namespace Basic {
@@ -22,7 +21,7 @@ namespace Basic {
     class Failure {
     protected:
         std::wstring m_message {};
-        std::source_location m_location;
+        SrcLoc::Point m_location;
 
     public:
         Failure() = delete;
@@ -32,26 +31,26 @@ namespace Basic {
         [[maybe_unused]]
         explicit Failure(
             const std::wstring_view message,
-            std::source_location && location = std::source_location::current()
-        ) : m_message(message.begin(), message.end()), m_location(std::forward<std::source_location>(location)) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : m_message(message.begin(), message.end()), m_location(std::forward<SrcLoc::Point>(location)) {}
 
         [[maybe_unused]]
         explicit Failure(
             const std::string_view message,
-            std::source_location && location = std::source_location::current()
-        ) : m_message(Text::convert(message)), m_location(std::forward<std::source_location>(location)) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : m_message(Text::convert(message)), m_location(std::forward<SrcLoc::Point>(location)) {}
 
         [[maybe_unused]]
         explicit Failure(
             const std::exception & e,
-            std::source_location && location = std::source_location::current()
-        ) : m_message(Text::convert(e.what())), m_location(std::forward<std::source_location>(location)) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : m_message(Text::convert(e.what())), m_location(std::forward<SrcLoc::Point>(location)) {}
 
         [[maybe_unused]]
         explicit Failure(
             const std::error_code & e,
-            std::source_location && location = std::source_location::current()
-        ) : m_message(Text::convert(e.message())), m_location(std::forward<std::source_location>(location)) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : m_message(Text::convert(e.message())), m_location(std::forward<SrcLoc::Point>(location)) {}
 
         virtual ~Failure() = default;
 
@@ -64,7 +63,7 @@ namespace Basic {
         }
 
         [[nodiscard, maybe_unused]]
-        const std::source_location & where() const noexcept {
+        const SrcLoc::Point & where() const noexcept {
             return m_location;
         }
 
@@ -100,29 +99,29 @@ namespace Basic {
         explicit DataError(
             const std::wstring_view message,
             const std::wstring_view variable = {},
-            std::source_location && location = std::source_location::current()
-        ) : Failure(message, std::forward<std::source_location>(location)), m_variable(variable) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Failure(message, std::forward<SrcLoc::Point>(location)), m_variable(variable) {}
 
         [[maybe_unused]]
         explicit DataError(
             const std::string_view message,
             const std::wstring_view variable = {},
-            std::source_location && location = std::source_location::current()
-        ) : Failure(message, std::forward<std::source_location>(location)), m_variable(variable) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Failure(message, std::forward<SrcLoc::Point>(location)), m_variable(variable) {}
 
         [[maybe_unused]]
         explicit DataError(
             const std::exception & e,
             const std::wstring_view variable = {},
-            std::source_location && location = std::source_location::current()
-        ) : Failure(e, std::forward<std::source_location>(location)), m_variable(variable) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Failure(e, std::forward<SrcLoc::Point>(location)), m_variable(variable) {}
 
         [[maybe_unused]]
         explicit DataError(
             const std::error_code & e,
             const std::wstring_view variable = {},
-            std::source_location && location = std::source_location::current()
-        ) : Failure(e, std::forward<std::source_location>(location)), m_variable(variable) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Failure(e, std::forward<SrcLoc::Point>(location)), m_variable(variable) {}
 
         ~DataError() override = default;
 

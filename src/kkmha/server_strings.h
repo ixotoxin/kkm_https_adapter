@@ -31,9 +31,9 @@ namespace Server {
         using Csv = const std::string_view;
 
         constexpr Csv c_prefixedText { "Запрос [{:04x}]: {}" };
-        constexpr Csv c_prefixedTextWithSource { "Запрос [{:04x}]: {}{}" };
+        constexpr Csv c_prefixedTextWithSource { "Запрос [{:04x}]: {} ({})" };
         constexpr Csv c_prefixedOperation { "Запрос [{:04x}]: {}: {}" };
-        constexpr Csv c_prefixedOperationWithSource { "Запрос [{:04x}]: {}: {}{}" };
+        constexpr Csv c_prefixedOperationWithSource { "Запрос [{:04x}]: {}: {} ({})" };
 
         constexpr Csv c_badRequest { "Некорректный запрос" };
         constexpr Csv c_methodNotAllowed { "Невозможно выполнить данный запрос" };

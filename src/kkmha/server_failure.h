@@ -17,20 +17,20 @@ namespace Server {
         explicit Failure(
             const std::string_view operation,
             const Asio::Error error,
-            std::source_location && location = std::source_location::current()
+            SrcLoc::Point && location = SrcLoc::Point::current()
         ) : Basic::Failure(
                 Text::concat(operation, ": ", error.message()),
-                std::forward<std::source_location>(location)
+                std::forward<SrcLoc::Point>(location)
             ) {}
 
         explicit Failure(
             const Http::Request::IdType id,
             const std::string_view operation,
             const Asio::Error error,
-            std::source_location && location = std::source_location::current()
+            SrcLoc::Point && location = SrcLoc::Point::current()
         ) : Basic::Failure(
                 std::format(Mbs::c_prefixedOperation, id, operation, error.message()),
-                std::forward<std::source_location>(location)
+                std::forward<SrcLoc::Point>(location)
             ) {}
 
         ~Failure() override = default;

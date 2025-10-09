@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(kkm_https_adapter VERSION 1.7.5 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.7.6 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -16,11 +16,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "$<1:${PROJECT_BINARY_DIR}/_Library_${CMAKE_B
 option(BUILD_SEPARATED "Build separated" OFF)
 option(BUILD_STATIC "Build static" OFF)
 option(BUILD_TESTS "Build tests" OFF)
-option(ENABLE_HACKS "Enable questionable optimizations" OFF)
 #option(WITH_ASAN "Build with AddressSanitizer" OFF)
 #option(WITH_UBSAN "Build with UndefinedBehaviorSanitizer" OFF)
 option(WITH_CRTDBG "Build with memory profiling" OFF)
 option(WITH_LEAKS "Build with memory leaks" OFF)
+option(WITH_RELSL "Enable relative path for source location" ON)
+option(WITH_SSIAC "Enable std::string invasive access" OFF)
 
 string(TIMESTAMP KKMHA_BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
 set(KKMHA_BUILD_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
@@ -74,6 +75,9 @@ else ()
         -Wno-deprecated-declarations -Wno-implicit-int-conversion
         -Wno-sign-compare -Wno-sign-conversion -Wno-unknown-pragmas
     )
+    if (WITH_RELSL)
+        add_compile_options("-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/=.\\")
+    endif ()
     if (BUILD_STATIC)
         add_compile_options(-static)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
@@ -81,8 +85,6 @@ else ()
 endif ()
 
 add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0601)
-
-set(STD_STRING_INVASIVE_ACCESS ${ENABLE_HACKS})
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/incl.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/src/library/incl.cmake")

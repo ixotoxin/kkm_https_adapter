@@ -57,7 +57,7 @@ namespace Kkm {
         }
     }
 
-    void Device::fail(Result & result, const std::wstring_view message, const std::source_location & location) {
+    void Device::fail(Result & result, const std::wstring_view message, const SrcLoc::Point & location) {
         if (Log::s_appendLocation) {
             LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
         } else {
@@ -69,7 +69,7 @@ namespace Kkm {
         }
     }
 
-    void Device::fail(Result & result, const std::wstring & message, const std::source_location & location) {
+    void Device::fail(Result & result, const std::wstring & message, const SrcLoc::Point & location) {
         if (Log::s_appendLocation) {
             LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
         } else {
@@ -81,7 +81,7 @@ namespace Kkm {
         }
     }
 
-    void Device::fail(Result & result, std::wstring && message, const std::source_location & location) {
+    void Device::fail(Result & result, std::wstring && message, const SrcLoc::Point & location) {
         if (Log::s_appendLocation) {
             LOG_WARNING_TS(KKM_WFMT(Wcs::c_fault, m_logPrefix, m_serialNumber, message) + location);
         } else {
@@ -93,7 +93,7 @@ namespace Kkm {
         }
     }
 
-    void Device::fail(Result & result, const std::source_location & location) {
+    void Device::fail(Result & result, const SrcLoc::Point & location) {
         std::wstring message { m_kkm.errorDescription() };
         m_kkm.resetError();
         if (Log::s_appendLocation) {

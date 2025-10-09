@@ -24,13 +24,13 @@ namespace Kkm {
 
         explicit Failure(
             const std::wstring_view message,
-            std::source_location && location = std::source_location::current()
-        ) : Basic::Failure(message, std::forward<std::source_location>(location)) {}
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Basic::Failure(message, std::forward<SrcLoc::Point>(location)) {}
 
         explicit Failure(
             Atol::Fptr & kkm,
-            std::source_location && location = std::source_location::current()
-        ) : Basic::Failure(kkm.errorDescription(), std::forward<std::source_location>(location)) {
+            SrcLoc::Point && location = SrcLoc::Point::current()
+        ) : Basic::Failure(kkm.errorDescription(), std::forward<SrcLoc::Point>(location)) {
             kkm.resetError();
         }
 

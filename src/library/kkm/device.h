@@ -61,10 +61,10 @@ namespace Kkm {
         explicit Device(std::wstring_view);
 
         void connect(const ConnParams &);
-        void fail(Result &, std::wstring_view, const std::source_location & = std::source_location::current());
-        void fail(Result &, const std::wstring &, const std::source_location & = std::source_location::current());
-        void fail(Result &, std::wstring &&, const std::source_location & = std::source_location::current());
-        void fail(Result &, const std::source_location & = std::source_location::current());
+        void fail(Result &, std::wstring_view, const SrcLoc::Point & = SrcLoc::Point::current());
+        void fail(Result &, const std::wstring &, const SrcLoc::Point & = SrcLoc::Point::current());
+        void fail(Result &, std::wstring &&, const SrcLoc::Point & = SrcLoc::Point::current());
+        void fail(Result &, const SrcLoc::Point & = SrcLoc::Point::current());
         [[nodiscard, maybe_unused]] static std::wstring addMargins(std::wstring_view, int = 1, int = -1);
         [[maybe_unused]] void addSeparator(std::wstring &, int = 0, int = -1) const;
         [[nodiscard, maybe_unused]] std::wstring addSeparators(std::wstring_view, int = 0, int = -1) const;
