@@ -18,15 +18,12 @@ namespace Server::Default {
 
     void Handler::operator()(Http::Request & request) const noexcept try {
         assert(request.m_response.m_status == Http::Status::Ok);
-        // if (request.m_response.m_status != Status::Ok) {
-        //     return;
-        // }
 
         if (request.m_method == Http::Method::Get) {
             if (Static::s_enable && request.m_hint.size() < 2) {
                 request.m_response.m_status = Http::Status::MovedTemporarily;
                 request.m_response.m_data = std::make_shared<Http::SolidResponse>(Mbs::c_redirectToStaticResponse);
-                LOG_DEBUG_TS(Http::Wcs::c_redirectToStatic, request.m_id);
+                LOG_DEBUG_TS(Wcs::c_redirectToStatic, request.m_id);
             } else if (request.m_hint.size() == 2 && request.m_hint[1] == "favicon.ico") {
                 request.m_response.m_data
                     = std::make_shared<Http::BinaryResponse<Http::Regular>>(
@@ -35,19 +32,19 @@ namespace Server::Default {
                         c_favIconMime
                     );
             } else {
-                request.fail(Http::Status::NotFound, Http::Mbs::c_notFound);
+                fail(request, Http::Status::NotFound, Server::Mbs::c_notFound);
             }
         } else if (request.m_method == Http::Method::Post) {
-            request.fail(Http::Status::NotFound, Http::Mbs::c_notFound);
+            fail(request, Http::Status::NotFound, Server::Mbs::c_notFound);
         } else {
-            request.fail(Http::Status::MethodNotAllowed, Http::Mbs::c_methodNotAllowed);
+            fail(request, Http::Status::MethodNotAllowed, Server::Mbs::c_methodNotAllowed);
         }
 
     } catch (const Failure & e) {
-        request.fail(Http::Status::InternalServerError, Text::convert(e.what()), e.where());
+        fail(request, Http::Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {
-        request.fail(Http::Status::InternalServerError, e.what());
+        fail(request, Http::Status::InternalServerError, e.what());
     } catch (...) {
-        request.fail(Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
+        fail(request, Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
     }
 }

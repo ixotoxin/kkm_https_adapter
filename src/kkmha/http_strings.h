@@ -12,32 +12,13 @@ namespace Http {
     namespace Wcs {
         using Csv = const std::wstring_view;
 
-        constexpr Csv c_requestPrefix { L"Запрос [{:04x}]: " };
-        constexpr Csv c_prefixedText { L"Запрос [{:04x}]: {}" };
-        constexpr Csv c_forbidden { L"Запрос [{:04x}]: Сбой авторизации" };
-        constexpr Csv c_fromCache { L"Запрос [{:04x}]: Данные взяты из кеша" };
-        constexpr Csv c_redirectToStatic { L"Запрос [{:04x}]: Перенаправляем в /static/" };
         constexpr Csv c_bodySizeLimitExceeded { L"Запрос [{:04x}]: Превышен допустимый размер тела запроса" };
     }
 
     namespace Mbs {
         using Csv = const std::string_view;
 
-        constexpr Csv c_requestPrefix { "Запрос [{:04x}]: " };
-        constexpr Csv c_prefixedText { "Запрос [{:04x}]: {}" };
-        constexpr Csv c_badRequest { "Некорректный запрос" };
-        constexpr Csv c_methodNotAllowed { "Невозможно выполнить данный запрос" };
-        constexpr Csv c_unknownMethod { "Неизвестный метод" };
-        constexpr Csv c_notImplemented { "Не реализовано" };
-        constexpr Csv c_forbidden { "Сбой авторизации" };
-        constexpr Csv c_badPath { "Некорректный путь" };
-        constexpr Csv c_notFound { "Документ не найден" };
         constexpr Csv c_bodySizeLimitExceeded { "Превышен допустимый размер тела запроса" };
-        constexpr Csv c_invalidContentType { "Заголовок 'Content-Type' отсутствует или некорректен" };
-        constexpr Csv c_invalidXSecret { "Заголовок 'X-Secret' отсутствует или некорректен" };
-        constexpr Csv c_invalidXIdempotencyKey { "Заголовок 'X-Idempotency-Key' отсутствует или некорректен" };
-        constexpr Csv c_requestedMethod { "От клиента [{}] поступил запрос [{} {}]" };
-
         constexpr Csv c_jsonMimeType { "application/json" };
 
         constexpr Csv c_responseHeaderTemplate {

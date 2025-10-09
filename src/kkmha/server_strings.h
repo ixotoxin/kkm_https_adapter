@@ -3,13 +3,15 @@
 
 #pragma once
 
-#include "http_strings.h"
+#include <string_view>
 
 namespace Server {
     namespace Wcs {
         using Csv = const std::wstring_view;
 
-        using Http::Wcs::c_prefixedText;
+        constexpr Csv c_prefixedText { L"Запрос [{:04x}]: {}" };
+        constexpr Csv c_forbidden { L"Запрос [{:04x}]: Сбой авторизации" };
+        constexpr Csv c_redirectToStatic { L"Запрос [{:04x}]: Перенаправляем в /static/" };
 
         constexpr Csv c_starting { L"Запуск сервера..." };
         constexpr Csv c_startingFailed { L"Не удалось запустить сервер" };
@@ -28,10 +30,30 @@ namespace Server {
     namespace Mbs {
         using Csv = const std::string_view;
 
+        constexpr Csv c_prefixedText { "Запрос [{:04x}]: {}" };
+        constexpr Csv c_prefixedTextWithSource { "Запрос [{:04x}]: {}{}" };
+        constexpr Csv c_prefixedOperation { "Запрос [{:04x}]: {}: {}" };
+        constexpr Csv c_prefixedOperationWithSource { "Запрос [{:04x}]: {}: {}{}" };
+
+        constexpr Csv c_badRequest { "Некорректный запрос" };
+        constexpr Csv c_methodNotAllowed { "Невозможно выполнить данный запрос" };
+        constexpr Csv c_unknownMethod { "Неизвестный метод" };
+        constexpr Csv c_notImplemented { "Не реализовано" };
+        constexpr Csv c_forbidden { "Сбой авторизации" };
+        constexpr Csv c_badPath { "Некорректный путь" };
+        constexpr Csv c_notFound { "Документ не найден" };
+        constexpr Csv c_invalidContentType { "Заголовок 'Content-Type' отсутствует или некорректен" };
+        constexpr Csv c_invalidXSecret { "Заголовок 'X-Secret' отсутствует или некорректен" };
+        constexpr Csv c_invalidXIdempotencyKey { "Заголовок 'X-Idempotency-Key' отсутствует или некорректен" };
+        constexpr Csv c_requestedMethod { "От клиента [{}] поступил запрос [{} {}]" };
+
         constexpr Csv c_connectionAcceptStatus { "Connection accept: {}" };
         constexpr Csv c_acceptorCancelStatus { "Acceptor cancel: {}" };
         constexpr Csv c_acceptorCloseStatus { "Acceptor close: {}" };
-        constexpr Csv c_streamShutdownStatus { "Запрос [{:04x}]: SSL stream shutdown: {}" };
-        constexpr Csv c_socketCloseStatus { "Запрос [{:04x}]: Socket close: {}" };
+        constexpr Csv c_sslHandshakeOperation { "SSL handshake" };
+        constexpr Csv c_sslReadOperation { "SSL read" };
+        constexpr Csv c_sslWriteOperation { "SSL write" };
+        constexpr Csv c_sslShutdownOperation { "SSL shutdown" };
+        constexpr Csv c_socketCloseOperation { "Socket close" };
     }
 }

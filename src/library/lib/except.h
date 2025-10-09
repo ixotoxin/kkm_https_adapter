@@ -6,6 +6,7 @@
 #include "macro.h"
 #include "wconv.h"
 #include "slapp.h"
+#include <utility>
 #include <system_error>
 #include <string>
 #include <source_location>
