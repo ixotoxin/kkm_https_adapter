@@ -25,7 +25,7 @@ namespace Server {
             Http::Request & request,
             const Http::Status status,
             const std::string & message,
-            const std::source_location & location = std::source_location::current()
+            const SrcLoc::Point & location = SrcLoc::Point::current()
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             if (Log::s_appendLocation) {
@@ -41,7 +41,7 @@ namespace Server {
             Http::Request & request,
             const Http::Status status,
             std::string && message,
-            const std::source_location & location = std::source_location::current()
+            const SrcLoc::Point & location = SrcLoc::Point::current()
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             if (Log::s_appendLocation) {
@@ -57,7 +57,7 @@ namespace Server {
             Http::Request & request,
             const Http::Status status,
             const std::string_view message,
-            const std::source_location & location = std::source_location::current()
+            const SrcLoc::Point & location = SrcLoc::Point::current()
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             if (Log::s_appendLocation) {
@@ -73,7 +73,7 @@ namespace Server {
             Http::Request & request,
             const Http::Status status,
             const char * message,
-            const std::source_location & location = std::source_location::current()
+            const SrcLoc::Point & location = SrcLoc::Point::current()
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             if (Log::s_appendLocation) {

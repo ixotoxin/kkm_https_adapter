@@ -58,7 +58,7 @@ namespace Server::KkmOp {
         inline void fail(
             const Http::Status status,
             const std::string_view message,
-            const std::source_location & location = std::source_location::current()
+            const SrcLoc::Point & location = SrcLoc::Point::current()
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             m_status = status;

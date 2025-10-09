@@ -188,7 +188,7 @@ namespace Server {
                     if (Log::s_appendLocation) {
                         LOG_ERROR_TS(
                             Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_sslShutdownOperation,
-                            error.message(), SrcLoc::toMbs(std::source_location::current())
+                            error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
                         );
                     } else {
                         LOG_ERROR_TS(
@@ -204,7 +204,7 @@ namespace Server {
                     if (Log::s_appendLocation) {
                         LOG_ERROR_TS(
                             Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_socketCloseOperation,
-                            error.message(), SrcLoc::toMbs(std::source_location::current())
+                            error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
                         );
                     } else {
                         LOG_ERROR_TS(
