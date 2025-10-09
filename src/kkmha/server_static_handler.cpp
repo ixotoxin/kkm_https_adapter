@@ -34,15 +34,12 @@ namespace Server::Static {
 
     void Handler::operator()(Http::Request & request) const noexcept try {
         assert(request.m_response.m_status == Http::Status::Ok);
-        // if (request.m_response.m_status != Status::Ok) {
-        //     return;
-        // }
 
         if (request.m_method != Http::Method::Get) {
-            return request.fail(Http::Status::MethodNotAllowed, Http::Mbs::c_methodNotAllowed);
+            return fail(request, Http::Status::MethodNotAllowed, Server::Mbs::c_methodNotAllowed);
         }
         if (request.m_path.size() < 3 || !Path::isGood(request.m_path) || !request.m_path.starts_with('/')) {
-            return request.fail(Http::Status::BadRequest, Http::Mbs::c_badPath);
+            return fail(request, Http::Status::BadRequest, Server::Mbs::c_badPath);
         }
 
         std::filesystem::path path { s_directory };
@@ -66,7 +63,7 @@ namespace Server::Static {
                 return redirectToIndex(request);
             }
             if (!std::filesystem::is_regular_file(path)) {
-                return request.fail(Http::Status::NotFound, Http::Mbs::c_notFound);
+                return fail(request, Http::Status::NotFound, Server::Mbs::c_notFound);
             }
         }
 
@@ -75,10 +72,10 @@ namespace Server::Static {
         {
             auto status = std::filesystem::status(path, error);
             if (error) {
-                return request.fail(Http::Status::NotFound, error.message());
+                return fail(request, Http::Status::NotFound, error.message());
             }
             if (status.type() != std::filesystem::file_type::regular) {
-                return request.fail(Http::Status::NotFound, Mbs::c_badFilesystemEntityType);
+                return fail(request, Http::Status::NotFound, Mbs::c_badFilesystemEntityType);
             }
         }
 
@@ -90,7 +87,7 @@ namespace Server::Static {
         if (cacheEntry) {
             auto fileTime = std::filesystem::last_write_time(path, error);
             if (error) {
-                return request.fail(Http::Status::NotFound, error.message());
+                return fail(request, Http::Status::NotFound, error.message());
             }
             if (DateTime::cast<DateTime::Point>(fileTime) <= cacheEntry->m_cachedAt) {
                 request.m_response.m_status = cacheEntry->m_status;
@@ -105,10 +102,10 @@ namespace Server::Static {
         {
             fileSize = std::filesystem::file_size(path, error);
             if (error) {
-                return request.fail(Http::Status::NotFound, error.message());
+                return fail(request, Http::Status::NotFound, error.message());
             }
             if (fileSize > c_fileSizeLimit) {
-                return request.fail(Http::Status::NotFound, Mbs::c_fileTooLarge);
+                return fail(request, Http::Status::NotFound, Mbs::c_fileTooLarge);
             }
         }
 
@@ -122,7 +119,7 @@ namespace Server::Static {
             } else if (s_enableUnknownType) {
                 response->m_mimeType = c_defMimeType;
             } else {
-                return request.fail(Http::Status::NotFound, Mbs::c_unknownMimeType);
+                return fail(request, Http::Status::NotFound, Mbs::c_unknownMimeType);
             }
         }
 
@@ -141,10 +138,10 @@ namespace Server::Static {
         }
 
     } catch (const Failure & e) {
-        request.fail(Http::Status::InternalServerError, Text::convert(e.what()), e.where());
+        fail(request, Http::Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {
-        request.fail(Http::Status::InternalServerError, e.what());
+        fail(request, Http::Status::InternalServerError, e.what());
     } catch (...) {
-        request.fail(Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
+        fail(request, Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
     }
 }

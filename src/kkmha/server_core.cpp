@@ -4,6 +4,7 @@
 #include "server_core.h"
 #include "server_variables.h"
 #include "server_strings.h"
+#include "server_failure.h"
 #include "server_counter.h"
 #include "server_hitman.h"
 #include "server_default_handler.h"
@@ -20,19 +21,9 @@
 #include <latch>
 
 namespace Server {
-    static_assert(c_controlTimeout >= c_sleepQuantum);
-
     using namespace std::chrono_literals;
 
-    namespace Wcs {
-        using namespace Http::Wcs;
-    }
-
-    namespace Mbs {
-        using namespace Http::Mbs;
-    }
-
-    using Basic::Failure;
+    static_assert(c_controlTimeout >= c_sleepQuantum);
 
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 
@@ -86,15 +77,16 @@ namespace Server {
         try {
             Asio::Stream stream { std::forward<Asio::TcpSocket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
+            bool handshakeCompleted { false };
 
             try {
                 { /** Приветствуем **/
                     const auto & [handshakeError]
                         = co_await stream.async_handshake(asio::ssl::stream_base::server);
                     if (handshakeError) {
-                        request.m_response.m_status = Http::Status::BadRequest;
-                        throw Failure(handshakeError); // NOLINT(*-exception-baseclass)
+                        throw Failure(request.m_id, Mbs::c_sslHandshakeOperation, handshakeError); // NOLINT(*-exception-baseclass)
                     }
+                    handshakeCompleted = true;
                 }
 
                 { /** Читаем запрос **/
@@ -102,8 +94,7 @@ namespace Server {
                     const auto & [headerReadingError, headerSize]
                         = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
                     if (headerReadingError) {
-                        request.m_response.m_status = Http::Status::BadRequest;
-                        throw Failure(headerReadingError); // NOLINT(*-exception-baseclass)
+                        throw Failure(request.m_id, Mbs::c_sslReadOperation, headerReadingError); // NOLINT(*-exception-baseclass)
                     } else {
                         Http::Parser parser(request);
                         parser(buffer);
@@ -113,8 +104,7 @@ namespace Server {
                                 const auto & [bodyReadingError, bodyReadingSize]
                                     = co_await asio::async_read(stream, buffer, asio::transfer_at_least(expecting));
                                 if (bodyReadingError) {
-                                    request.fail(Http::Status::BadRequest, bodyReadingError.message());
-                                    break;
+                                    throw Failure(request.m_id, Mbs::c_sslReadOperation, bodyReadingError); // NOLINT(*-exception-baseclass)
                                 }
                                 parser(buffer);
                                 expecting = parser.expecting();
@@ -168,37 +158,11 @@ namespace Server {
                     request.m_response.render(buffer);
                     const auto & [writingError, writingSize] = co_await asio::async_write(stream, buffer);
                     if (writingError) {
-                        request.m_response.m_status = Http::Status::InternalServerError;
-                        LOG_ERROR_TS(writingError);
+                        throw Failure(request.m_id, Mbs::c_sslWriteOperation, writingError); // NOLINT(*-exception-baseclass)
                     }
                 }
 
-                { /** Закрываем стрим и сокет **/
-                    if (stream.lowest_layer().is_open()) {
-                        Asio::Error error {};
-                        stream.shutdown(error); // NOLINT(*-unused-return-value)
-                        if (
-                            error
-                            && error != asio::ssl::error::stream_truncated  /* <= обязательно игнорируем */
-                            /*&& error != asio::error::eof*/
-                            && error != asio::error::connection_aborted     /* <= обязательно игнорируем */
-                            && error != asio::error::connection_refused
-                            && error != asio::error::connection_reset       /* <= обязательно игнорируем */
-                            && error != asio::error::not_connected
-                        ) {
-                            LOG_WARNING_TS(Mbs::c_streamShutdownStatus, request.m_id, error.message());
-                        }
-                    }
-                    if (stream.lowest_layer().is_open()) {
-                        Asio::Error error {};
-                        stream.lowest_layer().close(error); // NOLINT(*-unused-return-value)
-                        if (error) {
-                            LOG_WARNING_TS(Mbs::c_socketCloseStatus, request.m_id, error.message());
-                        }
-                    }
-                }
-
-            } catch (const Failure & e) {
+            } catch (const Basic::Failure & e) {
                 request.m_response.m_status = Http::Status::InternalServerError;
                 LOG_ERROR_TS(e);
             } catch (const std::exception & e) {
@@ -209,13 +173,54 @@ namespace Server {
                 LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
             }
 
+            if (handshakeCompleted && stream.lowest_layer().is_open()) {
+                Asio::Error error {};
+                stream.shutdown(error); // NOLINT(*-unused-return-value)
+                if (
+                    error
+                    && error != asio::ssl::error::stream_truncated  /* <= обязательно игнорируем */
+                    /*&& error != asio::error::eof*/
+                    && error != asio::error::connection_aborted     /* <= обязательно игнорируем */
+                    && error != asio::error::connection_refused
+                    && error != asio::error::connection_reset       /* <= обязательно игнорируем */
+                    && error != asio::error::not_connected
+                ) {
+                    if (Log::s_appendLocation) {
+                        LOG_ERROR_TS(
+                            Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_sslShutdownOperation,
+                            error.message(), SrcLoc::toMbs(std::source_location::current())
+                        );
+                    } else {
+                        LOG_ERROR_TS(
+                            Mbs::c_prefixedOperation, request.m_id, Mbs::c_sslShutdownOperation, error.message()
+                        );
+                    }
+                }
+            }
+            if (stream.lowest_layer().is_open()) {
+                Asio::Error error {};
+                stream.lowest_layer().close(error); // NOLINT(*-unused-return-value)
+                if (error) {
+                    if (Log::s_appendLocation) {
+                        LOG_ERROR_TS(
+                            Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_socketCloseOperation,
+                            error.message(), SrcLoc::toMbs(std::source_location::current())
+                        );
+                    } else {
+                        LOG_ERROR_TS(
+                            Mbs::c_prefixedOperation, request.m_id, Mbs::c_socketCloseOperation, error.message()
+                        );
+                    }
+                }
+            }
+
             if (request.m_response.m_status < Http::Status::BadRequest) {
                 LOG_INFO_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
             } else {
-                LOG_ERROR_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
+                LOG_WARNING_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
             }
 
-        } catch (const Failure & e) {
+        } catch (const Basic::Failure & e) {
             LOG_ERROR_TS(e);
         } catch (const std::exception & e) {
             LOG_ERROR_TS(e);
@@ -308,7 +313,7 @@ namespace Server {
                     co_await timer.async_wait(asio::use_awaitable);
                 }
             }
-        } catch (const Failure & e) {
+        } catch (const Basic::Failure & e) {
             LOG_ERROR_TS(e);
         } catch (const std::exception & e) {
             LOG_ERROR_TS(e);

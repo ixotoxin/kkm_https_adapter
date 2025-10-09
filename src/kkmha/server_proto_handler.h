@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "server_strings.h"
 #include "http_request.h"
+#include <log/write.h>
 
 namespace Server {
     class ProtoHandler {
@@ -18,5 +20,69 @@ namespace Server {
 
         [[nodiscard]] virtual bool asyncReady() const noexcept = 0;
         virtual void operator()(Http::Request &) const noexcept = 0;
+
+        inline static void fail(
+            Http::Request & request,
+            const Http::Status status,
+            const std::string & message,
+            const std::source_location & location = std::source_location::current()
+        ) {
+            assert(Meta::toUnderlying(status) >= 400);
+            if (Log::s_appendLocation) {
+                LOG_ERROR_TS(Mbs::c_prefixedTextWithSource, request.m_id, message, SrcLoc::toMbs(location));
+            } else {
+                LOG_ERROR_TS(Mbs::c_prefixedText, request.m_id, message);
+            }
+            request.m_response.m_status = status;
+            request.m_response.m_data = message;
+        }
+
+        inline static void fail(
+            Http::Request & request,
+            const Http::Status status,
+            std::string && message,
+            const std::source_location & location = std::source_location::current()
+        ) {
+            assert(Meta::toUnderlying(status) >= 400);
+            if (Log::s_appendLocation) {
+                LOG_ERROR_TS(Mbs::c_prefixedTextWithSource, request.m_id, message, SrcLoc::toMbs(location));
+            } else {
+                LOG_ERROR_TS(Mbs::c_prefixedText, request.m_id, message);
+            }
+            request.m_response.m_status = status;
+            request.m_response.m_data.emplace<std::string>(std::forward<std::string>(message));
+        }
+
+        inline static void fail(
+            Http::Request & request,
+            const Http::Status status,
+            const std::string_view message,
+            const std::source_location & location = std::source_location::current()
+        ) {
+            assert(Meta::toUnderlying(status) >= 400);
+            if (Log::s_appendLocation) {
+                LOG_ERROR_TS(Mbs::c_prefixedTextWithSource, request.m_id, message, SrcLoc::toMbs(location));
+            } else {
+                LOG_ERROR_TS(Mbs::c_prefixedText, request.m_id, message);
+            }
+            request.m_response.m_status = status;
+            request.m_response.m_data.emplace<std::string>(message);
+        }
+
+        inline static void fail(
+            Http::Request & request,
+            const Http::Status status,
+            const char * message,
+            const std::source_location & location = std::source_location::current()
+        ) {
+            assert(Meta::toUnderlying(status) >= 400);
+            if (Log::s_appendLocation) {
+                LOG_ERROR_TS(Mbs::c_prefixedTextWithSource, request.m_id, message, SrcLoc::toMbs(location));
+            } else {
+                LOG_ERROR_TS(Mbs::c_prefixedText, request.m_id, message);
+            }
+            request.m_response.m_status = status;
+            request.m_response.m_data.emplace<std::string>(message);
+        }
     };
 }

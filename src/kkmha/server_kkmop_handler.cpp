@@ -4,10 +4,9 @@
 #include "server_kkmop_handler.h"
 #include "server_kkmop_defauls.h"
 #include "server_kkmop_strings.h"
-#include "http_json_response.h"
-#include "server_strings.h"
 #include "server_cache_strings.h"
 #include "server_cache_core.h"
+#include "http_json_response.h"
 #include <lib/meta.h>
 #include <debug/memprof.h>
 #include <kkm/strings.h>
@@ -63,19 +62,19 @@ namespace Server::KkmOp {
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             m_status = status;
-            std::string message2 { message };
-            m_result[Json::Mbs::c_messageKey] = message2;
+            m_result[Json::Mbs::c_messageKey] = message;
             if (Log::s_appendLocation) {
-                message2 += location;
+                LOG_ERROR_TS(Server::Mbs::c_prefixedTextWithSource, m_requestId, message, SrcLoc::toMbs(location));
+            } else {
+                LOG_ERROR_TS(Server::Mbs::c_prefixedText, m_requestId, message);
             }
-            LOG_ERROR_TS(Http::Mbs::c_prefixedText, m_requestId, message2);
         }
     };
 
     [[maybe_unused]]
     inline std::shared_ptr<KnownConnParams> resolveConnParams(Payload & payload) {
         if (payload.m_serialNumber.empty()) {
-            payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+            payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
             return nullptr;
         }
         std::wstring wcSerialNumber { Text::convert(payload.m_serialNumber) };
@@ -123,7 +122,7 @@ namespace Server::KkmOp {
 
     void learn(Payload & payload) {
         if (!payload.m_serialNumber.empty()) {
-            return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+            return payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
         }
 
         std::wstring connString;
@@ -172,7 +171,7 @@ namespace Server::KkmOp {
     void status(Payload & payload) {
         FORCE_MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
-            return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+            return payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
         }
         auto connParams = resolveConnParams(payload);
         if (connParams) {
@@ -195,7 +194,7 @@ namespace Server::KkmOp {
     void fullStatus(Payload & payload) {
         FORCE_MEMORY_LEAK;
         if (payload.m_serialNumber.empty()) {
-            return payload.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+            return payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
         }
         auto connParams = resolveConnParams(payload);
         if (connParams) {
@@ -342,7 +341,7 @@ namespace Server::KkmOp {
 
         if (request.m_method == Http::Method::Post) {
             if (idempotencyKey.empty()) {
-                return request.fail(Http::Status::BadRequest, Http::Mbs::c_invalidXIdempotencyKey);
+                return fail(request, Http::Status::BadRequest, Server::Mbs::c_invalidXIdempotencyKey);
             }
             auto it = request.m_header.find("content-type");
             if (it != request.m_header.end()) {
@@ -363,11 +362,11 @@ namespace Server::KkmOp {
                     }
                 }
                 if (!typeOk || !charsetOk) {
-                    return request.fail(Http::Status::BadRequest, Http::Mbs::c_invalidContentType);
+                    return fail(request, Http::Status::BadRequest, Server::Mbs::c_invalidContentType);
                 }
             }
         } else if (request.m_method != Http::Method::Get) {
-            return request.fail(Http::Status::MethodNotAllowed, Http::Mbs::c_methodNotAllowed);
+            return fail(request, Http::Status::MethodNotAllowed, Server::Mbs::c_methodNotAllowed);
         }
 
         Cache::maintain();
@@ -398,12 +397,12 @@ namespace Server::KkmOp {
         } else if (request.m_hint.size() == 3) {
             Text::joinTo(handlerKey, request.m_hint, "/");
         } else {
-            return request.fail(Http::Status::NotFound, Http::Mbs::c_notFound);
+            return fail(request, Http::Status::NotFound, Server::Mbs::c_notFound);
         }
 
         auto handler = s_handlers.find(handlerKey);
         if (handler == s_handlers.end()) {
-            return request.fail(Http::Status::NotFound, Http::Mbs::c_notFound);
+            return fail(request, Http::Status::NotFound, Server::Mbs::c_notFound);
         }
 
         Nln::Json details(Nln::EmptyJsonObject);
@@ -411,7 +410,7 @@ namespace Server::KkmOp {
         if (request.m_method == Http::Method::Post && !request.m_body.empty()) {
             details = Nln::Json::parse(request.m_body);
             if (!details.is_object()) {
-                return request.fail(Http::Status::BadRequest, Http::Mbs::c_badRequest);
+                return fail(request, Http::Status::BadRequest, Server::Mbs::c_badRequest);
             }
         }
 
@@ -434,10 +433,10 @@ namespace Server::KkmOp {
         }
 
     } catch (const Basic::Failure & e) {
-        request.fail(Http::Status::InternalServerError, Text::convert(e.what()), e.where());
+        fail(request, Http::Status::InternalServerError, Text::convert(e.what()), e.where());
     } catch (const std::exception & e) {
-        request.fail(Http::Status::InternalServerError, e.what());
+        fail(request, Http::Status::InternalServerError, e.what());
     } catch (...) {
-        request.fail(Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
+        fail(request, Http::Status::InternalServerError, Basic::Mbs::c_somethingWrong);
     }
 }
