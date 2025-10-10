@@ -12,15 +12,15 @@
 
 namespace Http {
     class Parser {
-        using Consumer = void (Parser::*)(std::istream &);
+        using Reader = void (Parser::*)(std::istream &);
 
         void parseMethod(std::istream &);
         void parseHeader(std::istream &);
         void parseBody(std::istream &);
-        void dummyParser(std::istream &);
+        void dummyReader(std::istream &);
 
         Request & m_request;
-        Consumer m_reader { &Parser::parseMethod };
+        Reader m_reader { &Parser::parseMethod };
         size_t m_expectedSize { 0 };
         int m_step { 0 };
 

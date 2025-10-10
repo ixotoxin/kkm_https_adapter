@@ -11,6 +11,7 @@ namespace Asio {
     using Timer = asio::steady_timer;
     using IpAddress = asio::ip::address;
     using IoContext = asio::io_context;
+    using Executor = asio::any_io_executor;
     using SignalSet = asio::signal_set;
     using StreamBuffer = asio::streambuf;
     using SslContext = asio::ssl::context;

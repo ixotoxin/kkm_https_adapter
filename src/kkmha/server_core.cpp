@@ -28,6 +28,8 @@ namespace Server {
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 
     static std::atomic<State> s_state { State::Initial };
+    static Counter::Type s_concurrentRequestsCounter { 0 };
+    static Counter::Type s_delayedSocketsCounter { 0 };
     static Hitman s_hitman {};
     static std::latch s_shutdownSync { 2 };
 
@@ -72,12 +74,11 @@ namespace Server {
     }
 
     asio::awaitable<void> accept(Asio::TcpSocket && socket, Asio::SslContext & sslContext) {
-        Counter counter {};
+        Counter counter { s_concurrentRequestsCounter };
 
         try {
             Asio::Stream stream { std::forward<Asio::TcpSocket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
-            bool handshakeCompleted { false };
 
             try {
                 { /** Приветствуем **/
@@ -86,7 +87,6 @@ namespace Server {
                     if (handshakeError) {
                         throw Failure(request.m_id, Mbs::c_sslHandshakeOperation, handshakeError); // NOLINT(*-exception-baseclass)
                     }
-                    handshakeCompleted = true;
                 }
 
                 { /** Читаем запрос **/
@@ -173,13 +173,14 @@ namespace Server {
                 LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
             }
 
-            if (handshakeCompleted && stream.lowest_layer().is_open()) {
+            stream.lowest_layer().cancel();
+            if (stream.lowest_layer().is_open()) {
                 Asio::Error error {};
                 stream.shutdown(error); // NOLINT(*-unused-return-value)
                 if (
                     error
                     && error != asio::ssl::error::stream_truncated  /* <= обязательно игнорируем */
-                    /*&& error != asio::error::eof*/
+                    && error != asio::error::eof
                     && error != asio::error::connection_aborted     /* <= обязательно игнорируем */
                     && error != asio::error::connection_refused
                     && error != asio::error::connection_reset       /* <= обязательно игнорируем */
@@ -228,6 +229,20 @@ namespace Server {
             LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
         }
 
+        co_return;
+    }
+
+    asio::awaitable<void> delayedClose(Asio::TcpSocket && socket0, Asio::Executor & executor) {
+        Counter counter { s_delayedSocketsCounter };
+        Asio::TcpSocket socket { std::forward<Asio::TcpSocket>(socket0) }; /** Чтобы сокет пережил co_await **/
+        try {
+            Asio::Timer timer { executor };
+            timer.expires_after(c_closingDelay);
+            co_await timer.async_wait(asio::use_awaitable);
+            socket.cancel();
+            socket.shutdown(Asio::TcpSocket::shutdown_both);
+            socket.close();
+        } catch (...) {}
         co_return;
     }
 
@@ -283,11 +298,15 @@ namespace Server {
                     } else if (!socket.is_open()) {
                         LOG_ERROR_TS(Wcs::c_socketOpeningError);
                         LOG_ERROR_TS(Wcs::c_servicingFailed);
-                    } else if (Counter::value() >= s_concurrencyLimit) {
-                        socket.cancel();
-                        socket.shutdown(Asio::TcpSocket::shutdown_both);
-                        socket.close();
-                        LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
+                    } else if (s_concurrentRequestsCounter >= s_concurrencyLimit) {
+                        if (s_delayedSocketsCounter >= c_delayedSockets) {
+                            socket.cancel();
+                            socket.shutdown(Asio::TcpSocket::shutdown_both);
+                            socket.close();
+                        } else {
+                            LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
+                            asio::co_spawn(executor, delayedClose(std::move(socket), executor), asio::detached);
+                        }
                     } else {
                         asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                     }
@@ -376,7 +395,7 @@ namespace Server {
         LOG_DEBUG_TS(Wcs::c_stopping);
 
         s_state.store(State::Shutdown);
-        s_hitman.await(c_controlTimeout, [] { return Counter::value() > 0; });
+        s_hitman.await(c_controlTimeout, [] { return s_concurrentRequestsCounter > 0; });
         s_state.store(State::Stopping);
         s_hitman.await(c_sleep);
         s_hitman.completeOrder();

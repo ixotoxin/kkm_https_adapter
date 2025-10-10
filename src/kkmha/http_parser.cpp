@@ -16,7 +16,7 @@ namespace Http {
         auto pos1 = line.find_first_of(' ');
         if (pos1 == std::string::npos) {
             m_request.m_response.m_status = Status::BadRequest;
-            m_reader = &Parser::dummyParser;
+            m_reader = &Parser::dummyReader;
             return;
         }
         m_request.m_verb.assign(line.data(), line.data() + pos1);
@@ -25,7 +25,7 @@ namespace Http {
         auto pos2 = line.find_first_of(" ?#\r\n", pos1);
         if (pos2 == std::string::npos || pos1 == pos2) {
             m_request.m_response.m_status = Status::BadRequest;
-            m_reader = &Parser::dummyParser;
+            m_reader = &Parser::dummyReader;
             return;
         }
         m_request.m_path.assign(line.data() + pos1, line.data() + pos2);
@@ -33,7 +33,7 @@ namespace Http {
         Text::splitTo(m_request.m_hint, Text::lowered<std::string>({ line.c_str(), pos2 }), " /\\");
         if (m_request.m_hint.empty()) {
             m_request.m_response.m_status = Status::BadRequest;
-            m_reader = &Parser::dummyParser;
+            m_reader = &Parser::dummyReader;
             return;
         }
 
@@ -43,7 +43,7 @@ namespace Http {
             m_request.m_method = Method::Get;
         } else {
             m_request.m_response.m_status = Status::NotImplemented;
-            m_reader = &Parser::dummyParser;
+            m_reader = &Parser::dummyReader;
             return;
         }
 
@@ -61,7 +61,7 @@ namespace Http {
                 ++m_step;
                 m_reader = &Parser::parseBody;
             } else {
-                m_reader = &Parser::dummyParser;
+                m_reader = &Parser::dummyReader;
             }
             return;
         }
@@ -76,7 +76,7 @@ namespace Http {
                 m_expectedSize = 0;
                 m_request.m_response.m_status = Status::BadRequest;
                 m_request.m_response.m_data.emplace<1>(Mbs::c_bodySizeLimitExceeded);
-                m_reader = &Parser::dummyParser;
+                m_reader = &Parser::dummyReader;
             } else {
                 m_request.m_body.reserve(m_expectedSize + 1);
             }
@@ -91,7 +91,7 @@ namespace Http {
         m_request.m_body.append(buffer, stream.gcount());
     }
 
-    void Parser::dummyParser(std::istream & stream) { // NOLINT(*-convert-member-functions-to-static)
+    void Parser::dummyReader(std::istream & stream) { // NOLINT(*-convert-member-functions-to-static)
         // ISSUE: А надо ли очищать стрим? Разобраться.
         // TODO: Оптимизировать очистку стрима.
         char buffer[c_parserBufferSize];
@@ -118,6 +118,6 @@ namespace Http {
         if (m_request.m_response.m_status == Status::Ok) {
             m_request.m_response.m_status = Status::BadRequest;
         }
-        m_reader = &Parser::dummyParser;
+        m_reader = &Parser::dummyReader;
     }
 }
