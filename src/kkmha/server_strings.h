@@ -21,7 +21,8 @@ namespace Server {
         constexpr Csv c_stopped { L"Сервер остановлен" };
         constexpr Csv c_servicingFailed { L"Сбой сервера" };
         constexpr Csv c_socketOpeningError { L"Ошибка открытия сокета" };
-        constexpr Csv c_maximumIsExceeded { L"Превышено количество одновременных запросов" };
+        constexpr Csv c_maximumIsExceeded { L"Превышено разрешенное количество одновременных запросов" };
+        constexpr Csv c_timeoutExpired { L"Превышена разрешенная длительность выполнения запроса" };
         constexpr Csv c_processingSuccess { L"Запрос успешно обработан" };
         constexpr Csv c_processingFailed { L"Не удалось обработать запрос" };
         constexpr Csv c_cacheMaintain { L"Обслуживание кэша (размер {} => {})" };

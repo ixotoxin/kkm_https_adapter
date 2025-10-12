@@ -12,6 +12,7 @@ namespace Asio {
     using IpAddress = asio::ip::address;
     using IoContext = asio::io_context;
     using Executor = asio::any_io_executor;
+    using CancellationSignal = asio::cancellation_signal;
     using SignalSet = asio::signal_set;
     using StreamBuffer = asio::streambuf;
     using SslContext = asio::ssl::context;

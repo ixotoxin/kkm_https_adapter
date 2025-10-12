@@ -19,6 +19,7 @@
 #include <memory>
 #include <atomic>
 #include <latch>
+#include <chrono>
 
 namespace Server {
     using namespace std::chrono_literals;
@@ -79,42 +80,75 @@ namespace Server {
         try {
             Asio::Stream stream { std::forward<Asio::TcpSocket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
+            auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(s_requestTimeout);
+            Asio::Timer timeoutTimer { co_await asio::this_coro::executor, deadline };
+            Asio::Error error {};
+            Asio::CancellationSignal signal {};
+            bool canceled { false };
+
+            timeoutTimer.expires_at(deadline);
+            timeoutTimer.async_wait(
+                [& signal, & canceled]
+                (Asio::Error error) {
+                    if (!error) {
+                        canceled = true;
+                        signal.emit(asio::cancellation_type::all);
+                    }
+                }
+            );
 
             try {
-                { /** Приветствуем **/
-                    const auto & [handshakeError]
-                        = co_await stream.async_handshake(asio::ssl::stream_base::server);
-                    if (handshakeError) {
-                        throw Failure(request.m_id, Mbs::c_sslHandshakeOperation, handshakeError); // NOLINT(*-exception-baseclass)
+                {
+                    co_await stream.async_handshake(
+                        asio::ssl::stream_base::server,
+                        asio::bind_cancellation_slot(
+                            signal.slot(),
+                            asio::redirect_error(asio::use_awaitable, error)
+                        )
+                    );
+                    if (error) {
+                        throw Failure(request.m_id, Mbs::c_sslHandshakeOperation, error); // NOLINT(*-exception-baseclass)
                     }
                 }
 
-                { /** Читаем запрос **/
+                if (!canceled) {
                     Asio::StreamBuffer buffer {};
-                    const auto & [headerReadingError, headerSize]
-                        = co_await asio::async_read_until(stream, buffer, "\r\n\r\n");
-                    if (headerReadingError) {
-                        throw Failure(request.m_id, Mbs::c_sslReadOperation, headerReadingError); // NOLINT(*-exception-baseclass)
-                    } else {
-                        Http::Parser parser(request);
-                        parser(buffer);
-                        if (request.m_method == Http::Method::Post) {
-                            auto expecting = parser.expecting();
-                            while (expecting) {
-                                const auto & [bodyReadingError, bodyReadingSize]
-                                    = co_await asio::async_read(stream, buffer, asio::transfer_at_least(expecting));
-                                if (bodyReadingError) {
-                                    throw Failure(request.m_id, Mbs::c_sslReadOperation, bodyReadingError); // NOLINT(*-exception-baseclass)
-                                }
-                                parser(buffer);
-                                expecting = parser.expecting();
-                            }
-                        }
-                        parser.complete();
+
+                    co_await asio::async_read_until(
+                        stream, buffer, "\r\n\r\n",
+                        asio::bind_cancellation_slot(
+                            signal.slot(),
+                            asio::redirect_error(asio::use_awaitable, error)
+                        )
+                    );
+                    if (error) {
+                        throw Failure(request.m_id, Mbs::c_sslReadOperation, error); // NOLINT(*-exception-baseclass)
                     }
+
+                    Http::Parser parser(request);
+                    parser(buffer);
+
+                    if (request.m_method == Http::Method::Post) {
+                        auto expecting = parser.expecting();
+                        while (!canceled && expecting) {
+                            co_await asio::async_read(
+                                stream, buffer, asio::transfer_at_least(expecting),
+                                asio::bind_cancellation_slot(
+                                    signal.slot(),
+                                    asio::redirect_error(asio::use_awaitable, error)
+                                )
+                            );
+                            if (error) {
+                                throw Failure(request.m_id, Mbs::c_sslReadOperation, error); // NOLINT(*-exception-baseclass)
+                            }
+                            parser(buffer);
+                            expecting = parser.expecting();
+                        }
+                    }
+                    parser.complete();
                 }
 
-                { /** Обрабатываем запрос **/
+                if (!canceled) {
                     if (request.m_response.m_status == Http::Status::Ok) {
                         LOG_INFO_TS(
                             [& request] {
@@ -153,69 +187,96 @@ namespace Server {
                     }
                 }
 
-                { /** Пишем ответ **/
+                if (!canceled) {
                     Asio::StreamBuffer buffer {};
                     request.m_response.render(buffer);
-                    const auto & [writingError, writingSize] = co_await asio::async_write(stream, buffer);
-                    if (writingError) {
-                        throw Failure(request.m_id, Mbs::c_sslWriteOperation, writingError); // NOLINT(*-exception-baseclass)
+                    co_await asio::async_write(
+                        stream, buffer,
+                        asio::bind_cancellation_slot(
+                            signal.slot(),
+                            asio::redirect_error(asio::use_awaitable, error)
+                        )
+                    );
+                    if (error) {
+                        throw Failure(request.m_id, Mbs::c_sslWriteOperation, error); // NOLINT(*-exception-baseclass)
                     }
                 }
 
             } catch (const Basic::Failure & e) {
-                request.m_response.m_status = Http::Status::InternalServerError;
-                LOG_ERROR_TS(e);
+                if (!canceled) {
+                    request.m_response.m_status = Http::Status::InternalServerError;
+                    LOG_ERROR_TS(e);
+                }
             } catch (const std::exception & e) {
-                request.m_response.m_status = Http::Status::InternalServerError;
-                LOG_ERROR_TS(e);
+                if (!canceled) {
+                    request.m_response.m_status = Http::Status::InternalServerError;
+                    LOG_ERROR_TS(e);
+                }
             } catch (...) {
-                request.m_response.m_status = Http::Status::InternalServerError;
-                LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
-            }
-
-            stream.lowest_layer().cancel();
-            if (stream.lowest_layer().is_open()) {
-                Asio::Error error {};
-                stream.shutdown(error); // NOLINT(*-unused-return-value)
-                if (
-                    error
-                    && error != asio::ssl::error::stream_truncated  /* <= обязательно игнорируем */
-                    && error != asio::error::eof
-                    && error != asio::error::connection_aborted     /* <= обязательно игнорируем */
-                    && error != asio::error::connection_refused
-                    && error != asio::error::connection_reset       /* <= обязательно игнорируем */
-                    && error != asio::error::not_connected
-                ) {
-                    if (Log::s_appendLocation) {
-                        LOG_ERROR_TS(
-                            Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_sslShutdownOperation,
-                            error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
-                        );
-                    } else {
-                        LOG_ERROR_TS(
-                            Mbs::c_prefixedOperation, request.m_id, Mbs::c_sslShutdownOperation, error.message()
-                        );
-                    }
-                }
-            }
-            if (stream.lowest_layer().is_open()) {
-                Asio::Error error {};
-                stream.lowest_layer().close(error); // NOLINT(*-unused-return-value)
-                if (error) {
-                    if (Log::s_appendLocation) {
-                        LOG_ERROR_TS(
-                            Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_socketCloseOperation,
-                            error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
-                        );
-                    } else {
-                        LOG_ERROR_TS(
-                            Mbs::c_prefixedOperation, request.m_id, Mbs::c_socketCloseOperation, error.message()
-                        );
-                    }
+                if (!canceled) {
+                    request.m_response.m_status = Http::Status::InternalServerError;
+                    LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
                 }
             }
 
-            if (request.m_response.m_status < Http::Status::BadRequest) {
+            timeoutTimer.cancel();
+
+            {
+                stream.lowest_layer().cancel();
+
+                if (stream.lowest_layer().is_open()) {
+                    error.clear();
+                    stream.shutdown(error); // NOLINT(*-unused-return-value)
+                    if (error) {
+                        if (error.category() == asio::error::get_ssl_category()) {
+                            auto sslError = ERR_GET_REASON(error.value());
+                            if (sslError == SSL_R_APPLICATION_DATA_AFTER_CLOSE_NOTIFY) {
+                                error = asio::ssl::error::stream_truncated;
+                            }
+                        }
+                        if (
+                            error != asio::ssl::error::stream_truncated // <= обязательно игнорируем
+                            && error != asio::error::eof
+                            && error != asio::error::connection_aborted // <= обязательно игнорируем
+                            && error != asio::error::connection_refused
+                            && error != asio::error::connection_reset   // <= обязательно игнорируем
+                            && error != asio::error::not_connected
+                        ) {
+                            if (Log::s_appendLocation) {
+                                LOG_ERROR_TS(
+                                    Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_sslShutdownOperation,
+                                    error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
+                                );
+                            } else {
+                                LOG_ERROR_TS(
+                                    Mbs::c_prefixedOperation, request.m_id, Mbs::c_sslShutdownOperation, error.message()
+                                );
+                            }
+                        }
+                    }
+                }
+
+                if (stream.lowest_layer().is_open()) {
+                    error.clear();
+                    stream.lowest_layer().close(error); // NOLINT(*-unused-return-value)
+                    if (error) {
+                        if (Log::s_appendLocation) {
+                            LOG_ERROR_TS(
+                                Mbs::c_prefixedOperationWithSource, request.m_id, Mbs::c_socketCloseOperation,
+                                error.message(), SrcLoc::toMbs(SrcLoc::Point::current())
+                            );
+                        } else {
+                            LOG_ERROR_TS(
+                                Mbs::c_prefixedOperation, request.m_id, Mbs::c_socketCloseOperation, error.message()
+                            );
+                        }
+                    }
+                }
+            }
+
+            if (canceled) {
+                LOG_WARNING_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_timeoutExpired);
+            } else if (request.m_response.m_status < Http::Status::BadRequest) {
                 LOG_INFO_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingSuccess);
             } else {
                 LOG_WARNING_TS(Wcs::c_prefixedText, request.m_id, Wcs::c_processingFailed);
@@ -232,11 +293,11 @@ namespace Server {
         co_return;
     }
 
-    asio::awaitable<void> delayedClose(Asio::TcpSocket && socket0, Asio::Executor & executor) {
+    asio::awaitable<void> close(Asio::TcpSocket && socket0) {
         Counter counter { s_delayedSocketsCounter };
-        Asio::TcpSocket socket { std::forward<Asio::TcpSocket>(socket0) }; /** Чтобы сокет пережил co_await **/
+        Asio::TcpSocket socket { std::forward<Asio::TcpSocket>(socket0) }; // Чтобы сокет пережил co_await
         try {
-            Asio::Timer timer { executor };
+            Asio::Timer timer { co_await asio::this_coro::executor };
             timer.expires_after(c_closingDelay);
             co_await timer.async_wait(asio::use_awaitable);
             socket.cancel();
@@ -284,16 +345,16 @@ namespace Server {
 
             auto executor = co_await asio::this_coro::executor;
 
-            { /** Принимаем подключений **/
+            {
                 Asio::Acceptor acceptor { executor, endpoint };
 
                 LOG_INFO_TS(Wcs::c_started);
                 s_state.store(State::Running);
 
                 do {
-                    auto [acceptingError, socket] = co_await acceptor.async_accept();
-                    if (acceptingError) {
-                        LOG_ERROR_TS(Mbs::c_connectionAcceptStatus, acceptingError.message());
+                    auto [error, socket] = co_await acceptor.async_accept();
+                    if (error) {
+                        LOG_ERROR_TS(Mbs::c_connectionAcceptStatus, error.message());
                         LOG_ERROR_TS(Wcs::c_servicingFailed);
                     } else if (!socket.is_open()) {
                         LOG_ERROR_TS(Wcs::c_socketOpeningError);
@@ -305,27 +366,31 @@ namespace Server {
                             socket.close();
                         } else {
                             LOG_ERROR_TS(Wcs::c_maximumIsExceeded);
-                            asio::co_spawn(executor, delayedClose(std::move(socket), executor), asio::detached);
+                            asio::co_spawn(executor, close(std::move(socket)), asio::detached);
                         }
                     } else {
                         asio::co_spawn(executor, accept(std::move(socket), sslContext), asio::detached);
                     }
                 } while (s_state.load() == State::Running);
 
-                Asio::Error error {};
-                acceptor.cancel(error); // NOLINT(*-unused-return-value)
-                if (error) {
-                    LOG_WARNING_TS(Mbs::c_acceptorCancelStatus, error.message());
-                }
-                error.clear();
-                acceptor.close(error); // NOLINT(*-unused-return-value)
-                if (error) {
-                    LOG_WARNING_TS(Mbs::c_acceptorCloseStatus, error.message());
+                {
+                    Asio::Error error {};
+
+                    acceptor.cancel(error); // NOLINT(*-unused-return-value)
+                    if (error) {
+                        LOG_WARNING_TS(Mbs::c_acceptorCancelStatus, error.message());
+                    }
+
+                    error.clear();
+                    acceptor.close(error); // NOLINT(*-unused-return-value)
+                    if (error) {
+                        LOG_WARNING_TS(Mbs::c_acceptorCloseStatus, error.message());
+                    }
                 }
             }
 
-            { /** Ждем остановки обработчиков в корутинах **/
-                Asio::Timer timer { executor };
+            {
+                Asio::Timer timer { co_await asio::this_coro::executor };
 
                 while (s_state.load() == State::Shutdown) {
                     timer.expires_after(c_sleepQuantum);
@@ -363,7 +428,7 @@ namespace Server {
 
         try {
             {
-                Asio::IoContext ioContext(1);
+                Asio::IoContext ioContext { std::clamp(static_cast<int>(std::thread::hardware_concurrency()), 1, 4) };
                 Asio::SignalSet signals(ioContext, SIGINT, SIGTERM);
                 signals.async_wait([] (auto, auto) { std::thread(stop).detach(); });
                 s_hitman.placeOrder([&ioContext] { ioContext.stop(); });

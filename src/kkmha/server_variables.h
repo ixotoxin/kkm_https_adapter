@@ -8,6 +8,7 @@
 #include <filesystem>
 
 namespace Server {
+    inline int64_t s_requestTimeout { c_defRequestTimeout };
     inline bool s_ipv4Only { c_defIpv4Only };
     inline unsigned short s_port { c_defPort };
     inline int64_t s_concurrencyLimit { c_defConcurrencyLimit };

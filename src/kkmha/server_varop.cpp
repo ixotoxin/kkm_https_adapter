@@ -12,6 +12,10 @@ namespace Server {
         Json::handleKey(
             json, "server",
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
+                Json::handleKey(
+                    json, "requestTimeout", Server::s_requestTimeout,
+                    Numeric::between(Server::c_minRequestTimeout, Server::c_maxRequestTimeout), path
+                );
                 Json::handleKey(json, "ipv4Only", Server::s_ipv4Only, path);
                 Json::handleKey(
                     json, "port", Server::s_port,

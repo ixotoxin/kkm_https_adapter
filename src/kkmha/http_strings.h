@@ -47,6 +47,7 @@ namespace Http {
             { Status::Forbidden, "Forbidden" },
             { Status::NotFound, "Not Found" },
             { Status::MethodNotAllowed, "Method Not Allowed" },
+            // { Status::RequestTimeout, "Request Timeout" },
             // { Status::ImATeapot, "I’m a teapot" },
             { Status::InternalServerError, "Internal Server Error" },
             { Status::NotImplemented, "Not Implemented" },

@@ -42,7 +42,7 @@ namespace Http {
         BinaryResponse(const BinaryResponse &) = delete;
         BinaryResponse(BinaryResponse &&) = delete;
 
-        BinaryResponse(T data, size_t size, std::string_view mimeType) // NOLINT(*-unnecessary-value-param)
+        BinaryResponse(T data, size_t size, std::string_view mimeType)
         : m_mimeType { mimeType }, m_data { data }, m_size { size } {}
 
         ~BinaryResponse() override = default;

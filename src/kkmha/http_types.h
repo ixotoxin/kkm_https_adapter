@@ -19,6 +19,7 @@ namespace Http {
         Forbidden = 403,
         NotFound,
         MethodNotAllowed,
+        // RequestTimeout = 408,
         // ImATeapot = 418,
         InternalServerError = 500,
         NotImplemented,
