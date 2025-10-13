@@ -4,9 +4,24 @@
 #pragma once
 
 #include "server_proto_handler.h"
+#include "http_constant_response.h"
+#include <memory>
+#include <string_view>
 
 namespace Server::Ping {
+    using namespace std::string_view_literals;
+
     class Handler : public ProtoHandler {
+        inline static auto s_pongResponse = std::make_shared<Http::ConstantResponse>(
+            "HTTP/1.1 200 OK\r\n"
+            "Connection: close\r\n"
+            "Pragma: no-cache\r\n"
+            "Cache-Control: no-cache, private\r\n"
+            "Content-Type: application/json\r\n"
+            "Content-Length: 35\r\n\r\n"
+            "{\"!message\":\"Pong\",\"!success\":true}"sv
+        );
+
     public:
         Handler() = default;
         Handler(const Handler &) = default;

@@ -12,13 +12,13 @@ namespace Http {
     namespace Wcs {
         using Csv = const std::wstring_view;
 
-        constexpr Csv c_bodySizeLimitExceeded { L"Запрос [{:04x}]: Превышен допустимый размер тела запроса" };
+        constexpr Csv c_bodySizeLimitExceeded { L"Запрос [{:04x}]: Превышен разрешенный размер тела запроса" };
     }
 
     namespace Mbs {
         using Csv = const std::string_view;
 
-        constexpr Csv c_bodySizeLimitExceeded { "Превышен допустимый размер тела запроса" };
+        constexpr Csv c_bodySizeLimitExceeded { "Превышен разрешенный размер тела запроса" };
         constexpr Csv c_jsonMimeType { "application/json" };
 
         constexpr Csv c_responseHeaderTemplate {

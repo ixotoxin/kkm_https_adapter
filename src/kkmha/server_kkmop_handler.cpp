@@ -6,6 +6,7 @@
 #include "server_kkmop_strings.h"
 #include "server_cache_strings.h"
 #include "server_cache_core.h"
+#include "http_constant_response.h"
 #include "http_json_response.h"
 #include <lib/meta.h>
 #include <debug/memprof.h>
@@ -28,7 +29,7 @@ namespace Server::KkmOp {
 
         const std::string m_serialNumber;
         const Nln::Json m_details;
-        Nln::Json m_result;
+        OptionalResult m_result;
         DateTime::Offset m_expiresAfter;
         Http::Status m_status { Http::Status::Ok };
         const Id m_requestId;
@@ -41,10 +42,9 @@ namespace Server::KkmOp {
             const Id requestId,
             const DateTime::Offset expiresAfter = 0s
         ) : m_serialNumber(std::forward<std::string>(serialNumber)),
-            m_details(std::forward<Nln::Json>(details)), m_result(Nln::EmptyJsonObject),
+            m_details(std::forward<Nln::Json>(details)), m_result(std::nullopt),
             m_expiresAfter(expiresAfter), m_requestId(requestId) {
             assert(m_details.is_object());
-            assert(m_result.is_object());
         }
 
         Payload(const Payload &) = delete;
@@ -62,7 +62,11 @@ namespace Server::KkmOp {
         ) {
             assert(Meta::toUnderlying(status) >= 400);
             m_status = status;
-            m_result[Json::Mbs::c_messageKey] = message;
+            if (!m_result.has_value()) {
+                m_result.emplace(Nln::EmptyJsonObject);
+            }
+            m_result.value()[Json::Mbs::c_successKey] = false;
+            m_result.value()[Json::Mbs::c_messageKey] = message;
             if (Log::s_appendLocation) {
                 LOG_ERROR_TS(Server::Mbs::c_prefixedTextWithSource, m_requestId, message, SrcLoc::toMbs(location));
             } else {
@@ -326,9 +330,6 @@ namespace Server::KkmOp {
 
     void Handler::operator()(Http::Request & request) const noexcept try {
         assert(request.m_response.m_status == Http::Status::Ok);
-        // if (request.m_response.m_status != Status::Ok) {
-        //     return;
-        // }
 
         std::string idempotencyKey {};
 
@@ -418,18 +419,33 @@ namespace Server::KkmOp {
             std::move(serialNumber), std::move(details), request.m_id,
             request.m_method == Http::Method::Get ? c_reportCacheLifeTime : c_receiptCacheLifeTime
         };
+
         (handler->second)(payload);
-        assert(payload.m_result.is_object());
 
-        auto response = std::make_shared<Http::JsonResponse>(std::move(payload.m_result));
-        if (!cacheKey.empty()) {
-            Cache::store(cacheKey, Cache::expiresAfter(payload.m_expiresAfter), payload.m_status, response);
-        }
-
+        assert(!payload.m_result.has_value() || payload.m_result.value().is_object());
         assert(request.m_response.m_status == Http::Status::Ok);
-        if (request.m_response.m_status == Http::Status::Ok) {
-            request.m_response.m_status = payload.m_status;
-            request.m_response.m_data = std::move(response);
+
+        if (!payload.m_result.has_value() && payload.m_status == Http::Status::Ok) {
+            if (!cacheKey.empty()) {
+                Cache::store(
+                    cacheKey,
+                    Cache::expiresAfter(payload.m_expiresAfter),
+                    Http::Status::Ok,
+                    Http::ConstantResponse::s_okResponse
+                );
+            }
+            if (request.m_response.m_status == Http::Status::Ok) {
+                request.m_response.m_data = Http::ConstantResponse::s_okResponse;
+            }
+        } else {
+            auto response = std::make_shared<Http::JsonResponse>(std::move(payload.m_result));
+            if (!cacheKey.empty()) {
+                Cache::store(cacheKey, Cache::expiresAfter(payload.m_expiresAfter), payload.m_status, response);
+            }
+            if (request.m_response.m_status == Http::Status::Ok) {
+                request.m_response.m_status = payload.m_status;
+                request.m_response.m_data = std::move(response);
+            }
         }
 
     } catch (const Basic::Failure & e) {

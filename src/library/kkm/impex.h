@@ -8,6 +8,8 @@
 #include <concepts>
 
 namespace Kkm {
+    using OptionalResult = std::optional<Nln::Json>;
+
     bool assign(Nln::Json &, const Result &);
     bool assign(Nln::Json &, const StatusResult &);
     bool assign(Nln::Json &, const ShiftStateResult &);
@@ -32,6 +34,24 @@ namespace Kkm {
     Nln::Json & operator<<(Nln::Json & json, const std::derived_from<Result> auto & result) {
         assign(json, result);
         return json;
+    }
+
+    template<std::derived_from<Result> R>
+    OptionalResult & operator<<(OptionalResult & optionalResult, const R & result) {
+        if constexpr (std::is_same_v<R, Result>) {
+            if (!result.m_success || !(result.m_message.empty() || result.m_message == Basic::Wcs::c_ok)) {
+                if (!optionalResult.has_value()) {
+                    optionalResult.emplace(Nln::EmptyJsonObject);
+                }
+                assign(optionalResult.value(), result);
+             }
+        } else {
+            if (!optionalResult.has_value()) {
+                optionalResult.emplace(Nln::EmptyJsonObject);
+            }
+            assign(optionalResult.value(), result);
+        }
+        return optionalResult;
     }
 
     const Nln::Json & operator>>(const Nln::Json & json, std::derived_from<Details> auto & details) {

@@ -15,7 +15,7 @@ namespace Server::Ping {
         assert(request.m_response.m_status == Http::Status::Ok);
 
         if (request.m_method == Http::Method::Get) {
-            request.m_response.m_data = "Pong";
+            request.m_response.m_data = s_pongResponse;
         } else {
             fail(request, Http::Status::MethodNotAllowed, Server::Mbs::c_methodNotAllowed);
         }

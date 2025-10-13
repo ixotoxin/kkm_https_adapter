@@ -21,7 +21,8 @@ namespace SrcLoc {
     class Point {
         size_t m_line {};
         std::array<char, MAX_PATH> m_file {};
-        constexpr static size_t c_prefixLength { std::string_view(BUILD_SOURCE).length() };
+
+        constexpr static std::string_view c_prefix { BUILD_PREFIX };
         constexpr static std::string_view c_invalidPath { "[invalid-path]" };
 
     public:
@@ -40,11 +41,11 @@ namespace SrcLoc {
             Point result;
             result.m_line = line;
             std::string_view view0 { file };
-            if (view0.length() <= c_prefixLength) {
+            if (view0.starts_with(c_prefix)) {
                 std::copy(c_invalidPath.begin(), c_invalidPath.end(), result.m_file.begin());
                 result.m_file[c_invalidPath.size()] = 0;
             } else {
-                std::string_view view { view0.substr(c_prefixLength) };
+                std::string_view view { view0.substr(c_prefix.length()) };
                 if (view.length() >= MAX_PATH - 1 || view.length() < 1) {
                     std::copy(c_invalidPath.begin(), c_invalidPath.end(), result.m_file.begin());
                     result.m_file[c_invalidPath.size()] = 0;
