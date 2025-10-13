@@ -12,14 +12,14 @@ namespace Server {
         Json::handleKey(
             json, "server",
             [] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(
-                    json, "requestTimeout", Server::s_requestTimeout,
-                    Numeric::between(Server::c_minRequestTimeout, Server::c_maxRequestTimeout), path
-                );
                 Json::handleKey(json, "ipv4Only", Server::s_ipv4Only, path);
                 Json::handleKey(
                     json, "port", Server::s_port,
                     Numeric::between(Server::c_minPort, Server::c_maxPort), path
+                );
+                Json::handleKey(
+                    json, "requestTimeout", Server::s_requestTimeout,
+                    Numeric::between(Server::c_minRequestTimeout, Server::c_maxRequestTimeout), path
                 );
                 Json::handleKey(
                     json, "concurrencyLimit", Server::s_concurrencyLimit,
@@ -57,6 +57,7 @@ namespace Server {
         stream
             << L"CFG: server.ipv4Only = " << Text::Wcs::yesNo(s_ipv4Only) << L"\n"
             L"CFG: server.port = " << s_port << L"\n"
+            L"CFG: server.requestTimeout = " << s_requestTimeout << L"\n"
             L"CFG: server.concurrencyLimit = " << s_concurrencyLimit << L"\n"
             L"CFG: server.enableLegacyTls = " << Text::Wcs::yesNo(s_enableLegacyTls) << L"\n"
             L"CFG: server.securityLevel = " << securityLevel << L"\n"

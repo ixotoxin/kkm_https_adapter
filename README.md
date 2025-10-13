@@ -45,9 +45,9 @@
         "appendLocation": false
     },
     "server": {
-        "requestTimeout": 180,
         "ipv4Only": false,
         "port": 5757,
+        "requestTimeout": 180,
         "concurrencyLimit": 10,
         "enableLegacyTls": "no",
         "securityLevel": 5,
@@ -90,9 +90,9 @@
 | `log.eventLog.level.foreground` | Уровень логирования в журнал событий Windows для foreground-процесса                                         |
 | `log.eventLog.level.background` | Уровень логирования в журнал событий Windows для background-процесса                                         |
 | `log.appendLocation`            | Включить/выключить вывод точки происхождения сообщения в исходных файлах                                     |
-| `server.requestTimeout`         | Таймаут                                                                                                      |
 | `server.ipv4Only`               | Включить/выключить поддержку IPv6                                                                            |
 | `server.port`                   | Порт, который будет слушать сервер                                                                           |
+| `server.requestTimeout`         | Таймаут (в секундах)                                                                                         |
 | `server.concurrencyLimit`       | Ограничение максимального количества одновременных соединений                                                |
 | `server.enableLegacyTls`        | Разрешить/запретить поддержку TLS 1.0 и TLS 1.1                                                              |
 | `server.securityLevel`          | Уровень безопасности устанавливаемый в библиотеке OpenSSL (0 - 5)                                            |
@@ -105,12 +105,12 @@
 | `server.staticDirectory`        | Путь к директории, содержимое которой будет отдаваться для запросов `/static/{file-path}`                    |
 | `server.indexFile`              | Имя индексного файла (на этот файл происходит перенаправление, если запрашиваемый путь является директорией) |
 | `server.mimeMap`                | Путь к файлу с описанием типа содержимого                                                                    |
-| `server.enableUnknownType`      | Разрешить/запретить отдавать файлы с расширениями не представленными в файле `mime.json`                     |
+| `server.enableUnknownType`      | Разрешить/запретить отдавать файлы с расширениями не представленными в файле `mime.json` (`server.mimeMap`)  |
 | `kkm.dbDirectory`               | Путь к директории, в которой будет формироваться БД известных ККМ                                            |
 | `kkm.defaultBaudRate`           | Скорость COM-порта по-умолчанию                                                                              |
 | `kkm.defaultLineLength`         | Ширина чековой ленты по-умолчанию. Используется, если данное свойство не удается получить опросом ККМ        |
 | `kkm.timeZone`                  | Временная зона передаваемая ОФД при регистрации чека                                                         |
-| `kkm.documentClosingTimeout`    | Таймаут проверки корректности закрытия документа                                                             |
+| `kkm.documentClosingTimeout`    | Таймаут проверки корректности закрытия документа  (в миллисекундах)                                          |
 | `kkm.cliOperator.name`          | Имя оператора для консольных команд требующих логина оператора ККМ                                           |
 | `kkm.customerAccountField`      | Заголовок поля с номером лицевого счета клиента                                                              |
 | `kkm.maxCashInOut`              | Максимальная сумма для внесения или выплаты                                                                  |
