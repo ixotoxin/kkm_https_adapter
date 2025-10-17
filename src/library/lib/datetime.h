@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <chrono>
 #include <format>
-#include <ostream>
 #include <ctime>
 
 namespace Meta {
@@ -32,11 +31,11 @@ namespace DateTime {
     using namespace std::chrono_literals;
 
     namespace Wcs {
-        constexpr const std::wstring_view c_timestamp { L"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
+        constexpr std::wstring_view c_timestamp { L"{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
     }
 
     namespace Mbs {
-        constexpr const std::string_view c_timestamp { "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
+        constexpr std::string_view c_timestamp { "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" };
     }
 
     using Basic::DataError;
@@ -56,7 +55,7 @@ namespace DateTime {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const std::tm & dateTime) {
+    T cast(const std::tm & dateTime) {
         if constexpr (Meta::isWide<T>) {
             return
                 std::format(
@@ -74,25 +73,25 @@ namespace DateTime {
 
     template<Meta::Clock T, Meta::TimePoint U>
     [[nodiscard, maybe_unused]]
-    inline auto cast(const U & timePoint) {
+    auto cast(const U & timePoint) {
         return std::chrono::clock_cast<T>(timePoint);
     }
 
     template<Meta::TimePoint T, Meta::TimePoint U>
     [[nodiscard, maybe_unused]]
-    inline auto cast(const U & timePoint) {
+    auto cast(const U & timePoint) {
         return std::chrono::clock_cast<typename T::clock>(timePoint);
     }
 
     template<Meta::fromTemplate<std::chrono::duration> T>
     [[nodiscard, maybe_unused]]
-    inline auto clamp(T min, T max) {
+    auto clamp(T min, T max) {
         return [min, max] (const T value) -> T { return std::clamp(value, min, max); };
     }
 
     template<Meta::fromTemplate<std::chrono::duration> T>
     [[nodiscard, maybe_unused]]
-    inline auto min(T min) {
+    auto min(T min) {
         return
             [min] (const T value) -> T {
                 if (value < min) {
@@ -104,7 +103,7 @@ namespace DateTime {
 
     template<Meta::fromTemplate<std::chrono::duration> T>
     [[nodiscard, maybe_unused]]
-    inline auto max(T max) {
+    auto max(T max) {
         return
             [max] (const T value) -> T {
                 if (value > max) {
@@ -116,7 +115,7 @@ namespace DateTime {
 
     template<Meta::fromTemplate<std::chrono::duration> T>
     [[nodiscard, maybe_unused]]
-    inline auto between(T min, T max) {
+    auto between(T min, T max) {
         return
             [min, max] (const T value) -> T {
                 if (value < min || value > max) {

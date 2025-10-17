@@ -12,7 +12,7 @@ namespace Numeric {
 
     template<std::signed_integral T>
     [[maybe_unused]]
-    inline void doubleClamp(T & a, T & b, const T min, const T max) {
+    void doubleClamp(T & a, T & b, const T min, const T max) {
         if (a < min) {
             a = min;
         } else if (a > max) {
@@ -25,7 +25,7 @@ namespace Numeric {
 
     template<Meta::String T, Meta::Numeric U>
     [[nodiscard, maybe_unused]]
-    inline T cast(U num) {
+    T cast(U num) {
         if constexpr (std::is_same_v<T, std::wstring>) {
             return std::to_wstring(num);
         } else {
@@ -35,19 +35,19 @@ namespace Numeric {
 
     template<Meta::View T, Meta::BooleanLabels U>
     [[nodiscard, maybe_unused]]
-    inline T boolCast(auto && value) {
+    T boolCast(auto && value) {
         return static_cast<bool>(value) ? Meta::BoolLabels<T, U>::c_true : Meta::BoolLabels<T, U>::c_false;
     }
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline auto clamp(T min, T max) {
+    auto clamp(T min, T max) {
         return [min, max] (const T value) -> T { return std::clamp(value, min, max); };
     }
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline auto min(T min) {
+    auto min(T min) {
         return
             [min] (const T value) -> T {
                 if (value < min) {
@@ -59,7 +59,7 @@ namespace Numeric {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline auto max(T max) {
+    auto max(T max) {
         return
             [max] (const T value) -> T {
                 if (value > max) {
@@ -71,7 +71,7 @@ namespace Numeric {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline auto between(T min, T max) {
+    auto between(T min, T max) {
         return
             [min, max] (const T value) -> T {
                 if (value < min || value > max) {

@@ -17,7 +17,7 @@ namespace Kkm {
     template<class R, class K, AutoResult AR>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void callMethod(K && kkm, UndetailedMethod<R> method, AR & result) {
+    void callMethod(K && kkm, UndetailedMethod<R> method, AR & result) {
         if constexpr (std::is_same_v<AR, Nln::Json>) {
             assert(result.is_object());
         } else {
@@ -31,8 +31,8 @@ namespace Kkm {
     template<class K, AutoResult AR, typename ... METHODS>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void collectDataFromMethods(AR & result, K && kkm, METHODS ... method) {
-        (callMethod(std::forward<K>(kkm), method, result), ...);
+    void collectDataFromMethods(AR & result, K && kkm, METHODS ... method) {
+        (callMethod(kkm, method, result), ...);
     }
 
     template<std::derived_from<Result> R, std::derived_from<Details> D>
@@ -41,7 +41,7 @@ namespace Kkm {
     template<class R, class D, class K, AutoResult AR>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void callMethod(K && kkm, DetailedMethod<R, D> method, const D & details, AR & result) {
+    void callMethod(K && kkm, DetailedMethod<R, D> method, const D & details, AR & result) {
         if constexpr (std::is_same_v<AR, Nln::Json>) {
             assert(result.is_object());
         } else {
@@ -55,7 +55,7 @@ namespace Kkm {
     template<class R, class D, class K, AutoResult AR>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void callMethod(K && kkm, DetailedMethod<R, D> method, const Nln::Json & details, AR & result) {
+    void callMethod(K && kkm, DetailedMethod<R, D> method, const Nln::Json & details, AR & result) {
         if constexpr (std::is_same_v<AR, Nln::Json>) {
             assert(result.is_object());
         } else {

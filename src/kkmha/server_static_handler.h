@@ -6,7 +6,7 @@
 #include "server_proto_handler.h"
 
 namespace Server::Static {
-    class Handler : public ProtoHandler {
+    class Handler final : public ProtoHandler {
     public:
         Handler() = default;
         Handler(const Handler &) = default;

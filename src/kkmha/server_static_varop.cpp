@@ -5,6 +5,7 @@
 #include "server_static_variables.h"
 #include "server_static_strings.h"
 #include <lib/path.h>
+#include <algorithm>
 
 namespace Server::Static {
     using namespace std::string_literals;
@@ -40,10 +41,10 @@ namespace Server::Static {
                 throw Failure(Wcs::c_incorrectStructure); // NOLINT(*-exception-baseclass)
             }
             auto ext = Text::lowered(key);
-            std::replace_if(ext.begin(), ext.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
+            std::ranges::replace_if(ext, [] (const char c) { return c == 0xa || c == 0xd; }, ' ');
             Text::trim(ext);
             auto type = Text::lowered(value.get<std::string>());
-            std::replace_if(type.begin(), type.end(), [] (char c) { return c == 0xa || c == 0xd; }, ' ');
+            std::ranges::replace_if(type, [] (const char c) { return c == 0xa || c == 0xd; }, ' ');
             Text::trim(type);
             if (ext.empty() || type.empty()) {
                 throw Failure(Wcs::c_incorrectStructure); // NOLINT(*-exception-baseclass)

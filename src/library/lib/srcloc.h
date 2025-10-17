@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "winapi.h"
+#include "winstrapi.h"
 #include "strings.h"
 #include <cmake/variables.h>
+#include <algorithm>
 #include <memory>
 #include <array>
 #include <string>
-#include <stringapiset.h>
 
 #if !WITH_RELSL || !defined(_MSC_VER) || defined(__clang__)
 #include <source_location>
@@ -22,8 +22,8 @@ namespace SrcLoc {
         size_t m_line {};
         std::array<char, MAX_PATH> m_file {};
 
-        constexpr static std::string_view c_prefix { BUILD_PREFIX };
-        constexpr static std::string_view c_invalidPath { "[invalid-path]" };
+        static constexpr std::string_view c_prefix { BUILD_PREFIX };
+        static constexpr std::string_view c_invalidPath { "[invalid-path]" };
 
     public:
         Point() = default;
@@ -40,18 +40,17 @@ namespace SrcLoc {
         ) noexcept {
             Point result;
             result.m_line = line;
-            std::string_view view0 { file };
-            if (view0.starts_with(c_prefix)) {
-                std::copy(c_invalidPath.begin(), c_invalidPath.end(), result.m_file.begin());
+            if (const std::string_view view0 { file }; view0.starts_with(c_prefix)) {
+                std::ranges::copy(c_invalidPath, result.m_file.begin());
                 result.m_file[c_invalidPath.size()] = 0;
             } else {
-                std::string_view view { view0.substr(c_prefix.length()) };
-                if (view.length() >= MAX_PATH - 1 || view.length() < 1) {
-                    std::copy(c_invalidPath.begin(), c_invalidPath.end(), result.m_file.begin());
+                const std::string_view view { view0.substr(c_prefix.length()) };
+                if (view.length() >= MAX_PATH - 1 || view.empty()) {
+                    std::ranges::copy(c_invalidPath, result.m_file.begin());
                     result.m_file[c_invalidPath.size()] = 0;
                 } else {
                     result.m_file[0] = '.';
-                    std::copy(view.begin(), view.end(), result.m_file.begin() + 1);
+                    std::ranges::copy(view, result.m_file.begin() + 1);
                     result.m_file[view.size() + 1] = 0;
                 }
             }
@@ -67,12 +66,12 @@ namespace SrcLoc {
 
     [[maybe_unused]]
     inline void append(std::wstring & message, const Point & slp) noexcept try {
-        auto mbFilePath = slp.file_name();
+        const auto mbFilePath = slp.file_name();
         auto size = WIN_MB2WC_ESTIMATED(mbFilePath, -1);
         if (size <= 0) {
             return;
         }
-        auto wcFilePath = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
+        const auto wcFilePath = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
         size = WIN_MB2WC(mbFilePath, -1, wcFilePath.get(), size);
         if (size <= 0) {
             return;

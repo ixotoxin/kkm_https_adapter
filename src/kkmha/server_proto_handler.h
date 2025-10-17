@@ -21,7 +21,7 @@ namespace Server {
         [[nodiscard]] virtual bool asyncReady() const noexcept = 0;
         virtual void operator()(Http::Request &) const noexcept = 0;
 
-        inline static void fail(
+        static void fail(
             Http::Request & request,
             const Http::Status status,
             const std::string & message,
@@ -37,7 +37,7 @@ namespace Server {
             request.m_response.m_data = message;
         }
 
-        inline static void fail(
+        static void fail(
             Http::Request & request,
             const Http::Status status,
             std::string && message,
@@ -53,7 +53,7 @@ namespace Server {
             request.m_response.m_data.emplace<std::string>(std::forward<std::string>(message));
         }
 
-        inline static void fail(
+        static void fail(
             Http::Request & request,
             const Http::Status status,
             const std::string_view message,
@@ -69,7 +69,7 @@ namespace Server {
             request.m_response.m_data.emplace<std::string>(message);
         }
 
-        inline static void fail(
+        static void fail(
             Http::Request & request,
             const Http::Status status,
             const char * message,

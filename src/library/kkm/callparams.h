@@ -4,7 +4,6 @@
 #pragma once
 
 #include "types.h"
-#include <utility>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -28,7 +27,7 @@ namespace Kkm {
         PrintableText & operator=(PrintableText &&) noexcept = default;
 
         [[maybe_unused]]
-        inline explicit operator bool() const {
+        explicit operator bool() const {
             return !m_content.empty();
         }
     };
@@ -38,7 +37,7 @@ namespace Kkm {
         bool m_success { true };
     };
 
-    struct StatusResult : public Result {
+    struct StatusResult : Result {
         std::tm m_dateTime {};
         std::wstring m_modelName {};
         std::wstring m_serialNumber {};
@@ -72,7 +71,7 @@ namespace Kkm {
         bool m_receiptPaperPresent {};
     };
 
-    struct ShiftStateResult : public Result {
+    struct ShiftStateResult : Result {
         std::tm m_expirationDateTime {};
         ShiftState m_shiftState {};
         unsigned int m_documentsCount {};
@@ -80,7 +79,7 @@ namespace Kkm {
         unsigned int m_shiftNumber {};
     };
 
-    struct ReceiptStateResult : public Result {
+    struct ReceiptStateResult : Result {
         double m_change {};
         double m_remainder {};
         double m_sum {};
@@ -89,7 +88,7 @@ namespace Kkm {
         ReceiptType m_receiptType {};
     };
 
-    struct CashStatResult : public Result {
+    struct CashStatResult : Result {
         double m_cashSum {};
         double m_cashInSum {};
         double m_cashOutSum {};
@@ -99,7 +98,7 @@ namespace Kkm {
         unsigned int m_cashOutCount {};
     };
 
-    struct FndtOfdExchangeStatusResult : public Result {
+    struct FndtOfdExchangeStatusResult : Result {
         std::tm m_firstUnsentDateTime {};
         std::tm m_okpDateTime {};
         std::tm m_lastSentDateTime {};
@@ -109,7 +108,7 @@ namespace Kkm {
         bool m_ofdMessageRead {};
     };
 
-    struct FndtFnInfoResult : public Result {
+    struct FndtFnInfoResult : Result {
         std::wstring m_execution {};
         std::wstring m_keysUpdaterServerUri {};
         std::wstring m_serial {};
@@ -124,7 +123,7 @@ namespace Kkm {
         bool m_ofdTimeout {};
     };
 
-    struct FndtRegistrationInfoResult : public Result {
+    struct FndtRegistrationInfoResult : Result {
         std::wstring m_fnsUrl {};
         std::wstring m_organizationAddress {};
         std::wstring m_organizationVATIN {};
@@ -156,26 +155,26 @@ namespace Kkm {
         bool m_wholesale {};
     };
 
-    struct FndtLastRegistrationResult : public Result {
+    struct FndtLastRegistrationResult : Result {
         std::tm m_registrationDateTime {};
         unsigned int m_documentNumber {};
         unsigned int m_registrationsCount {};
     };
 
-    struct FndtLastReceiptResult : public Result {
+    struct FndtLastReceiptResult : Result {
         std::tm m_documentDateTime {};
         std::wstring m_fiscalSign {};
         double m_receiptSum {};
         unsigned int m_documentNumber {};
     };
 
-    struct FndtLastDocumentResult : public Result {
+    struct FndtLastDocumentResult : Result {
         std::tm m_documentDateTime {};
         std::wstring m_fiscalSign {};
         unsigned int m_documentNumber {};
     };
 
-    struct FndtErrorsResult : public Result {
+    struct FndtErrorsResult : Result {
         std::tm m_successDateTime {};
         std::wstring m_fnErrorText {};
         std::wstring m_networkErrorText {};
@@ -188,7 +187,7 @@ namespace Kkm {
         bool m_dataForSendIsEmpty {};
     };
 
-    struct FfdVersionResult : public Result {
+    struct FfdVersionResult : Result {
         FfdVersion m_deviceFfdVersion { FfdVersion::Unknown };
         FfdVersion m_devMaxFfdVersion { FfdVersion::Unknown };
         FfdVersion m_devMinFfdVersion { FfdVersion::Unknown };
@@ -197,7 +196,7 @@ namespace Kkm {
         FfdVersion m_ffdVersion { FfdVersion::Unknown };
     };
 
-    struct FwVersionResult : public Result {
+    struct FwVersionResult : Result {
         std::wstring m_bootVersion {};
         std::wstring m_configurationVersion {};
         std::wstring m_controlUnitVersion {};
@@ -210,13 +209,13 @@ namespace Kkm {
         bool m_electronically { false };
     };
 
-    struct PrintDetails : public Details {
+    struct PrintDetails : Details {
         std::vector<PrintableText> m_document {};
         bool m_cliche { false };
         bool m_footer { false };
     };
 
-    struct OperatorDetails : public Details {
+    struct OperatorDetails : Details {
         std::wstring m_operatorName {};
         std::wstring m_operatorInn {};
 
@@ -230,7 +229,7 @@ namespace Kkm {
         OperatorDetails & operator=(OperatorDetails &&) = default;
     };
 
-    struct CashDetails : public OperatorDetails {
+    struct CashDetails : OperatorDetails {
         double m_cashSum {};
     };
 
@@ -252,7 +251,7 @@ namespace Kkm {
         ReceiptItemDetails & operator=(ReceiptItemDetails &&) noexcept = default;
     };
 
-    struct ReceiptDetails : public OperatorDetails {
+    struct ReceiptDetails : OperatorDetails {
         PrintableText m_text {};
         PrintableText m_headerText {};
         PrintableText m_footerText {};
@@ -277,7 +276,7 @@ namespace Kkm {
         bool m_electroPaymentInfo { false };
     };
 
-    struct CloseDetails : public OperatorDetails {
+    struct CloseDetails : OperatorDetails {
         bool m_closeShift { false };
         bool m_cashOut { false };
 

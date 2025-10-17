@@ -14,7 +14,7 @@
 #include <format>
 
 namespace Http {
-    struct JsonResponse : public ProtoResponse {
+    struct JsonResponse final : ProtoResponse {
         Nln::Json m_data;
 
         JsonResponse()
@@ -59,7 +59,7 @@ namespace Http {
             return !m_data.empty();
         }
 
-        void render(Asio::StreamBuffer & buffer, Status status) override {
+        void render(Asio::StreamBuffer & buffer, const Status status) override {
             assert(Mbs::c_statusStrings.contains(status));
             assert(m_data.is_object());
             if (!m_data.contains(Json::Mbs::c_successKey) || !m_data[Json::Mbs::c_successKey].is_boolean()) {
@@ -68,7 +68,7 @@ namespace Http {
             if (!m_data.contains(Json::Mbs::c_messageKey) || !m_data[Json::Mbs::c_messageKey].is_string()) {
                 m_data[Json::Mbs::c_messageKey] = Mbs::c_statusStrings.at(status);
             }
-            std::string text { m_data.dump() };
+            const std::string text { m_data.dump() };
             std::ostream output { &buffer };
             output
                 << std::format(

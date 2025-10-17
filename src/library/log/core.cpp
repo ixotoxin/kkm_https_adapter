@@ -6,6 +6,7 @@
 #include <lib/meta.h>
 #include <lib/winapi.h>
 #include <lib/datetime.h>
+#include <lib/text.h>
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -16,12 +17,12 @@ namespace Log {
 
     namespace Console {
         [[nodiscard, maybe_unused]]
-        bool ready(Level level) noexcept {
+        bool ready(const Level level) noexcept {
             return isForegroundProcess && Meta::toUnderlying(level) >= s_level;
         }
 
         [[maybe_unused]]
-        void write(Level level, const std::wstring_view message) noexcept try {
+        void write(const Level level, const std::wstring_view message) noexcept try {
             assert(Wcs::c_levelLabels.contains(level));
             assert(ready(level));
             std::wostream & output { level >= Level::Warning ? std::wcerr : std::wcout };
@@ -48,9 +49,8 @@ namespace Log {
             if (s_file.is_open()) {
                 if (localTime.wMonth == s_currentMonth && s_file.good()) {
                     return true;
-                } else {
-                    s_file.close();
                 }
+                s_file.close();
             }
             if (s_directory.empty()) {
                 return false;
@@ -90,7 +90,7 @@ namespace Log {
         }
 
         [[nodiscard, maybe_unused]]
-        bool ready(Level level) noexcept {
+        bool ready(const Level level) noexcept {
             if (Meta::toUnderlying(level) < (isForegroundProcess ? s_fgLevel : s_bgLevel)) {
                 return false;
             }
@@ -98,7 +98,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        void write(Level level, const std::wstring_view message) noexcept try {
+        void write(const Level level, const std::wstring_view message) noexcept try {
             assert(Wcs::c_levelLabels.contains(level));
             assert(ready(level));
             s_file << DateTime::iso << L": " << Wcs::c_levelLabels.at(level) << L": " << message << std::endl;
@@ -134,7 +134,7 @@ namespace Log {
         }
 
         [[nodiscard, maybe_unused]]
-        bool ready(Level level) noexcept {
+        bool ready(const Level level) noexcept {
             if (Meta::toUnderlying(level) < (isForegroundProcess ? s_fgLevel : s_bgLevel)) {
                 return false;
             }
@@ -142,7 +142,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        void write(Level level, const std::wstring & message) noexcept try {
+        void write(const Level level, const std::wstring & message) noexcept try {
             assert(c_types.contains(level));
             assert(ready(level));
 
@@ -165,13 +165,6 @@ namespace Log {
         } catch (...) {
             fallbackLog();
         }
-    }
-
-    EXECUTE_BEFORE_MAIN(closeLogChannels) {
-        std::atexit([] {
-            File::close();
-            EventLog::close();
-        });
     }
 
     void fallbackLog() noexcept try {
@@ -205,5 +198,14 @@ namespace Log {
             return Text::lowered(Wcs::c_levelLabels.at(static_cast<Level>(level)));
         }
         return Basic::Wcs::c_fallbackErrorMessage;
+    }
+}
+
+namespace Init {
+    EXECUTE_BEFORE_MAIN(closeLogChannels) {
+        std::atexit([] {
+            ::Log::File::close();
+            ::Log::EventLog::close();
+        });
     }
 }

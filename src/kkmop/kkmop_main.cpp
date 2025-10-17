@@ -37,7 +37,7 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
 
     try {
         if (argc > 1) {
-            std::wstring command { Text::lowered(argv[1]) };
+            const std::wstring command { Text::lowered(argv[1]) };
 
             if (argc == 2 && command == L"help") {
                 usage(std::wcout, argv[0]);
@@ -55,8 +55,9 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
             if (argc > 2 && command == L"learn") {
                 FORCE_MEMORY_LEAK;
                 return KkmOperator::learn(argc - 2, &argv[2]);
-            } else if (argc == 3) {
-                if (auto result = KkmOperator::exec(command, argv[2]); result) {
+            }
+            if (argc == 3) {
+                if (const auto result = KkmOperator::exec(command, argv[2]); result) {
                     return *result;
                 }
             }

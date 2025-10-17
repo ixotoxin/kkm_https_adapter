@@ -7,7 +7,6 @@
 #include "strings.h"
 #include "core.h"
 #include <lib/text.h>
-#include <iostream>
 
 #define LOG_DEBUG_NTS(x, ...) Log::Nts::write(Log::Level::Debug, x __VA_OPT__(,) __VA_ARGS__)
 #define LOG_INFO_NTS(x, ...) Log::Nts::write(Log::Level::Info, x __VA_OPT__(,) __VA_ARGS__)
@@ -22,7 +21,7 @@
 namespace Log {
     namespace Nts {
         [[maybe_unused]]
-        inline void write(Level level, const std::wstring_view message) noexcept {
+        inline void write(const Level level, const std::wstring_view message) noexcept {
             if (Console::ready(level)) {
                 Console::write(level, message);
             }
@@ -35,12 +34,12 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::string_view message) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        inline void write(const Level level, const std::string_view message) noexcept try {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                std::wstring message2 { Text::convert(message) };
+                const std::wstring message2 { Text::convert(message) };
                 if (consoleReady) {
                     Console::write(level, message2);
                 }
@@ -57,13 +56,13 @@ namespace Log {
 
         template<Meta::View Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt fmt, const auto & arg1, const Args & ... args) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        void write(const Level level, const Fmt fmt, const auto & arg1, const Args & ... args) noexcept try {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
                 if constexpr (Meta::isWide<Fmt>) {
-                    std::wstring message { std::vformat(fmt, std::make_wformat_args(arg1, args...)) };
+                    const std::wstring message { std::vformat(fmt, std::make_wformat_args(arg1, args...)) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -74,7 +73,7 @@ namespace Log {
                         EventLog::write(level, message);
                     }
                 } else {
-                    std::wstring message { Text::convert(std::vformat(fmt, std::make_format_args(arg1, args...))) };
+                    const std::wstring message { Text::convert(std::vformat(fmt, std::make_format_args(arg1, args...))) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -92,23 +91,23 @@ namespace Log {
 
         template<Meta::Char Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt * fmt, const auto & arg1, const Args & ... args) noexcept {
+        void write(const Level level, const Fmt * fmt, const auto & arg1, const Args & ... args) noexcept {
             write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         }
 
         template<Meta::String Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt & fmt, const auto & arg1, const Args & ... args) noexcept {
+        void write(const Level level, const Fmt & fmt, const auto & arg1, const Args & ... args) noexcept {
             write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const Basic::Failure & e) noexcept {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        inline void write(const Level level, const Basic::Failure & e) noexcept {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                std::wstring message { e.explain(s_appendLocation) };
+                const std::wstring message { e.explain(s_appendLocation) };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -122,12 +121,12 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::exception & e) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        inline void write(const Level level, const std::exception & e) noexcept try {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                std::wstring message { Text::convert(e.what()) };
+                const std::wstring message { Text::convert(e.what()) };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -143,12 +142,12 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::error_code & e) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        inline void write(const Level level, const std::error_code & e) noexcept try {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
-                std::wstring message { Text::convert(e.message()) };
+                const std::wstring message { Text::convert(e.message()) };
                 if (consoleReady) {
                     Console::write(level, message);
                 }
@@ -166,13 +165,13 @@ namespace Log {
         template<class T>
         requires requires (const T & t) { { t() } -> Meta::String; }
         [[maybe_unused]]
-        inline void write(Level level, const T & func) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
-            bool eventLogReady { EventLog::ready(level) };
+        void write(const Level level, const T & func) noexcept try {
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
+            const bool eventLogReady { EventLog::ready(level) };
             if (consoleReady || fileReady || eventLogReady) {
                 if constexpr (Meta::isWide<std::remove_cvref_t<decltype(func())>>) {
-                    std::wstring message { func() };
+                    const std::wstring message { func() };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -183,7 +182,7 @@ namespace Log {
                         EventLog::write(level, message);
                     }
                 } else {
-                    std::wstring message { Text::convert(func()) };
+                    const std::wstring message { Text::convert(func()) };
                     if (consoleReady) {
                         Console::write(level, message);
                     }
@@ -202,7 +201,7 @@ namespace Log {
 
     namespace Ts {
         [[maybe_unused]]
-        inline void write(Level level, const std::wstring_view message) noexcept try {
+        inline void write(const Level level, const std::wstring_view message) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, message);
         } catch (...) {
@@ -210,7 +209,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::string_view message) noexcept try {
+        inline void write(const Level level, const std::string_view message) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, message);
         } catch (...) {
@@ -219,7 +218,7 @@ namespace Log {
 
         template<Meta::View Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt fmt, const auto & arg1, const Args & ... args) noexcept try {
+        void write(const Level level, const Fmt fmt, const auto & arg1, const Args & ... args) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, fmt, arg1, args...);
         } catch (...) {
@@ -228,7 +227,7 @@ namespace Log {
 
         template<Meta::Char Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt * fmt, const auto & arg1, const Args & ... args) noexcept try {
+        void write(const Level level, const Fmt * fmt, const auto & arg1, const Args & ... args) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         } catch (...) {
@@ -237,7 +236,7 @@ namespace Log {
 
         template<Meta::String Fmt, typename ... Args>
         [[maybe_unused]]
-        inline void write(Level level, const Fmt & fmt, const auto & arg1, const Args & ... args) noexcept try {
+        void write(const Level level, const Fmt & fmt, const auto & arg1, const Args & ... args) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write<typename Meta::TextTrait<Fmt>::View>(level, fmt, arg1, args...);
         } catch (...) {
@@ -245,7 +244,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const Basic::Failure & e) noexcept try {
+        inline void write(const Level level, const Basic::Failure & e) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
@@ -253,7 +252,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::exception & e) noexcept try {
+        inline void write(const Level level, const std::exception & e) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
@@ -261,7 +260,7 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline void write(Level level, const std::error_code & e) noexcept try {
+        inline void write(const Level level, const std::error_code & e) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, e);
         } catch (...) {
@@ -271,7 +270,7 @@ namespace Log {
         template<class T>
         requires requires (T t) { { t() } -> Meta::String; }
         [[maybe_unused]]
-        inline void write(Level level, const T & func) noexcept try {
+        void write(const Level level, const T & func) noexcept try {
             std::scoped_lock logLock(s_logMutex);
             Nts::write(level, func);
         } catch (...) {

@@ -6,8 +6,6 @@
 #include "meta.h"
 #include "strings.h"
 #include "except.h"
-#include "text.h"
-#include <concepts>
 #include <functional>
 #include <filesystem>
 
@@ -102,7 +100,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto noEmpty(F && subFilter0) {
+    auto noEmpty(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -127,7 +125,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto good(F && subFilter0) {
+    auto good(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -141,7 +139,7 @@ namespace Path {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline auto good() {
+    auto good() {
         return
             [] (const T & value) -> T {
                 if (isGood(value)) {
@@ -153,7 +151,7 @@ namespace Path {
 
     template<Meta::String T, Meta::Filter<T> F>
     [[nodiscard, maybe_unused]]
-    inline auto good(F && subFilter0) {
+    auto good(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const T & value) -> T {
@@ -178,7 +176,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto goodFileName(F && subFilter0) {
+    auto goodFileName(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -192,7 +190,7 @@ namespace Path {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline auto goodFileName() {
+    auto goodFileName() {
         return
             [] (const T & value) -> T {
                 if (isGoodFileName(value)) {
@@ -204,7 +202,7 @@ namespace Path {
 
     template<Meta::String T, Meta::Filter<T> F>
     [[nodiscard, maybe_unused]]
-    inline auto goodFileName(F && subFilter0) {
+    auto goodFileName(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const T & value) -> T {
@@ -226,7 +224,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto absolute(F && subFilter0) {
+    auto absolute(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -238,7 +236,7 @@ namespace Path {
     inline auto absolute(const std::filesystem::path & dir) {
         return
             [dir] (const std::filesystem::path & value) -> std::filesystem::path {
-                std::filesystem::path current { std::filesystem::current_path() };
+                const std::filesystem::path current { std::filesystem::current_path() };
                 std::filesystem::current_path(dir);
                 std::filesystem::path result { std::filesystem::absolute(value) };
                 std::filesystem::current_path(current);
@@ -248,11 +246,11 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto absolute(const std::filesystem::path & dir, F && subFilter0) {
+    auto absolute(const std::filesystem::path & dir, F && subFilter0) {
         return
             [dir, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
-                std::filesystem::path current { std::filesystem::current_path() };
+                const std::filesystem::path current { std::filesystem::current_path() };
                 std::filesystem::current_path(dir);
                 std::filesystem::path result { std::filesystem::absolute(subFilter(value)) };
                 std::filesystem::current_path(current);
@@ -273,7 +271,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto existsDir(F && subFilter0) {
+    auto existsDir(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -298,7 +296,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto existsFile(F && subFilter0) {
+    auto existsFile(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -311,7 +309,7 @@ namespace Path {
     }
 
     [[nodiscard, maybe_unused]]
-    inline auto testDir(const bool & test) { //-V835
+    inline auto testDir(const bool & test) {
         return
             [& test] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (test && !std::filesystem::is_directory(value)) {
@@ -323,7 +321,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto testDir(const bool & test, F && subFilter0) { //-V835
+    auto testDir(const bool & test, F && subFilter0) {
         return
             [& test, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -336,7 +334,7 @@ namespace Path {
     }
 
     [[nodiscard, maybe_unused]]
-    inline auto testFile(const bool & test) { //-V835
+    inline auto testFile(const bool & test) {
         return
             [& test] (const std::filesystem::path & value) -> std::filesystem::path {
                 if (test && !std::filesystem::is_regular_file(value)) {
@@ -348,7 +346,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto testFile(const bool & test, F && subFilter0) { //-V835
+    auto testFile(const bool & test, F && subFilter0) {
         return
             [& test, subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -376,7 +374,7 @@ namespace Path {
 
     template<Meta::Filter<std::filesystem::path> F>
     [[nodiscard, maybe_unused]]
-    inline auto touchDir(F && subFilter0) {
+    auto touchDir(F && subFilter0) {
         return
             [subFilter = std::forward<F>(subFilter0)]
             (const std::filesystem::path & value) -> std::filesystem::path {
@@ -399,7 +397,7 @@ namespace Path {
 
         template<Meta::Filter<std::wstring> F>
         [[nodiscard, maybe_unused]]
-        inline auto good(F && subFilter) {
+        auto good(F && subFilter) {
             return ::Path::good<std::wstring>(std::forward<F>(subFilter));
         }
 
@@ -410,7 +408,7 @@ namespace Path {
 
         template<Meta::Filter<std::wstring> F>
         [[nodiscard, maybe_unused]]
-        inline auto goodFileName(F && subFilter) {
+        auto goodFileName(F && subFilter) {
             return ::Path::goodFileName<std::wstring>(std::forward<F>(subFilter));
         }
     }
@@ -423,7 +421,7 @@ namespace Path {
 
         template<Meta::Filter<std::string> F>
         [[nodiscard, maybe_unused]]
-        inline auto good(F && subFilter) {
+        auto good(F && subFilter) {
             return ::Path::good<std::string>(std::forward<F>(subFilter));
         }
 
@@ -434,7 +432,7 @@ namespace Path {
 
         template<Meta::Filter<std::string> F>
         [[nodiscard, maybe_unused]]
-        inline auto goodFileName(F && subFilter) {
+        auto goodFileName(F && subFilter) {
             return ::Path::goodFileName<std::string>(std::forward<F>(subFilter));
         }
     }

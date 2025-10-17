@@ -4,11 +4,10 @@
 #pragma once
 
 #include "macro.h"
-#include "defaults.h"
 #include "types.h"
-#include <lib/json.h>
-#include <string>
+#include "defaults.h"
 #include <mutex>
+#include <filesystem>
 
 namespace Log {
     namespace Console {

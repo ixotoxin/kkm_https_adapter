@@ -11,8 +11,8 @@
 namespace Server::Ping {
     using namespace std::string_view_literals;
 
-    class Handler : public ProtoHandler {
-        inline static auto s_pongResponse = std::make_shared<Http::ConstantResponse>(
+    class Handler final : public ProtoHandler {
+        static inline const auto s_pongResponse = std::make_shared<Http::ConstantResponse>(
             "HTTP/1.1 200 OK\r\n"
             "Connection: close\r\n"
             "Pragma: no-cache\r\n"

@@ -32,8 +32,8 @@ namespace Server::Cache {
     [[maybe_unused]]
     void store(
         const Key & key,
-        DateTime::Point expiredAt,
-        Http::Status status,
+        const DateTime::Point expiredAt,
+        const Http::Status status,
         std::shared_ptr<Http::ProtoResponse> data
     ) {
         std::scoped_lock cacheLock(s_cacheMutex);
@@ -48,7 +48,7 @@ namespace Server::Cache {
     [[nodiscard, maybe_unused]]
     std::optional<Entry> load(const Key & key) {
         std::scoped_lock cacheLock(s_cacheMutex);
-        auto it = s_cache.find(key);
+        const auto it = s_cache.find(key);
         if (it == s_cache.end()) {
             return std::nullopt;
         }
@@ -59,7 +59,7 @@ namespace Server::Cache {
     void maintain() {
         if (++s_counter >= c_cacheCleanUpThreshold) {
             std::scoped_lock cacheLock(s_cacheMutex);
-            auto oldSize = s_cache.size();
+            const auto oldSize = s_cache.size();
             std::erase_if(
                 s_cache,
                 [] (const auto & item) { return item.second.m_expiredAt < DateTime::Clock::now(); }

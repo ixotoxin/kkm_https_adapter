@@ -13,10 +13,8 @@
 #include <winsvc.h>
 
 namespace Service {
-    static_assert(c_waitHint >= c_sleepQuantum.count());
     static_assert(c_waitHint > Server::c_controlTimeout.count());
-    static_assert(c_controlTimeout >= c_sleepQuantum.count());
-    static_assert(c_controlTimeout > Server::c_controlTimeout.count());
+    static_assert(c_controlTimeout > c_waitHint);
 
     using Basic::Failure;
 
@@ -25,7 +23,7 @@ namespace Service {
         static ::SERVICE_STATUS_HANDLE s_statusHandle { nullptr };
         static ::DWORD s_checkPoint { 0 };
 
-        void setStatus(::DWORD state, ::DWORD win32ExitCode = NO_ERROR) noexcept {
+        void setStatus(const ::DWORD state, const ::DWORD win32ExitCode = NO_ERROR) noexcept {
             s_status.dwCurrentState = state;
             s_status.dwWin32ExitCode = win32ExitCode;
 
@@ -58,7 +56,7 @@ namespace Service {
         }
 
         void stop() noexcept {
-            ::DWORD originalState { s_status.dwCurrentState };
+            const ::DWORD originalState { s_status.dwCurrentState };
 
             try {
                 setStatus(SERVICE_STOP_PENDING);
@@ -76,7 +74,7 @@ namespace Service {
             setStatus(originalState);
         }
 
-        void WINAPI handler(::DWORD ctrl) noexcept {
+        void WINAPI handler(const ::DWORD ctrl) noexcept {
             if (ctrl == SERVICE_CONTROL_STOP) {
                 stop();
             }
@@ -100,7 +98,7 @@ namespace Service {
             s_status.dwCheckPoint = 0;
             s_status.dwWaitHint = 0;
 
-            ::SERVICE_TABLE_ENTRYW serviceTable[] {
+            const ::SERVICE_TABLE_ENTRYW serviceTable[] {
                 { const_cast<::LPWSTR>(c_systemName), main },
                 { nullptr, nullptr }
             };
@@ -112,12 +110,16 @@ namespace Service {
     }
 
     namespace Control {
-        inline void queryStatus(::SC_HANDLE & service, ::SERVICE_STATUS_PROCESS & status) {
+        /*inline*/ void queryStatus(::SC_HANDLE & service, ::SERVICE_STATUS_PROCESS & status) {
             ::DWORD bytesNeeded;
 
-            auto result
+            const auto result
                 = ::QueryServiceStatusEx(
-                    service, SC_STATUS_PROCESS_INFO, (::LPBYTE) &status, sizeof(::SERVICE_STATUS_PROCESS), &bytesNeeded
+                    service,
+                    SC_STATUS_PROCESS_INFO,
+                    reinterpret_cast<::LPBYTE>(&status),
+                    sizeof(::SERVICE_STATUS_PROCESS),
+                    &bytesNeeded
                 );
 
             if (!result) {
@@ -125,24 +127,24 @@ namespace Service {
             }
         }
 
-        inline ::DWORD waitNewState(
+        /*inline*/ ::DWORD waitNewState(
             ::SC_HANDLE & service,
             ::SERVICE_STATUS_PROCESS & status,
-            ::DWORD value,
-            std::wstring_view message
+            const ::DWORD value,
+            const std::wstring_view message
         ) {
-            auto checkPoint = status.dwCheckPoint;
-            auto initialTicks = ::GetTickCount();
+            const auto initialTicks = ::GetTickCount();
             auto ticks = initialTicks;
+            auto checkPoint = status.dwCheckPoint;
 
             do {
                 LOG_DEBUG_CLI(message);
                 ::Sleep(c_sleepQuantum);
                 queryStatus(service, status);
-                auto currTicks = ::GetTickCount();
+                const auto currTicks = ::GetTickCount();
                 if (status.dwCheckPoint > checkPoint) {
-                    checkPoint = status.dwCheckPoint;
                     ticks = currTicks;
+                    checkPoint = status.dwCheckPoint;
                 } else if (currTicks - ticks > status.dwWaitHint || currTicks - initialTicks > c_controlTimeout) {
                     break;
                 }
@@ -151,10 +153,10 @@ namespace Service {
             return status.dwCurrentState;
         }
 
-        inline ::DWORD waitNewState(
+        /*inline*/ ::DWORD waitNewState(
             ::SC_HANDLE & service,
-            ::DWORD value,
-            std::wstring_view message
+            const ::DWORD value,
+            const std::wstring_view message
         ) {
             ::SERVICE_STATUS_PROCESS status {};
 
@@ -215,7 +217,7 @@ namespace Service {
             LOG_INFO_CLI(Wcs::c_started);
         }
 
-        inline void stop(::SC_HANDLE & service, bool logAlreadyStopped = true) {
+        /*inline*/ void stop(::SC_HANDLE & service, const bool logAlreadyStopped = true) {
             ::SERVICE_STATUS_PROCESS status {};
 
             queryStatus(service, status);

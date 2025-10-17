@@ -10,9 +10,9 @@ namespace Log {
 
     using LevelUnderlying = std::underlying_type_t<Level>;
 
-    constexpr const LevelUnderlying c_levelDebug [[maybe_unused]] { Meta::toUnderlying(Level::Debug) };
-    constexpr const LevelUnderlying c_levelInfo [[maybe_unused]] { Meta::toUnderlying(Level::Info) };
-    constexpr const LevelUnderlying c_levelWarning [[maybe_unused]] { Meta::toUnderlying(Level::Warning) };
-    constexpr const LevelUnderlying c_levelError [[maybe_unused]] { Meta::toUnderlying(Level::Error) };
-    constexpr const LevelUnderlying c_levelNone [[maybe_unused]] { c_levelError + 1 };
+    constexpr LevelUnderlying c_levelDebug [[maybe_unused]] { Meta::toUnderlying(Level::Debug) };
+    constexpr LevelUnderlying c_levelInfo [[maybe_unused]] { Meta::toUnderlying(Level::Info) };
+    constexpr LevelUnderlying c_levelWarning [[maybe_unused]] { Meta::toUnderlying(Level::Warning) };
+    constexpr LevelUnderlying c_levelError [[maybe_unused]] { Meta::toUnderlying(Level::Error) };
+    constexpr LevelUnderlying c_levelNone [[maybe_unused]] { c_levelError + 1 };
 }

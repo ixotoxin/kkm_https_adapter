@@ -4,7 +4,6 @@
 #pragma once
 
 #include "types.h"
-#include <concepts>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -51,7 +50,7 @@ namespace Kkm {
         NewConnParams & operator=(const NewConnParams &) = default;
         NewConnParams & operator=(NewConnParams &&) noexcept = default;
 
-        void save(const std::wstring &);
+        void save(const std::wstring &) const;
     };
 
     class KnownConnParams : public ConnParams {

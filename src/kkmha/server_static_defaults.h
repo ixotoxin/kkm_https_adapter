@@ -9,12 +9,12 @@
 namespace Server::Static {
     using namespace std::chrono_literals;
 
-    constexpr const DateTime::Offset c_fileCacheLifeTime { 43'200s }; // Секунды
-    constexpr const bool c_enableStatic { false };
-    constexpr const std::wstring_view c_staticDirectory { L"static" };
-    constexpr const std::string_view c_indexFile { "index.html" };
-    constexpr const std::wstring_view c_mimeMapFile { L"conf\\mime.json" };
-    constexpr const bool c_enableUnknownType { false };
-    constexpr const std::string_view c_defMimeType { "application/octet-stream" };
-    constexpr const size_t c_fileSizeLimit { 2'097'152 }; // Байты
+    constexpr DateTime::Offset c_fileCacheLifeTime { 43'200s }; // Секунды
+    constexpr bool c_enableStatic { false };
+    constexpr std::wstring_view c_staticDirectory { L"static" };
+    constexpr std::string_view c_indexFile { "index.html" };
+    constexpr std::wstring_view c_mimeMapFile { L"conf\\mime.json" };
+    constexpr bool c_enableUnknownType { false };
+    constexpr std::string_view c_defMimeType { "application/octet-stream" };
+    constexpr size_t c_fileSizeLimit { 2'097'152 }; // Байты
 }

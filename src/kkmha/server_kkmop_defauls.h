@@ -8,6 +8,6 @@
 namespace Server::KkmOp {
     using namespace std::chrono_literals;
 
-    constexpr const DateTime::Offset c_reportCacheLifeTime { 5s }; // Секунды
-    constexpr const DateTime::Offset c_receiptCacheLifeTime { 345'600s }; // Секунды
+    constexpr DateTime::Offset c_reportCacheLifeTime { 5s }; // Секунды
+    constexpr DateTime::Offset c_receiptCacheLifeTime { 345'600s }; // Секунды
 }

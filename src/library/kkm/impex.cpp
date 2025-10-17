@@ -30,8 +30,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const StatusResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["status"] = {
                 { "blocked", result.m_blocked },
                 { "cashDrawerOpened", result.m_cashDrawerOpened },
@@ -75,8 +74,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const ShiftStateResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["shiftState"] = {
                 { "documentsCount", result.m_documentsCount },
                 { "receiptNumber", result.m_receiptNumber },
@@ -91,8 +89,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const ReceiptStateResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["receiptState"] = {
                 { "receiptType", result.m_receiptType },
                 { "receiptTypeText", safeGet(Mbs::c_receiptTypeLabels, result.m_receiptType) },
@@ -108,8 +105,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const CashStatResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["cashStat"] = {
                 { "sellCashSum", result.m_sellCashSum },
                 { "sellReturnCashSum", result.m_sellReturnCashSum },
@@ -125,8 +121,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtOfdExchangeStatusResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["ofdExchangeStatus"] = {
                 { "exchangeStatus", result.m_exchangeStatus },
                 { "unsentCount", result.m_unsentCount },
@@ -142,8 +137,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtFnInfoResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["fnInfo"] = {
                 { "serial", Text::convert(result.m_serial) },
                 { "version", Text::convert(result.m_version) },
@@ -164,8 +158,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtRegistrationInfoResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["registrationInfo"] = {
                 { "fnsUrl", Text::convert(result.m_fnsUrl) },
                 { "organizationAddress", Text::convert(result.m_organizationAddress) },
@@ -223,8 +216,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtLastRegistrationResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["lastRegistration"] = {
                 { "documentNumber", result.m_documentNumber },
                 { "registrationsCount", result.m_registrationsCount },
@@ -236,8 +228,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtLastReceiptResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["lastReceipt"] = {
                 { "documentNumber", result.m_documentNumber },
                 { "receiptSum", result.m_receiptSum },
@@ -250,8 +241,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtLastDocumentResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["lastDocument"] = {
                 { "documentNumber", result.m_documentNumber },
                 { "fiscalSign", Text::convert(result.m_fiscalSign) },
@@ -263,8 +253,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FndtErrorsResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["fndtErrors"] = {
                 { "networkError", result.m_networkError },
                 { "networkErrorText", Text::convert(result.m_networkErrorText) },
@@ -283,8 +272,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FfdVersionResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["ffdVersions"] = {
                 { "deviceFfd", safeGet(Mbs::c_ffdVersions, result.m_deviceFfdVersion) },
                 { "deviceMinFfd", safeGet(Mbs::c_ffdVersions, result.m_devMinFfdVersion) },
@@ -299,8 +287,7 @@ namespace Kkm {
     }
 
     bool assign(Nln::Json & json, const FwVersionResult & result) {
-        const Result & base { result };
-        if (assign(json, base) && result.m_success) {
+        if (const Result & base { result }; assign(json, base) && result.m_success) {
             json["fwVersions"] = {
                 { "boot", Text::convert(result.m_bootVersion) },
                 { "configuration", Text::convert(result.m_configurationVersion) },
@@ -339,7 +326,7 @@ namespace Kkm {
                 if (separator) {
                     separated = true;
                 } else {
-                    bool found = Json::handleKey(block, "content", content, basePath);
+                    const bool found { Json::handleKey(block, "content", content, basePath) };
                     if (!found) { // TODO: Добавить проверку длинны текста.
                         throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"content")); // NOLINT(*-exception-baseclass)
                     }
@@ -358,21 +345,23 @@ namespace Kkm {
     void assign(OperatorDetails & details, const Nln::Json & json) {
         Details & base { details };
         assign(base, json);
-        bool result = Json::handleKey(
-            json, "operator",
-            [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                auto found
-                    = Json::handleKey(
-                        json, "name", details.m_operatorName,
-                        Text::Wcs::length(1, 64, Text::Wcs::trim()), path
-                    );
-                if (!found) {
-                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"name")); // NOLINT(*-exception-baseclass)
+        const bool result {
+            Json::handleKey(
+                json, "operator",
+                [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
+                    const bool found {
+                        Json::handleKey(
+                            json, "name", details.m_operatorName, Text::Wcs::length(1, 64, Text::Wcs::trim()), path
+                        )
+                    };
+                    if (!found) {
+                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"name")); // NOLINT(*-exception-baseclass)
+                    }
+                    Json::handleKey(json, "inn", details.m_operatorInn, Text::Wcs::maxLength(12), path);
+                    return true;
                 }
-                Json::handleKey(json, "inn", details.m_operatorInn, Text::Wcs::maxLength(12), path);
-                return true;
-            }
-        );
+            )
+        };
         if (!result) {
             throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"operator")); // NOLINT(*-exception-baseclass)
         }
@@ -381,11 +370,9 @@ namespace Kkm {
     void assign(CashDetails & details, const Nln::Json & json) {
         OperatorDetails & base { details };
         assign(base, json);
-        bool found
-            = Json::handleKey(
-                json, "cashSum", details.m_cashSum,
-                Numeric::between(c_minCashInOut, s_maxCashInOut)
-            );
+        const bool found {
+            Json::handleKey(json, "cashSum", details.m_cashSum, Numeric::between(c_minCashInOut, s_maxCashInOut))
+        };
         if (!found) {
             throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"cashSum")); // NOLINT(*-exception-baseclass)
         }
@@ -454,18 +441,16 @@ namespace Kkm {
             }
         );
         Tax defaultTax { Tax::No };
-        bool hasDefaultTax = Json::handleKey(json, "tax", defaultTax, Mbs::c_taxCastMap);
+        const bool hasDefaultTax { Json::handleKey(json, "tax", defaultTax, Mbs::c_taxCastMap) };
         if (json.contains("items") && json["items"].is_array()) {
             details.m_items.reserve(json["items"].size());
             int i { 0 };
             for (auto & item : json["items"].get<std::vector<Nln::Json>>()) {
                 auto basePath { std::format(L"items[{}]", i++) };
                 std::wstring title;
-                bool found
-                    = Json::handleKey(
-                        item, "title", title,
-                        Text::Wcs::length(1, 128, Text::Wcs::trim()), basePath
-                    );
+                bool found {
+                    Json::handleKey(item, "title", title, Text::Wcs::length(1, 128, Text::Wcs::trim()), basePath)
+                };
                 if (!found) {
                     throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"title")); // NOLINT(*-exception-baseclass)
                 }
@@ -504,56 +489,58 @@ namespace Kkm {
         } else {
             throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"items")); // NOLINT(*-exception-baseclass)
         }
-        bool paymentFound = Json::handleKey(
-            json, "payment",
-            [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                std::wstring sum {};
-                if (Json::handleKey(json, "sum", sum, path)) {
-                    try {
-                        Text::lower(sum);
-                        if (sum == L"auto") {
-                            details.m_paymentSum = -1;
-                        } else {
-                            details.m_paymentSum = Text::cast<double>(sum);
+        const bool paymentFound {
+            Json::handleKey(
+                json, "payment",
+                [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
+                    if (std::wstring sum {}; Json::handleKey(json, "sum", sum, path)) {
+                        try {
+                            Text::lower(sum);
+                            if (sum == L"auto") {
+                                details.m_paymentSum = -1;
+                            } else {
+                                details.m_paymentSum = Text::cast<double>(sum);
+                            }
+                        } catch (...) {
+                            throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                         }
-                    } catch (...) {
+                    } else {
                         throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
                     }
-                } else {
-                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"sum")); // NOLINT(*-exception-baseclass)
-                }
-                bool found = Json::handleKey(json, "type", details.m_paymentType, Mbs::c_paymentTypeCastMap, path);
-                if (!found) {
-                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"type")); // NOLINT(*-exception-baseclass)
-                }
-                if (details.m_paymentType == PaymentType::Electronically) {
-                    details.m_electroPaymentInfo
-                        = Json::handleKey(
-                            json, "electroPaymentInfo",
-                            [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                                bool found = Json::handleKey(json, "method", details.m_electroPaymentMethod, path);
-                                if (!found) {
-                                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"method")); // NOLINT(*-exception-baseclass)
-                                }
-                                found
-                                    = Json::handleKey(
-                                        json, "id", details.m_electroPaymentId,
-                                        Text::Wcs::length(1, 256), path
+                    const bool found {
+                        Json::handleKey(json, "type", details.m_paymentType, Mbs::c_paymentTypeCastMap, path)
+                    };
+                    if (!found) {
+                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"type")); // NOLINT(*-exception-baseclass)
+                    }
+                    if (details.m_paymentType == PaymentType::Electronically) {
+                        details.m_electroPaymentInfo
+                            = Json::handleKey(
+                                json, "electroPaymentInfo",
+                                [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
+                                    bool found { Json::handleKey(json, "method", details.m_electroPaymentMethod, path) };
+                                    if (!found) {
+                                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"method")); // NOLINT(*-exception-baseclass)
+                                    }
+                                    found
+                                        = Json::handleKey(
+                                            json, "id", details.m_electroPaymentId, Text::Wcs::length(1, 256), path
+                                        );
+                                    if (!found) {
+                                        throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"id")); // NOLINT(*-exception-baseclass)
+                                    }
+                                    Json::handleKey(
+                                        json, "addInfo", details.m_electroPaymentAddInfo,
+                                        Text::Wcs::maxLength(256), path
                                     );
-                                if (!found) {
-                                    throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, path, L"id")); // NOLINT(*-exception-baseclass)
+                                    return true;
                                 }
-                                Json::handleKey(
-                                    json, "addInfo", details.m_electroPaymentAddInfo,
-                                    Text::Wcs::maxLength(256), path
-                                );
-                                return true;
-                            }
-                        );
+                            );
+                    }
+                    return true;
                 }
-                return true;
-            }
-        );
+            )
+        };
         if (!paymentFound) {
             throw Failure(KKM_WFMT(Wcs::c_requiresProperty, L"payment")); // NOLINT(*-exception-baseclass)
         }

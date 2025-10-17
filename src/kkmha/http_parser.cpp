@@ -57,7 +57,7 @@ namespace Http {
         Text::trim(line);
 
         if (line.empty()) {
-            if (m_request.m_method == Method::Post && m_expectedSize) {
+            if (m_request.m_method == Method::Post && m_expectedBodySize) {
                 ++m_step;
                 m_reader = &Parser::parseBody;
             } else {
@@ -70,15 +70,15 @@ namespace Http {
         Text::splitVariable(line, field, value);
         m_request.m_header[field] = value;
         if (field == "content-length") {
-            m_expectedSize = Text::cast<size_t>(value);
-            if (m_expectedSize > c_requestBodySizeLimit) {
+            m_expectedBodySize = Text::cast<size_t>(value);
+            if (m_expectedBodySize > c_requestBodySizeLimit) {
                 LOG_ERROR_TS(Wcs::c_bodySizeLimitExceeded, m_request.m_id);
-                m_expectedSize = 0;
+                m_expectedBodySize = 0;
                 m_request.m_response.m_status = Status::BadRequest;
                 m_request.m_response.m_data.emplace<1>(Mbs::c_bodySizeLimitExceeded);
                 m_reader = &Parser::dummyReader;
             } else {
-                m_request.m_body.reserve(m_expectedSize + 1);
+                m_request.m_body.reserve(m_expectedBodySize + 1);
             }
         }
     }

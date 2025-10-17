@@ -39,7 +39,7 @@ if (BUILD_STATIC)
         RUNTIME_DEPENDENCIES
         PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
-        DIRECTORIES ${CLANG_SANLIB_DIR}
+        DIRECTORIES "${CLANG_SANLIB_DIR}"
         DESTINATION .
     )
 else ()
@@ -57,7 +57,7 @@ else ()
         RUNTIME_DEPENDENCIES
         PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
-        DIRECTORIES ${KKMHA_DEPS_VCPKG_DLL} ${CLANG_SANLIB_DIR}
+        DIRECTORIES "${KKMHA_DEPS_VCPKG_DLL}" "${CLANG_SANLIB_DIR}"
         DESTINATION .
     )
 endif ()

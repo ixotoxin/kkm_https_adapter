@@ -9,7 +9,7 @@
 #include <ostream>
 
 namespace Http {
-    struct SolidResponse : public ProtoResponse {
+    struct SolidResponse final : ProtoResponse {
         std::string m_data;
 
         SolidResponse() = default;

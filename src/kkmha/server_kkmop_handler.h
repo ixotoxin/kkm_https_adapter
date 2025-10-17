@@ -6,7 +6,7 @@
 #include "server_proto_handler.h"
 
 namespace Server::KkmOp {
-    class Handler : public Server::ProtoHandler {
+    class Handler final : public Server::ProtoHandler {
     public:
         Handler() = default;
         Handler(const Handler &) = default;

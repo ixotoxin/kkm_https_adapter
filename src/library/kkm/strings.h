@@ -93,7 +93,7 @@ namespace Kkm {
         KKM_WSTR(c_helloTitle, L"Привет!");
         KKM_WSTR(c_helloText, L"\nЯ трудолюбивая касса.\n\nЯ очень рада работать в компании таких замечательных людей.");
 
-        inline const std::array<std::wstring, 11> c_allowedBaudRate {
+        inline const std::array/*<std::wstring, 11>*/ c_allowedBaudRate {
             std::to_wstring(Atol::LIBFPTR_PORT_BR_1200),
             std::to_wstring(Atol::LIBFPTR_PORT_BR_2400),
             std::to_wstring(Atol::LIBFPTR_PORT_BR_4800),
@@ -213,40 +213,40 @@ namespace Kkm {
         };
 
         inline const std::unordered_map<ShiftState, std::string_view> c_shiftStateLabels {
-            { ShiftState::Closed, Mbs::c_closedShift },
-            { ShiftState::Opened, Mbs::c_openedShift },
-            { ShiftState::Expired, Mbs::c_expiredShift },
+            { ShiftState::Closed, c_closedShift },
+            { ShiftState::Opened, c_openedShift },
+            { ShiftState::Expired, c_expiredShift },
         };
 
         inline const std::unordered_map<ReceiptType, std::string_view> c_receiptTypeLabels {
-            { ReceiptType::Closed, Mbs::c_closedReceipt },
-            { ReceiptType::Sell, Mbs::c_sellReceipt },
-            { ReceiptType::SellReturn, Mbs::c_sellReturnReceipt },
-            { ReceiptType::SellCorrection, Mbs::c_sellCorrectionReceipt },
-            { ReceiptType::SellReturnCorrection, Mbs::c_sellReturnCorrectionReceipt },
-            { ReceiptType::Buy, Mbs::c_buyReceipt },
-            { ReceiptType::BuyReturn, Mbs::c_buyReturnReceipt },
-            { ReceiptType::BuyCorrection, Mbs::c_buyCorrectionReceipt },
-            { ReceiptType::BuyReturnCorrection, Mbs::c_buyReturnCorrectionReceipt },
+            { ReceiptType::Closed, c_closedReceipt },
+            { ReceiptType::Sell, c_sellReceipt },
+            { ReceiptType::SellReturn, c_sellReturnReceipt },
+            { ReceiptType::SellCorrection, c_sellCorrectionReceipt },
+            { ReceiptType::SellReturnCorrection, c_sellReturnCorrectionReceipt },
+            { ReceiptType::Buy, c_buyReceipt },
+            { ReceiptType::BuyReturn, c_buyReturnReceipt },
+            { ReceiptType::BuyCorrection, c_buyCorrectionReceipt },
+            { ReceiptType::BuyReturnCorrection, c_buyReturnCorrectionReceipt },
         };
 
         inline const std::unordered_map<DocumentType, std::string_view> c_documentTypeLabels {
-            { DocumentType::Closed, Mbs::c_closedDocument },
-            { DocumentType::ReceiptSell, Mbs::c_sellReceipt },
-            { DocumentType::ReceiptSellReturn, Mbs::c_sellReturnReceipt },
-            { DocumentType::ReceiptSellCorrection, Mbs::c_sellCorrectionReceipt },
-            { DocumentType::ReceiptSellReturnCorrection, Mbs::c_sellReturnCorrectionReceipt },
-            { DocumentType::ReceiptBuy, Mbs::c_buyReceipt },
-            { DocumentType::ReceiptBuyReturn, Mbs::c_buyReturnReceipt },
-            { DocumentType::ReceiptBuyCorrection, Mbs::c_buyCorrectionReceipt },
-            { DocumentType::ReceiptBuyReturnCorrection, Mbs::c_buyReturnCorrectionReceipt },
-            { DocumentType::OpenShift, Mbs::c_openShiftDocument },
-            { DocumentType::CloseShift, Mbs::c_closeShiftDocument },
-            { DocumentType::Registration, Mbs::c_registrationDocument },
-            { DocumentType::CloseArchive, Mbs::c_closeArchiveDocument },
-            { DocumentType::OfdExchangeStatus, Mbs::c_ofdExchangeStatusDocument },
-            { DocumentType::DocumentService, Mbs::c_serviceDocument },
-            { DocumentType::DocumentCopy, Mbs::c_documentCopy },
+            { DocumentType::Closed, c_closedDocument },
+            { DocumentType::ReceiptSell, c_sellReceipt },
+            { DocumentType::ReceiptSellReturn, c_sellReturnReceipt },
+            { DocumentType::ReceiptSellCorrection, c_sellCorrectionReceipt },
+            { DocumentType::ReceiptSellReturnCorrection, c_sellReturnCorrectionReceipt },
+            { DocumentType::ReceiptBuy, c_buyReceipt },
+            { DocumentType::ReceiptBuyReturn, c_buyReturnReceipt },
+            { DocumentType::ReceiptBuyCorrection, c_buyCorrectionReceipt },
+            { DocumentType::ReceiptBuyReturnCorrection, c_buyReturnCorrectionReceipt },
+            { DocumentType::OpenShift, c_openShiftDocument },
+            { DocumentType::CloseShift, c_closeShiftDocument },
+            { DocumentType::Registration, c_registrationDocument },
+            { DocumentType::CloseArchive, c_closeArchiveDocument },
+            { DocumentType::OfdExchangeStatus, c_ofdExchangeStatusDocument },
+            { DocumentType::DocumentService, c_serviceDocument },
+            { DocumentType::DocumentCopy, c_documentCopy },
         };
 
         inline const std::unordered_map<std::string, MeasurementUnit> c_measurementUnitMap {

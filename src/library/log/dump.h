@@ -6,7 +6,6 @@
 #include "strings.h"
 #include "variables.h"
 #include "core.h"
-#include <iostream>
 #include <algorithm>
 #include <format>
 
@@ -19,16 +18,16 @@ namespace Log {
             const T * data,
             size_t dataSize,
             size_t rowLength = 16 / sizeof(T),
-            Level level = Level::Debug
+            const Level level = Level::Debug
         ) noexcept try {
-            bool consoleReady { Console::ready(level) };
-            bool fileReady { File::ready(level) };
+            const bool consoleReady { Console::ready(level) };
+            const bool fileReady { File::ready(level) };
             if (!consoleReady && !fileReady) {
                 return;
             }
             std::wstring buffer { L"      0 [ 0x0000 ] " };
             size_t count = 0, index = 0;
-            rowLength = std::clamp(rowLength, static_cast<size_t>(8 / sizeof(T)), static_cast<size_t>(64 / sizeof(T)));
+            rowLength = std::clamp(rowLength, 8 / sizeof(T), 64 / sizeof(T));
             std::wstring caps { L"  index [ offset ] hex " };
             caps.append(std::to_wstring(8 * sizeof(T)));
             caps.append(L"-bit data");
@@ -71,11 +70,17 @@ namespace Log {
     }
 
     namespace Ts {
-        template<typename ... Args>
+        template<std::integral T>
         [[maybe_unused]]
-        inline void dump(const Args & ... args) noexcept try {
+        void dump(
+            const std::wstring & message,
+            const T * data,
+            size_t dataSize,
+            size_t rowLength = 16 / sizeof(T),
+            const Level level = Level::Debug
+        ) noexcept try {
             std::scoped_lock logLock(s_logMutex);
-            Nts::dump(args...);
+            Nts::dump(message, data, dataSize, rowLength, level);
         } catch (...) {
             fallbackLog();
         }

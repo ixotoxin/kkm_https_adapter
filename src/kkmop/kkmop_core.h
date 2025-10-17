@@ -10,14 +10,13 @@
 #include <kkm/device.h>
 #include <kkm/callhelpers.h>
 #include <cstdlib>
-#include <iostream>
 #include <optional>
 
 namespace KkmOperator {
     using namespace Kkm;
 
     [[nodiscard]]
-    inline int learn(int connParamCount, wchar_t ** connParamItems) {
+    inline int learn(const int connParamCount, wchar_t ** connParamItems) {
         assert(connParamCount > 0);
         Log::Console::ScopeLevelDown scopeLevel { Log::Level::Info };
 
@@ -41,7 +40,7 @@ namespace KkmOperator {
     template<class R, class K>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void callMethod(K && kkm, UndetailedMethod<R> method) {
+    void callMethod(K && kkm, UndetailedMethod<R> method) {
         Log::Console::ScopeLevelDown scopeLevel { Log::Level::Info };
         R result {};
         (kkm.*method)(result);
@@ -55,7 +54,7 @@ namespace KkmOperator {
     template<class R, class D, class K>
     requires std::derived_from<std::remove_cvref_t<K>, Device>
     [[maybe_unused]]
-    inline void callMethod(K && kkm, DetailedMethod<R, D> method, D && details) {
+    void callMethod(K && kkm, DetailedMethod<R, D> method, D && details) {
         Log::Console::ScopeLevelDown scopeLevel { Log::Level::Info };
         R result {};
         (kkm.*method)(details, result);
@@ -85,12 +84,6 @@ namespace KkmOperator {
                 throw Basic::Failure(shiftStateResult.m_message); // NOLINT(*-exception-baseclass)
             }
 
-            /*ReceiptStateResult receiptStateResult {};
-            kkm.getReceiptState(receiptStateResult);
-            if (!receiptStateResult.m_success) {
-                throw Basic::Failure(receiptStateResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
-
             CashStatResult cashStatResult {};
             kkm.getCashStat(cashStatResult);
             if (!cashStatResult.m_success) {
@@ -102,36 +95,6 @@ namespace KkmOperator {
             if (!fndtOfdExchangeStatusResult.m_success) {
                 throw Basic::Failure(fndtOfdExchangeStatusResult.m_message); // NOLINT(*-exception-baseclass)
             }
-
-            /*FndtFnInfoResult fndtFnInfoResult {};
-            kkm.getFndtFnInfo(fndtFnInfoResult);
-            if (!fndtFnInfoResult.m_success) {
-                throw Basic::Failure(fndtFnInfoResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
-
-            /*FndtRegistrationInfoResult fndtRegistrationInfoResult {};
-            kkm.getFndtRegistrationInfo(fndtRegistrationInfoResult);
-            if (!fndtRegistrationInfoResult.m_success) {
-                throw Basic::Failure(fndtRegistrationInfoResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
-
-            /*FndtLastRegistrationResult fndtLastRegistrationResult {};
-            kkm.getFndtLastRegistration(fndtLastRegistrationResult);
-            if (!fndtLastRegistrationResult.m_success) {
-                throw Basic::Failure(fndtLastRegistrationResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
-
-            /*FndtLastReceiptResult fndtLastReceiptResult {};
-            kkm.getFndtLastReceipt(fndtLastReceiptResult);
-            if (!fndtLastReceiptResult.m_success) {
-                throw Basic::Failure(fndtLastReceiptResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
-
-            /*FndtLastDocumentResult fndtLastDocumentResult {};
-            kkm.getFndtLastDocument(fndtLastDocumentResult);
-            if (!fndtLastDocumentResult.m_success) {
-                throw Basic::Failure(fndtLastDocumentResult.m_message); // NOLINT(*-exception-baseclass)
-            }*/
 
             FndtErrorsResult fndtErrorsResult {};
             kkm.getFndtErrors(fndtErrorsResult);

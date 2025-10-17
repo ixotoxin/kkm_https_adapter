@@ -55,7 +55,7 @@ namespace Server::KkmOp {
         Payload & operator=(Payload &&) = delete;
 
         [[maybe_unused]]
-        inline void fail(
+        void fail(
             const Http::Status status,
             const std::string_view message,
             const SrcLoc::Point & location = SrcLoc::Point::current()
@@ -76,7 +76,7 @@ namespace Server::KkmOp {
     };
 
     [[maybe_unused]]
-    inline std::shared_ptr<KnownConnParams> resolveConnParams(Payload & payload) {
+    /*inline*/ std::shared_ptr<KnownConnParams> resolveConnParams(Payload & payload) {
         if (payload.m_serialNumber.empty()) {
             payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
             return nullptr;
@@ -87,13 +87,12 @@ namespace Server::KkmOp {
             auto & params { s_connParamsRegistry.at(wcSerialNumber) };
             LOG_DEBUG_TS(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*params));
             return params;
-        } else {
-            auto [it, insert]
-                = s_connParamsRegistry.try_emplace(wcSerialNumber, std::make_shared<KnownConnParams>(wcSerialNumber));
-            if (insert) {
-                LOG_DEBUG_TS(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*(it->second)));
-                return it->second;
-            }
+        }
+        auto [it, insert]
+            = s_connParamsRegistry.try_emplace(wcSerialNumber, std::make_shared<KnownConnParams>(wcSerialNumber));
+        if (insert) {
+            LOG_DEBUG_TS(Wcs::c_selectKkm, payload.m_requestId, wcSerialNumber, static_cast<std::wstring>(*it->second));
+            return it->second;
         }
         payload.fail(
             Http::Status::NotFound,
@@ -104,8 +103,8 @@ namespace Server::KkmOp {
 
     template<class R>
     [[maybe_unused]]
-    inline void callMethod(UndetailedMethod<R> method, Payload & payload) {
-        if (auto connParams = resolveConnParams(payload); connParams) {
+    void callMethod(UndetailedMethod<R> method, Payload & payload) {
+        if (const auto connParams = resolveConnParams(payload); connParams) {
             callMethod(
                 Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
                 method, payload.m_result
@@ -115,8 +114,8 @@ namespace Server::KkmOp {
 
     template<class R, class D>
     [[maybe_unused]]
-    inline void callMethod(DetailedMethod<R, D> method, Payload & payload) {
-        if (auto connParams = resolveConnParams(payload); connParams) {
+    void callMethod(DetailedMethod<R, D> method, Payload & payload) {
+        if (const auto connParams = resolveConnParams(payload); connParams) {
             callMethod(
                 Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
                 method, payload.m_details, payload.m_result
@@ -130,7 +129,7 @@ namespace Server::KkmOp {
         }
 
         std::wstring connString;
-        bool found = Json::handleKey(payload.m_details, "connParams", connString);
+        const bool found { Json::handleKey(payload.m_details, "connParams", connString) };
         if (!found) {
             return payload.fail(Http::Status::BadRequest, KKM_FMT(Kkm::Mbs::c_requiresProperty, "connParams"));
         }
@@ -177,8 +176,7 @@ namespace Server::KkmOp {
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
         }
-        auto connParams = resolveConnParams(payload);
-        if (connParams) {
+        if (const auto connParams = resolveConnParams(payload); connParams) {
             collectDataFromMethods(
                 payload.m_result,
                 Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
@@ -200,8 +198,7 @@ namespace Server::KkmOp {
         if (payload.m_serialNumber.empty()) {
             return payload.fail(Http::Status::BadRequest, Server::Mbs::c_badRequest);
         }
-        auto connParams = resolveConnParams(payload);
-        if (connParams) {
+        if (const auto connParams = resolveConnParams(payload); connParams) {
             collectDataFromMethods(
                 payload.m_result,
                 Device { *connParams, std::format(Wcs::c_requestPrefix, payload.m_requestId) },
@@ -381,8 +378,7 @@ namespace Server::KkmOp {
         }
 
         if (!cacheKey.empty()) {
-            auto cacheEntry = Cache::load(cacheKey);
-            if (cacheEntry) {
+            if (auto cacheEntry = Cache::load(cacheKey); cacheEntry) {
                 request.m_response.m_status = cacheEntry->m_status;
                 request.m_response.m_data = cacheEntry->m_data;
                 LOG_DEBUG_TS(Cache::Wcs::c_fromCache, request.m_id);
@@ -420,7 +416,7 @@ namespace Server::KkmOp {
             request.m_method == Http::Method::Get ? c_reportCacheLifeTime : c_receiptCacheLifeTime
         };
 
-        (handler->second)(payload);
+        handler->second(payload);
 
         assert(!payload.m_result.has_value() || payload.m_result.value().is_object());
         assert(request.m_response.m_status == Http::Status::Ok);

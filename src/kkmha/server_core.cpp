@@ -28,7 +28,7 @@ namespace Server {
 
     enum class State { Initial, Starting, Running, Shutdown, Stopping };
 
-    static std::atomic<State> s_state { State::Initial };
+    static std::atomic s_state { State::Initial };
     static Counter::Type s_concurrentRequestsCounter { 0 };
     static Counter::Type s_delayedSocketsCounter { 0 };
     static Hitman s_hitman {};
@@ -41,17 +41,20 @@ namespace Server {
     static Ping::Handler s_pingHandler {};
 
     [[nodiscard]]
-    inline ProtoHandler & lookupHandler(const Http::Request & request) {
+    /*inline*/ ProtoHandler & lookupHandler(const Http::Request & request) {
         // ISSUE: При большем количестве обработчиков стоит оптимизировать.
         if (request.m_hint.size() >= 2) {
-            auto area = request.m_hint[1];
+            const auto area = request.m_hint[1];
             if (area == "kkm") {
                 return s_kkmHandler;
-            } else if (area == "static") {
+            }
+            if (area == "static") {
                 return s_staticHandler;
-            } else if (area == "config") {
+            }
+            if (area == "config") {
                 return s_configHandler;
-            } else if (area == "ping") {
+            }
+            if (area == "ping") {
                 return s_pingHandler;
             }
         }
@@ -81,7 +84,7 @@ namespace Server {
             Asio::Stream stream { std::forward<Asio::TcpSocket>(socket), sslContext };
             Http::Request request { stream.lowest_layer().remote_endpoint().address() };
             auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(s_requestTimeout);
-            Asio::Timer timeoutTimer { co_await asio::this_coro::executor, deadline };
+            Asio::Timer timeoutTimer { co_await asio::this_coro::executor };
             Asio::Error error {};
             Asio::CancellationSignal signal {};
             bool canceled { false };
@@ -115,7 +118,8 @@ namespace Server {
                     Asio::StreamBuffer buffer {};
 
                     co_await asio::async_read_until(
-                        stream, buffer, "\r\n\r\n",
+                        stream, buffer,
+                        "\r\n\r\n",
                         asio::bind_cancellation_slot(
                             signal.slot(),
                             asio::redirect_error(asio::use_awaitable, error)
@@ -132,7 +136,8 @@ namespace Server {
                         auto expecting = parser.expecting();
                         while (!canceled && expecting) {
                             co_await asio::async_read(
-                                stream, buffer, asio::transfer_at_least(expecting),
+                                stream, buffer,
+                                asio::transfer_at_least(expecting),
                                 asio::bind_cancellation_slot(
                                     signal.slot(),
                                     asio::redirect_error(asio::use_awaitable, error)
@@ -294,10 +299,11 @@ namespace Server {
     }
 
     asio::awaitable<void> close(Asio::TcpSocket && socket0) {
-        Counter counter { s_delayedSocketsCounter };
-        Asio::TcpSocket socket { std::forward<Asio::TcpSocket>(socket0) }; // Чтобы сокет пережил co_await
         try {
+            Counter counter { s_delayedSocketsCounter };
+            Asio::TcpSocket socket { std::forward<Asio::TcpSocket>(socket0) }; // Чтобы сокет пережил co_await
             Asio::Timer timer { co_await asio::this_coro::executor };
+
             timer.expires_after(c_closingDelay);
             co_await timer.async_wait(asio::use_awaitable);
             socket.cancel();
@@ -343,9 +349,8 @@ namespace Server {
             sslContext.use_private_key_file(Text::convert(s_privateKeyFile.native()), Asio::SslContext::pem);
             sslContext.set_verify_mode(asio::ssl::verify_none);
 
-            auto executor = co_await asio::this_coro::executor;
-
             {
+                auto executor = co_await asio::this_coro::executor;
                 Asio::Acceptor acceptor { executor, endpoint };
 
                 LOG_INFO_TS(Wcs::c_started);
@@ -408,7 +413,7 @@ namespace Server {
         co_return;
     }
 
-    inline void logError() noexcept {
+    /*inline*/ void logError() noexcept {
         switch (s_state.load()) {
             case State::Starting:
                 LOG_ERROR_TS(Wcs::c_startingFailed);

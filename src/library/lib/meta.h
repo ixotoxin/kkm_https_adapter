@@ -16,7 +16,7 @@ namespace Meta {
 
     template<classTplt T, classTplt U>
     [[maybe_unused]]
-    inline constexpr bool isSameTemplate = templatesComparing<T, U>::value;
+    constexpr inline bool isSameTemplate = templatesComparing<T, U>::value;
 
     template<class T, classTplt U>
     concept fromTemplate = requires(T t) { [] <typename ... V>(U<V ...> &) {} (t); };
@@ -38,10 +38,10 @@ namespace Meta {
     struct ArrayElement<T> { using Type = std::remove_cv_t<std::remove_pointer_t<T>>; };
 
     template<typename T>
-    using ArrayElementType = typename ArrayElement<T>::Type;
+    using ArrayElementType = ArrayElement<T>::Type;
 
     template<typename T>
-    using ContainerElementType = typename std::remove_cvref_t<T>::value_type;
+    using ContainerElementType = std::remove_cvref_t<T>::value_type;
 
     template<typename ...>
     struct Rebind;
@@ -105,7 +105,7 @@ namespace Meta {
     template<typename T>
     struct CastTypeTrait { using CastType = T; };
 
-    template<typename T>
+    template<typename>
     struct CastTrait {};
 
     template<typename T>

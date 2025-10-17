@@ -4,18 +4,18 @@
 #include "device.h"
 #include "variables.h"
 #include "strings.h"
+#include <lib/numeric.h>
 #include <log/write.h>
 
 namespace Kkm {
-    Device::Device(const std::wstring_view logPrefix)
-    : m_kkm {}, m_serialNumber {}, m_logPrefix { logPrefix }, m_lineLength {}, m_needToCancelReceipt { false } {}
+    Device::Device(const std::wstring_view logPrefix) : m_logPrefix { logPrefix } {}
 
-    Device::Device(const ConnParams & connParams, std::wstring_view logPrefix)
+    Device::Device(const ConnParams & connParams, const std::wstring_view logPrefix)
     : Device(logPrefix) {
         connect(connParams);
     }
 
-    Device::Device(const KnownConnParams & connParams, std::wstring_view logPrefix)
+    Device::Device(const KnownConnParams & connParams, const std::wstring_view logPrefix)
     : Device(logPrefix) {
         connect(connParams);
         if (m_serialNumber != connParams.serialNumber()) {
@@ -112,7 +112,7 @@ namespace Kkm {
     }
 
     [[nodiscard, maybe_unused]]
-    std::wstring Device::addMargins(std::wstring_view text, int marginTop, int marginBottom) {
+    std::wstring Device::addMargins(const std::wstring_view text, int marginTop, int marginBottom) {
         Numeric::doubleClamp(marginTop, marginBottom, 0, 10);
         std::wstring result;
         if (marginTop) {
@@ -185,9 +185,9 @@ namespace Kkm {
         bool center,
         bool magnified,
         bool separated,
-        int outerMargin,
-        int innerMargin,
-        TextPosition position
+        const int outerMargin,
+        const int innerMargin,
+        const TextPosition position
     ) {
         std::wstring text;
         if (content.empty()) {
@@ -309,7 +309,7 @@ namespace Kkm {
             if (m_kkm.utilFormTlv() < 0) {
                 throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
             }
-            std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
+            const std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
             m_kkm.setParam(1256, clientInfo);
         }
 
@@ -322,7 +322,7 @@ namespace Kkm {
             if (m_kkm.utilFormTlv() < 0) {
                 throw Failure(m_kkm); // NOLINT(*-exception-baseclass)
             }
-            std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
+            const std::vector<uchar> clientInfo = m_kkm.getParamByteArray(Atol::LIBFPTR_PARAM_TAG_VALUE);
             m_kkm.setParam(1084, clientInfo);
         }
 

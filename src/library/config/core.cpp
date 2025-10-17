@@ -5,7 +5,6 @@
 #include "variables.h"
 #include <lib/winapi.h>
 #include <lib/errexp.h>
-#include <lib/path.h>
 #include <log/defaults.h>
 
 namespace Config {

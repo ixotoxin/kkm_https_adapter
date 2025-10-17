@@ -55,9 +55,8 @@ namespace Server::Static {
             }
             if (pos == std::string::npos) {
                 return redirectToIndex(request);
-            } else {
-                path2.assign(requestedPath, pos);
             }
+            path2.assign(requestedPath, pos);
             path /= path2;
             if (std::filesystem::is_directory(path)) {
                 return redirectToIndex(request);
@@ -82,9 +81,8 @@ namespace Server::Static {
         Cache::maintain();
         Cache::Key cacheKey { "static::::" };
         cacheKey.append(Text::convert(path.native()));
-        auto cacheEntry = Cache::load(cacheKey);
 
-        if (cacheEntry) {
+        if (auto cacheEntry = Cache::load(cacheKey); cacheEntry) {
             auto fileTime = std::filesystem::last_write_time(path, error);
             if (error) {
                 return fail(request, Http::Status::NotFound, error.message());

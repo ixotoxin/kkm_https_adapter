@@ -7,7 +7,6 @@
 #include <lib/except.h>
 #include <lib/text.h>
 #include <log/write.h>
-#include <kkm/variables.h>
 #include <kkm/strings.h>
 #include <kkm/device.h>
 #include <kkm/impex.h>
@@ -16,8 +15,6 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
-#include <optional>
-#include <unordered_map>
 
 namespace KkmJsonLoader {
     using namespace Kkm;
@@ -57,7 +54,7 @@ namespace KkmJsonLoader {
         Nln::Json result(Nln::EmptyJsonObject);
         if (query == L"learn") {
             std::wstring connString;
-            bool found = Json::handleKey(details, "connParams", connString);
+            const bool found { Json::handleKey(details, "connParams", connString) };
             if (!found) {
                 throw Basic::Failure(KKM_FMT(Kkm::Mbs::c_requiresProperty, "connParams")); // NOLINT(*-exception-baseclass)
             }
@@ -141,7 +138,7 @@ namespace KkmJsonLoader {
         return EXIT_SUCCESS;
     }
 
-    inline void printError(std::wstring_view error) {
+    inline void printError(const std::wstring_view error) {
         std::wcerr
             << L"{\n"
             L"    \"" << Text::convert(Json::Mbs::c_successKey) << L"\": false,\n"

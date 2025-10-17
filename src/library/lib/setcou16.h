@@ -9,7 +9,7 @@
 #include <io.h>
 #include <cstdio>
 
-namespace Basic {
+namespace Init {
     EXECUTE_BEFORE_MAIN(setupConsoleOutput) {
         ::_setmode(::_fileno(stdout), _O_U16TEXT);
         ::_setmode(::_fileno(stderr), _O_U16TEXT);

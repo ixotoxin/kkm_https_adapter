@@ -6,9 +6,7 @@
 #include "http_types.h"
 #include "http_response.h"
 #include "asio.h"
-#include <lib/meta.h>
 #include <lib/datetime.h>
-#include <cassert>
 #include <utility>
 #include <atomic>
 #include <vector>
@@ -17,8 +15,8 @@ namespace Http {
     class Request {
         using SequenceType = int64_t;
 
-        constexpr static SequenceType c_idMask { 0xfff };
-        inline static std::atomic<SequenceType> s_sequence { 1 + (DateTime::windows() & c_idMask) };
+        static constexpr SequenceType c_idMask { 0xfff };
+        static inline std::atomic<SequenceType> s_sequence { 1 + (DateTime::windows() & c_idMask) };
 
     public:
         using IdType = uint16_t;
@@ -36,9 +34,9 @@ namespace Http {
 
         Request() = delete;
 
-        inline explicit Request(Asio::IpAddress && remote)
+        explicit Request(Asio::IpAddress && remote)
         : m_remote { std::forward<Asio::IpAddress>(remote) },
-          m_id { static_cast<IdType>(s_sequence.fetch_add(1 + (DateTime::windows() & c_idMask))) } {};
+          m_id { static_cast<IdType>(s_sequence.fetch_add(1 + (DateTime::windows() & c_idMask))) } {}
 
         Request(const Request &) = delete;
         Request(Request &&) = delete;
@@ -48,7 +46,7 @@ namespace Http {
         Request & operator=(Request &&) = delete;
 
         [[nodiscard]]
-        inline bool emptyResponse() const {
+        bool emptyResponse() const {
             return m_response.m_data.index() == 0
                 || (
                     m_response.m_data.index() == 1

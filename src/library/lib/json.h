@@ -9,7 +9,6 @@
 #include "datetime.h"
 #include "text.h"
 #include "path.h"
-#include <ostream>
 #include <nlohmann/json.hpp>
 
 namespace Nln {
@@ -39,12 +38,14 @@ namespace Json {
 
     template<Meta::Bool T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_boolean()) {
             return json.get<T>();
-        } else if (json.is_string()) {
+        }
+        if (json.is_string()) {
             return Text::cast<T>(static_cast<std::string>(json));
-        } else if (json.is_number()) {
+        }
+        if (json.is_number()) {
             return static_cast<T>(json.get<int64_t>());
         }
         throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
@@ -54,12 +55,14 @@ namespace Json {
 
     template<Meta::Numeric T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_number/*_integer*/()) {
             return json.get<T>();
-        } else if (json.is_string()) {
+        }
+        if (json.is_string()) {
             return Text::cast<T>(static_cast<std::string>(json));
-        } else if (json.is_boolean()) {
+        }
+        if (json.is_boolean()) {
             return static_cast<T>(json.get<bool>());
         }
         throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
@@ -69,10 +72,11 @@ namespace Json {
 
     template<Meta::fromTemplate<std::chrono::duration> T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_number/*_integer*/()) {
             return T(json.get<typename T::rep>());
-        } else if (json.is_string()) {
+        }
+        if (json.is_string()) {
             return T(Text::cast<typename T::rep>(static_cast<std::string>(json)));
         }
         throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
@@ -82,12 +86,14 @@ namespace Json {
 
     template<Meta::FloatingPoint T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_number()) {
             return json.get<T>();
-        } else if (json.is_string()) {
+        }
+        if (json.is_string()) {
             return Text::cast<T>(static_cast<std::string>(json));
-        } else if (json.is_boolean()) {
+        }
+        if (json.is_boolean()) {
             return static_cast<T>(json.get<bool>());
         }
         throw DataError(Basic::Wcs::c_invalidValue); // NOLINT(*-exception-baseclass)
@@ -97,18 +103,21 @@ namespace Json {
 
     template<Meta::String T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_string()) {
             if constexpr (Meta::isWide<T>) {
                 return Text::convert(json.get<std::string>());
             } else {
                 return json.get<std::string>();
             }
-        } else if (json.is_number_integer()) {
+        }
+        if (json.is_number_integer()) {
             return Numeric::cast<T>(json.get<int64_t>());
-        } else if (json.is_number_float()) {
+        }
+        if (json.is_number_float()) {
             return Numeric::cast<T>(json.get<long double>());
-        } else if (json.is_boolean()) {
+        }
+        if (json.is_boolean()) {
             auto value = Text::yesNo<typename Meta::TextTrait<T>::Wideness>(json.get<bool>());
             // auto value = Numeric::boolCast<typename Meta::TextTrait<T>::View, Meta::YesNo>(json.get<bool>());
             return { value.begin(), value.end() };
@@ -120,7 +129,7 @@ namespace Json {
 
     template<std::same_as<std::filesystem::path> T>
     [[nodiscard, maybe_unused]]
-    inline T cast(const Nln::Json & json) try {
+    T cast(const Nln::Json & json) try {
         if (json.is_string()) {
             return T(Text::convert(static_cast<std::string>(json)));
         }
@@ -162,7 +171,8 @@ namespace Json {
                     return handle(json[key], handler, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -177,7 +187,7 @@ namespace Json {
     template<typename T>
     requires (!Meta::BackSideGrowingRange<T>)
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const std::wstring & jsonPath = {}
@@ -197,7 +207,7 @@ namespace Json {
     template<typename T>
     requires (!Meta::BackSideGrowingRange<T>)
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -212,7 +222,8 @@ namespace Json {
                     return handle<T>(json[key], variable, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -226,7 +237,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const Meta::Filter<T> auto & filter,
@@ -246,7 +257,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -262,7 +273,8 @@ namespace Json {
                     return handle<T>(json[key], variable, filter, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -276,7 +288,7 @@ namespace Json {
 
     template<typename T, Meta::EnumCastMap<T> U>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const U & castMap,
@@ -303,7 +315,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -319,7 +331,8 @@ namespace Json {
                     return handle<T>(json[key], variable, castMap, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -333,7 +346,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const Meta::EnumCastMap<T> auto & castMap,
@@ -343,8 +356,7 @@ namespace Json {
         if (json.is_null()) {
             return false;
         }
-        T value {};
-        if (handle(json, value, castMap, jsonPath)) {
+        if (T value {}; handle(json, value, castMap, jsonPath)) {
             variable = filter(value);
             return true;
         }
@@ -358,7 +370,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -375,7 +387,8 @@ namespace Json {
                     return handle<T>(json[key], variable, castMap, filter, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -389,7 +402,7 @@ namespace Json {
 
     template<typename T, Meta::EnumDomain<T> U>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const U & domain,
@@ -417,7 +430,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -433,7 +446,8 @@ namespace Json {
                     return handle<T>(json[key], variable, domain, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -447,7 +461,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const Meta::EnumDomain<T> auto & domain,
@@ -457,8 +471,7 @@ namespace Json {
         if (json.is_null()) {
             return false;
         }
-        T value {};
-        if (handle(json, value, domain, jsonPath)) {
+        if (T value {}; handle(json, value, domain, jsonPath)) {
             variable = filter(value);
             return true;
         }
@@ -472,7 +485,7 @@ namespace Json {
 
     template<typename T>
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -489,7 +502,8 @@ namespace Json {
                     return handle<T>(json[key], variable, domain, filter, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -503,7 +517,7 @@ namespace Json {
 
     template<Meta::BackSideGrowingRange T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const std::wstring & jsonPath = {}
@@ -513,7 +527,8 @@ namespace Json {
                 variable.push_back(cast<typename T::value_type>(j));
             }
             return true;
-        } else if (json.is_null()) {
+        }
+        if (json.is_null()) {
             return false;
         }
         throw DataError(Basic::Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
@@ -525,7 +540,7 @@ namespace Json {
     }
 
     [[maybe_unused]]
-    inline bool handleKey(
+    bool handleKey(
         const Nln::Json & json,
         const std::string_view key,
         Meta::BackSideGrowingRange auto & variable,
@@ -540,7 +555,8 @@ namespace Json {
                     return handle(json[key], variable, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {
@@ -554,7 +570,7 @@ namespace Json {
 
     template<Meta::BackSideGrowingRange T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         T & variable,
         const Meta::Filter<typename T::value_type> auto & filter,
@@ -565,7 +581,8 @@ namespace Json {
                 variable.push_back(filter(cast<typename T::value_type>(j)));
             }
             return true;
-        } else if (json.is_null()) {
+        }
+        if (json.is_null()) {
             return false;
         }
         throw DataError(Basic::Wcs::c_invalidValue, jsonPath); // NOLINT(*-exception-baseclass)
@@ -578,7 +595,7 @@ namespace Json {
 
     template<Meta::BackSideGrowingRange T>
     [[maybe_unused]]
-    inline bool handle(
+    bool handle(
         const Nln::Json & json,
         const std::string_view key,
         T & variable,
@@ -593,7 +610,8 @@ namespace Json {
                     return handle<T>(json[key], variable, filter, jsonPath);
                 }
                 return false;
-            } else if (json.is_null()) {
+            }
+            if (json.is_null()) {
                 return false;
             }
         } catch (DataError & e) {

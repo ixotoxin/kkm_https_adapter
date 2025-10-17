@@ -10,8 +10,8 @@
 
 namespace System {
     namespace Wcs {
-        constexpr const std::wstring_view c_fault { L"Error {0:#10x}: {1}" };
-        constexpr const std::wstring_view c_failed { L"{0} failed with error {1:#010x}: {2}" };
+        constexpr std::wstring_view c_fault { L"Error {0:#10x}: {1}" };
+        constexpr std::wstring_view c_failed { L"{0} failed with error {1:#010x}: {2}" };
     }
 
     [[nodiscard, maybe_unused]] std::wstring errorMessage(::DWORD) noexcept;

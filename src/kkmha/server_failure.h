@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Vitaly Anasenko
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
+#pragma once
+
 #include "asio.h"
 #include "server_strings.h"
 #include "http_request.h"
@@ -8,7 +10,7 @@
 #include <lib/text.h>
 
 namespace Server {
-    class Failure : public Basic::Failure {
+    class Failure final : public Basic::Failure {
     public:
         Failure() = delete;
         Failure(const Failure &) = default;

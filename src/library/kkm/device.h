@@ -52,19 +52,21 @@ namespace Kkm {
         void resetState(const CloseDetails &, Result &);
 
     private:
-        Atol::Fptr m_kkm;
-        std::wstring m_serialNumber;
+        Atol::Fptr m_kkm {};
+        std::wstring m_serialNumber {};
         std::wstring m_logPrefix;
-        unsigned int m_lineLength;
-        bool m_needToCancelReceipt;
+        unsigned int m_lineLength { 0 };
+        bool m_needToCancelReceipt { false };
 
         explicit Device(std::wstring_view);
 
         void connect(const ConnParams &);
+
         void fail(Result &, std::wstring_view, const SrcLoc::Point & = SrcLoc::Point::current());
         void fail(Result &, const std::wstring &, const SrcLoc::Point & = SrcLoc::Point::current());
         void fail(Result &, std::wstring &&, const SrcLoc::Point & = SrcLoc::Point::current());
         void fail(Result &, const SrcLoc::Point & = SrcLoc::Point::current());
+
         [[nodiscard, maybe_unused]] static std::wstring addMargins(std::wstring_view, int = 1, int = -1);
         [[maybe_unused]] void addSeparator(std::wstring &, int = 0, int = -1) const;
         [[nodiscard, maybe_unused]] std::wstring addSeparators(std::wstring_view, int = 0, int = -1) const;

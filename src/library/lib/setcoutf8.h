@@ -7,7 +7,7 @@
 #include "winapi.h"
 #include <clocale>
 
-namespace Basic {
+namespace Init {
     EXECUTE_BEFORE_MAIN(setupConsoleOutput) {
         ::SetConsoleOutputCP(CP_UTF8);
         ::SetConsoleCP(CP_UTF8);

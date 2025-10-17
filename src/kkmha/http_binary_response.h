@@ -30,10 +30,10 @@ namespace Http {
     template<> struct isSmartPointer<Weak> : std::true_type {};
 
     template<CustomPointer T>
-    inline constexpr bool isSmart = isSmartPointer<T>::value;
+    constexpr inline bool isSmart = isSmartPointer<T>::value;
 
     template<CustomPointer T>
-    struct BinaryResponse : public ProtoResponse {
+    struct BinaryResponse final : ProtoResponse {
         std::string m_mimeType {};
         T m_data { nullptr };
         size_t m_size { 0 };
@@ -42,7 +42,7 @@ namespace Http {
         BinaryResponse(const BinaryResponse &) = delete;
         BinaryResponse(BinaryResponse &&) = delete;
 
-        BinaryResponse(T data, size_t size, std::string_view mimeType)
+        BinaryResponse(T data, const size_t size, const std::string_view mimeType)
         : m_mimeType { mimeType }, m_data { data }, m_size { size } {}
 
         ~BinaryResponse() override = default;
@@ -54,7 +54,7 @@ namespace Http {
             return m_data && m_size;
         }
 
-        void render(Asio::StreamBuffer & buffer, Status status) override {
+        void render(Asio::StreamBuffer & buffer, const Status status) override {
             assert(Mbs::c_statusStrings.contains(status));
             std::ostream output { &buffer };
             if (m_data && m_size) {

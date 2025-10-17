@@ -28,12 +28,11 @@ namespace Asio {
     inline bool isLoopback(const IpAddress & address) {
         if (address.is_v4()) {
             return address.to_v4().is_loopback();
-        } else {
-            auto v6 = address.to_v6();
-            if (v6.is_v4_mapped() || v6.is_v4_compatible()) {
-                return v6.to_v4().is_loopback();
-            }
-            return v6.is_loopback();
         }
+        const auto v6 = address.to_v6();
+        if (v6.is_v4_mapped() || v6.is_v4_compatible()) {
+            return v6.to_v4().is_loopback();
+        }
+        return v6.is_loopback();
     }
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-find_package(Catch2 CONFIG REQUIRED PATHS ${KKMHA_DEPS_VCPKG})
+find_package(Catch2 CONFIG REQUIRED PATHS "${KKMHA_DEPS_VCPKG}")
 
 set(TESTS_PUB_DEFS WIN32_LEAN_AND_MEAN NOMINMAX)
 

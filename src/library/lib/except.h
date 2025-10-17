@@ -73,7 +73,7 @@ namespace Basic {
         }
 
         [[nodiscard, maybe_unused]]
-        virtual std::wstring explain(bool appendLocation) const noexcept {
+        virtual std::wstring explain(const bool appendLocation) const noexcept {
             std::wstring result { m_message };
             if (appendLocation) {
                 result += m_location;
@@ -129,7 +129,7 @@ namespace Basic {
         DataError & operator=(DataError &&) = default;
 
         [[maybe_unused]]
-        void variable(const std::wstring_view variable, bool override = false) noexcept {
+        void variable(const std::wstring_view variable, const bool override = false) noexcept {
             if (override || (m_variable.empty() && !variable.empty())) {
                 m_variable.assign(variable);
             }
@@ -148,7 +148,7 @@ namespace Basic {
         }
 
         [[nodiscard, maybe_unused]]
-        std::wstring explain(bool appendLocation) const noexcept override {
+        std::wstring explain(const bool appendLocation) const noexcept override {
             std::wstring message {
                 m_variable.empty()
                 ? m_message

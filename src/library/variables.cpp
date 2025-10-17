@@ -3,9 +3,7 @@
 
 #include <lib/winapi.h>
 #include <lib/datetime.h>
-#include <log/types.h>
 #include <log/variables.h>
-#include <kkm/types.h>
 #include <kkm/variables.h>
 #include <config/defaults.h>
 #include <config/variables.h>

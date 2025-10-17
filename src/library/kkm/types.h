@@ -16,7 +16,7 @@ namespace Kkm {
 
     class Device;
 
-    class Failure : public Basic::Failure {
+    class Failure final : public Basic::Failure {
     public:
         Failure() = delete;
         Failure(const Failure &) = default;

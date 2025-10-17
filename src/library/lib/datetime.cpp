@@ -3,6 +3,7 @@
 
 #include "datetime.h"
 #include "winapi.h"
+#include <ostream>
 
 namespace DateTime {
     [[nodiscard, maybe_unused]]

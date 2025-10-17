@@ -23,8 +23,8 @@ namespace Log {
         [[maybe_unused]] void write(Level, std::wstring_view) noexcept;
 
         [[maybe_unused]]
-        inline Level levelDown(Level level) {
-            auto prevLevel = static_cast<Level>(s_level);
+        inline Level levelDown(const Level level) {
+            const auto prevLevel = static_cast<Level>(s_level);
             if (Meta::toUnderlying(level) < s_level) {
                 s_level = Meta::toUnderlying(level);
             }
@@ -32,8 +32,8 @@ namespace Log {
         }
 
         [[maybe_unused]]
-        inline Level levelUp(Level level) {
-            auto prevLevel = static_cast<Level>(s_level);
+        inline Level levelUp(const Level level) {
+            const auto prevLevel = static_cast<Level>(s_level);
             if (Meta::toUnderlying(level) > s_level) {
                 s_level = Meta::toUnderlying(level);
             }
@@ -41,12 +41,12 @@ namespace Log {
         }
 
         [[nodiscard, maybe_unused]]
-        inline auto postLevelDownRestorer(Level level) {
+        inline auto postLevelDownRestorer(const Level level) {
             return [prevLevel = levelDown(level)] { levelUp(prevLevel); };
         }
 
         [[nodiscard, maybe_unused]]
-        inline auto postLevelUpRestorer(Level level) {
+        inline auto postLevelUpRestorer(const Level level) {
             return [prevLevel = levelUp(level)] { levelDown(prevLevel); };
         }
 
@@ -55,7 +55,7 @@ namespace Log {
             ScopeLevelDown() = delete;
             ScopeLevelDown(const ScopeLevelDown &) = delete;
             ScopeLevelDown(ScopeLevelDown &&) = delete;
-            [[maybe_unused]] explicit ScopeLevelDown(Level level) : Exec(postLevelDownRestorer(level)) {}
+            [[maybe_unused]] explicit ScopeLevelDown(const Level level) : Exec(postLevelDownRestorer(level)) {}
             ~ScopeLevelDown() = default;
 
             ScopeLevelDown & operator=(const ScopeLevelDown &) = delete;
@@ -67,7 +67,7 @@ namespace Log {
             ScopeLevelUp() = delete;
             ScopeLevelUp(const ScopeLevelUp &) = delete;
             ScopeLevelUp(ScopeLevelUp &&) = delete;
-            [[maybe_unused]] explicit ScopeLevelUp(Level level) : Exec(postLevelUpRestorer(level)) {}
+            [[maybe_unused]] explicit ScopeLevelUp(const Level level) : Exec(postLevelUpRestorer(level)) {}
             ~ScopeLevelUp() = default;
 
             ScopeLevelUp & operator=(const ScopeLevelUp &) = delete;

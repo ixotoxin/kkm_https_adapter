@@ -5,6 +5,7 @@
 #include "defaults.h"
 #include "variables.h"
 #include "strings.h"
+#include <utility>
 
 namespace Kkm {
     using Basic::DataError;
@@ -12,10 +13,10 @@ namespace Kkm {
     [[maybe_unused]]
     PrintableText::PrintableText(
         std::wstring && content,
-        bool center,
-        bool magnified,
-        bool separated,
-        bool margin
+        const bool center,
+        const bool magnified,
+        const bool separated,
+        const bool margin
     ) : m_content(std::forward<std::wstring>(content)), m_marginInner(margin ? 1 : 0),
         m_center(center), m_magnified(magnified), m_separated(separated) {}
 

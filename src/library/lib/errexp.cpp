@@ -6,11 +6,11 @@
 
 namespace System {
     [[nodiscard, maybe_unused]]
-    std::wstring errorMessage(::DWORD error) noexcept {
+    std::wstring errorMessage(const ::DWORD error) noexcept {
         wchar_t * text { nullptr };
-        Deferred::LocalFree freeTextBuffer { text };
+        const Deferred::LocalFree freeTextBuffer { text };
         try {
-            auto status
+            const auto status
                 = ::FormatMessageW(
                     FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
                     nullptr,

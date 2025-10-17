@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include "macro.h"
-#include "winapi.h"
+#include "winstrapi.h"
 #include "strings.h"
 #include <cmake/options.h>
 #include <memory>
 #include <string>
-#include <stringapiset.h>
 
 namespace Text {
     constexpr int c_convertBufferReserve { 2 };
@@ -31,7 +29,7 @@ namespace Text {
         return length > 0;
 #else
         const int size { length + c_convertBufferReserve };
-        auto buffer = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
+        const auto buffer = std::make_unique_for_overwrite<wchar_t[]>(static_cast<std::size_t>(size));
         length = WIN_MB2WC(&text[0], static_cast<int>(text.size()), buffer.get(), size);
         if (length <= 0) {
             return false;
@@ -60,7 +58,7 @@ namespace Text {
         return length > 0;
 #else
         const int size { length + c_convertBufferReserve };
-        auto buffer = std::make_unique_for_overwrite<char[]>(static_cast<std::size_t>(size));
+        const auto buffer = std::make_unique_for_overwrite<char[]>(static_cast<std::size_t>(size));
         length = WIN_WC2MB(&text[0], static_cast<int>(text.size()), buffer.get(), size);
         if (length <= 0) {
             return false;

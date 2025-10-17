@@ -30,49 +30,49 @@ namespace Basic {
 namespace Meta {
     template<>
     struct BoolLabels<std::wstring_view, DaNet> {
-        constexpr inline static const std::wstring_view c_true [[maybe_unused]] { L"Да" };
-        constexpr inline static const std::wstring_view c_false [[maybe_unused]] { L"Нет" };
+        static constexpr /*inline*/ std::wstring_view c_true [[maybe_unused]] { L"Да" };
+        static constexpr /*inline*/ std::wstring_view c_false [[maybe_unused]] { L"Нет" };
     };
 
     template<>
     struct BoolLabels<std::string_view, DaNet> {
-        constexpr inline static const std::string_view c_true [[maybe_unused]] { "Да" };
-        constexpr inline static const std::string_view c_false [[maybe_unused]] { "Нет" };
+        static constexpr /*inline*/ std::string_view c_true [[maybe_unused]] { "Да" };
+        static constexpr /*inline*/ std::string_view c_false [[maybe_unused]] { "Нет" };
     };
 
     template<>
     struct BoolLabels<std::wstring_view, YesNo> {
-        constexpr inline static const std::wstring_view c_true [[maybe_unused]] { L"yes" };
-        constexpr inline static const std::wstring_view c_false [[maybe_unused]] { L"no" };
+        static constexpr /*inline*/ std::wstring_view c_true [[maybe_unused]] { L"yes" };
+        static constexpr /*inline*/ std::wstring_view c_false [[maybe_unused]] { L"no" };
     };
 
     template<>
     struct BoolLabels<std::string_view, YesNo> {
-        constexpr inline static const std::string_view c_true [[maybe_unused]] { "yes" };
-        constexpr inline static const std::string_view c_false [[maybe_unused]] { "no" };
+        static constexpr /*inline*/ std::string_view c_true [[maybe_unused]] { "yes" };
+        static constexpr /*inline*/ std::string_view c_false [[maybe_unused]] { "no" };
     };
 
     template<>
     struct BoolLabels<std::wstring_view, EnaDis> {
-        constexpr inline static const std::wstring_view c_true [[maybe_unused]] { L"enable" };
-        constexpr inline static const std::wstring_view c_false [[maybe_unused]] { L"disable" };
+        static constexpr /*inline*/ std::wstring_view c_true [[maybe_unused]] { L"enable" };
+        static constexpr /*inline*/ std::wstring_view c_false [[maybe_unused]] { L"disable" };
     };
 
     template<>
     struct BoolLabels<std::string_view, EnaDis> {
-        constexpr inline static const std::string_view c_true [[maybe_unused]] { "enable" };
-        constexpr inline static const std::string_view c_false [[maybe_unused]] { "disable" };
+        static constexpr /*inline*/ std::string_view c_true [[maybe_unused]] { "enable" };
+        static constexpr /*inline*/ std::string_view c_false [[maybe_unused]] { "disable" };
     };
 
     template<>
     struct BoolLabels<std::wstring_view, TrueFalse> {
-        constexpr inline static const std::wstring_view c_true [[maybe_unused]] { L"true" };
-        constexpr inline static const std::wstring_view c_false [[maybe_unused]] { L"false" };
+        static constexpr /*inline*/ std::wstring_view c_true [[maybe_unused]] { L"true" };
+        static constexpr /*inline*/ std::wstring_view c_false [[maybe_unused]] { L"false" };
     };
 
     template<>
     struct BoolLabels<std::string_view, TrueFalse> {
-        constexpr inline static const std::string_view c_true [[maybe_unused]] { "true" };
-        constexpr inline static const std::string_view c_false [[maybe_unused]] { "false" };
+        static constexpr /*inline*/ std::string_view c_true [[maybe_unused]] { "true" };
+        static constexpr /*inline*/ std::string_view c_false [[maybe_unused]] { "false" };
     };
 }

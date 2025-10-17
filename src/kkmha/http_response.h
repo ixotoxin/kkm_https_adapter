@@ -32,11 +32,21 @@ namespace Http {
                 std::get<2>(m_data)->render(buffer, m_status);
             } else {
                 assert(Mbs::c_statusStrings.contains(m_status));
-                Nln::Json json({
-                    { Json::Mbs::c_successKey, m_status < Status::BadRequest },
-                    { Json::Mbs::c_messageKey, m_data.index() == 1 ? std::get<1>(m_data) : Mbs::c_statusStrings.at(m_status) }
-                }, false, Nln::EmptyJsonObject);
-                std::string text { json.dump() };
+                const Nln::Json json(
+                    {
+                        {
+                            Json::Mbs::c_successKey,
+                            m_status < Status::BadRequest
+                        },
+                        {
+                            Json::Mbs::c_messageKey,
+                            m_data.index() == 1 ? std::get<1>(m_data) : Mbs::c_statusStrings.at(m_status)
+                        }
+                    },
+                    false,
+                    Nln::EmptyJsonObject
+                );
+                const std::string text { json.dump() };
                 std::ostream output { &buffer };
                 output
                     << std::format(

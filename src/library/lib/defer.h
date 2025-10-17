@@ -31,7 +31,7 @@ namespace Deferred {
         Exec & operator=(Exec &&) = delete;
 
         [[maybe_unused]]
-        void perform(bool repeatable = false) noexcept {
+        void perform(const bool repeatable = false) noexcept {
             if (m_permitted) {
                 std::invoke(m_func);
                 m_permitted = repeatable;
@@ -62,7 +62,7 @@ namespace Deferred {
         LocalFree & operator=(LocalFree &&) = delete;
 
         [[maybe_unused]]
-        void perform() noexcept {
+        void perform() const noexcept {
             if (m_permitted && m_memory) {
                 ::LocalFree(m_memory);
                 m_memory = nullptr;

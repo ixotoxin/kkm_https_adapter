@@ -32,7 +32,7 @@ namespace Server {
         template<typename T>
         requires std::is_convertible_v<T, std::function<void()>>
         [[maybe_unused]]
-        Hitman(T && gun, DateTime::SleepUnit waitingTime)
+        Hitman(T && gun, const DateTime::SleepUnit waitingTime)
         : m_gun { gun }, m_counter { waitingTime / c_sleepQuantum } {
             assert(waitingTime >= 0ms);
         }
@@ -54,7 +54,7 @@ namespace Server {
         template<typename T>
         requires std::is_convertible_v<T, std::function<void()>>
         [[maybe_unused]]
-        void placeOrder(T && gun, DateTime::SleepUnit waitingTime) {
+        void placeOrder(T && gun, const DateTime::SleepUnit waitingTime) {
             assert(waitingTime >= 0ms);
             std::scoped_lock lock { m_mutex };
             m_gun = gun;
@@ -77,7 +77,7 @@ namespace Server {
         }
 
         [[maybe_unused]]
-        void await(DateTime::SleepUnit waitingTime) {
+        void await(const DateTime::SleepUnit waitingTime) {
             assert(waitingTime.count() >= 0);
             m_counter.store(waitingTime / c_sleepQuantum);
             while (m_counter.load() > 0) {
@@ -100,7 +100,7 @@ namespace Server {
         template<typename T>
         requires std::is_invocable_r_v<bool, T>
         [[maybe_unused]]
-        void await(DateTime::SleepUnit waitingTime, T && safetyLock) {
+        void await(const DateTime::SleepUnit waitingTime, T && safetyLock) {
             assert(waitingTime >= 0ms);
             m_counter.store(waitingTime / c_sleepQuantum);
             while (m_counter.load() > 0 && std::invoke(safetyLock)) {
@@ -109,11 +109,6 @@ namespace Server {
             }
             m_counter.store(0);
         }
-
-        // [[nodiscard, maybe_unused]]
-        // bool awaiting() {
-        //     return m_counter.load() > 0;
-        // }
 
         [[maybe_unused]]
         void completeOrder() {

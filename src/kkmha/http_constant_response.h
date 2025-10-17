@@ -5,7 +5,6 @@
 
 #include "http_types.h"
 #include "http_proto_response.h"
-#include <utility>
 #include <memory>
 #include <string_view>
 #include <ostream>
@@ -13,8 +12,8 @@
 namespace Http {
     using namespace std::string_view_literals;
 
-    struct ConstantResponse : public ProtoResponse {
-        inline static auto s_okResponse = std::make_shared<Http::ConstantResponse>(
+    struct ConstantResponse final : ProtoResponse {
+        static inline const auto s_okResponse = std::make_shared<ConstantResponse>(
             "HTTP/1.1 200 OK\r\n"
             "Connection: close\r\n"
             "Pragma: no-cache\r\n"

@@ -8,7 +8,7 @@
 
 namespace Server::Cache {
     [[nodiscard, maybe_unused]]
-    inline DateTime::Point expiresAfter(DateTime::Offset seconds) {
+    inline DateTime::Point expiresAfter(const DateTime::Offset seconds) {
         return DateTime::Clock::now() + seconds;
     }
 

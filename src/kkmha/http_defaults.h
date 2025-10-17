@@ -4,6 +4,6 @@
 #pragma once
 
 namespace Http {
-    constexpr const size_t c_parserBufferSize { 2'048 };
-    constexpr const size_t c_requestBodySizeLimit { 131'072 };
+    constexpr size_t c_parserBufferSize { 2'048 };
+    constexpr size_t c_requestBodySizeLimit { 131'072 };
 }

@@ -75,7 +75,7 @@ namespace Kkm {
             L"LRN: kkm.connParams = {\n";
 
         try {
-            std::filesystem::path directory { s_dbDirectory };
+            const std::filesystem::path directory { s_dbDirectory };
             bool nonFirst = false;
             for (auto const & entry: std::filesystem::directory_iterator { directory }) {
                 if (entry.is_regular_file()) {

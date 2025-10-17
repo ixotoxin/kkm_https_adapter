@@ -21,7 +21,7 @@ namespace Http {
 
         Request & m_request;
         Reader m_reader { &Parser::parseMethod };
-        size_t m_expectedSize { 0 };
+        size_t m_expectedBodySize { 0 };
         int m_step { 0 };
 
     public:
@@ -37,18 +37,18 @@ namespace Http {
         void operator()(Asio::StreamBuffer &);
 
         [[nodiscard]]
-        inline size_t expecting() const {
+        size_t expecting() const {
             if (
                 m_request.m_response.m_status == Status::Ok
                 && m_step >= 2
-                && m_request.m_body.size() < m_expectedSize
+                && m_request.m_body.size() < m_expectedBodySize
             ) {
-                return m_expectedSize - m_request.m_body.size();
+                return m_expectedBodySize - m_request.m_body.size();
             }
             return 0;
         }
 
-        inline void complete() {
+        void complete() const {
             assert(Mbs::c_statusStrings.contains(m_request.m_response.m_status));
             if (m_request.m_response.m_status != Status::Ok && m_request.emptyResponse()) {
                 m_request.m_response.m_data = Mbs::c_statusStrings.at(m_request.m_response.m_status);

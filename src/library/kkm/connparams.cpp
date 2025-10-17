@@ -11,7 +11,7 @@
 namespace Kkm {
     using namespace std::string_literals;
 
-    constexpr const std::wstring_view allowed { L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_" };
+    constexpr std::wstring_view allowed { L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-_" };
 
     ConnParams::ConnParams(const Container & params)
     : m_params { params } {}
@@ -113,7 +113,7 @@ namespace Kkm {
         Text::lower(m_params[0]);
     }
 
-    void NewConnParams::save(const std::wstring & serialNumber) {
+    void NewConnParams::save(const std::wstring & serialNumber) const {
         if (serialNumber.empty()) {
             throw Failure(KKM_WFMT(Wcs::c_savingError, L"-")); // NOLINT(*-exception-baseclass)
         }
@@ -125,7 +125,7 @@ namespace Kkm {
             }
         }
         filePath /= serialNumber + L".json";
-        Nln::Json json = Text::convert(m_params);
+        const Nln::Json json = Text::convert(m_params);
         std::ofstream file { filePath };
         file << json.dump();
         file.close();
@@ -146,7 +146,7 @@ namespace Kkm {
         if (!file.is_open() || !file.good()) {
             throw Failure(LIB_WFMT(Basic::Wcs::c_couldntReadFile, path.native())); // NOLINT(*-exception-baseclass)
         }
-        Nln::Json json(Nln::Json::parse(std::ifstream(path)));
+        const Nln::Json json(Nln::Json::parse(std::ifstream(path)));
         Json::handle(json, m_params);
     }
 
