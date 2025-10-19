@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.28)
 
-include(../library.cmake)
-
 add_executable(kkmjl kkmjl_main.cpp kkmjl_variables.cpp)
-target_compile_definitions(kkmjl PUBLIC ${XTXN_PUB_DEFS} PRIVATE ${XTXN_PRI_DEFS})
-target_link_libraries(kkmjl PRIVATE xtxn_lib)
+target_compile_definitions(kkmjl PUBLIC ${KKMHA_PUB_DEFS} PRIVATE ${KKMHA_PRI_DEFS})
+target_link_libraries(kkmjl PRIVATE kkmha_lib)
 target_link_libraries(kkmjl PRIVATE nlohmann_json::nlohmann_json)
 
 install(

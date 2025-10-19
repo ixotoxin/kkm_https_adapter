@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
 
-include(../library.cmake)
-
 add_executable(
     kkmha
     http_parser.cpp
@@ -23,8 +21,8 @@ if (BUILD_SEPARATED)
     target_sources(kkmha PRIVATE kkmha_variables.cpp)
 endif ()
 
-target_compile_definitions(kkmha PUBLIC ${XTXN_PUB_DEFS} PRIVATE ${XTXN_PRI_DEFS})
-target_link_libraries(kkmha PRIVATE xtxn_lib)
+target_compile_definitions(kkmha PUBLIC ${KKMHA_PUB_DEFS} PRIVATE ${KKMHA_PRI_DEFS})
+target_link_libraries(kkmha PRIVATE kkmha_lib)
 target_link_libraries(kkmha PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(kkmha PRIVATE asio::asio)
 target_link_libraries(kkmha PRIVATE nlohmann_json::nlohmann_json)
@@ -48,7 +46,7 @@ else ()
     add_custom_command(
         TARGET kkmha
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E
+        COMMAND "${CMAKE_COMMAND}" -E
             copy_directory_if_different "${KKMHA_DEPS_VCPKG_DLL}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     )
     install(

@@ -76,7 +76,7 @@ else ()
         -Wno-sign-compare -Wno-sign-conversion -Wno-unknown-pragmas
     )
     if (WITH_RELSL)
-        add_compile_options("-fmacro-prefix-map=${PROJECT_SOURCE_DIR}/=.\\")
+        add_compile_options("-fmacro-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=.\\")
     endif ()
     if (BUILD_STATIC)
         add_compile_options(-static)
@@ -84,20 +84,55 @@ else ()
     endif ()
 endif ()
 
-add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /D_WIN32_WINNT=0x0601)
-
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/incl.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/library/incl.cmake")
+add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /DNOMINMAX /D_WIN32_WINNT=0x0601)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/fptr10")
+
+set(KKMHA_CONF_INCL_DIR "${PROJECT_BINARY_DIR}/_Include_${CMAKE_BUILD_TYPE}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/options.h.in" "${KKMHA_CONF_INCL_DIR}/cmake/options.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/variables.h.in" "${KKMHA_CONF_INCL_DIR}/cmake/variables.h")
+include_directories("${KKMHA_CONF_INCL_DIR}" BEFORE)
+
+file(GLOB_RECURSE KKMHA_LIB_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/lib/*.cpp")
+file(GLOB_RECURSE KKMHA_MAIN_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/main/*.cpp")
+file(GLOB_RECURSE KKMHA_LOG_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/log/*.cpp")
+file(GLOB_RECURSE KKMHA_KKM_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/kkm/*.cpp")
+file(GLOB_RECURSE KKMHA_CONFIG_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/config/*.cpp")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/library" BEFORE)
 
 if (BUILD_TESTS)
     enable_testing()
 endif ()
 
-#add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/heap")
+set(
+    KKMHA_PUB_DEFS
+        ASIO_STANDALONE
+        ASIO_NO_WIN32_LEAN_AND_MEAN
+        ASIO_NO_NOMINMAX
+        ASIO_HAS_THREADS
+        ASIO_HAS_STD_COROUTINE
+        ASIO_HAS_CO_AWAIT
+        JSON_USE_IMPLICIT_CONVERSIONS=0
+)
+
+if (BUILD_SEPARATED)
+    set(
+        KKMHA_PRI_DEFS
+            EXTERNAL_LIB_VARIABLES
+            EXTERNAL_MAIN_VARIABLES
+            EXTERNAL_LOG_VARIABLES
+            EXTERNAL_KKM_VARIABLES
+            EXTERNAL_CONFIG_VARIABLES
+    )
+else ()
+    set(KKMHA_PRI_DEFS)
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmop")
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmjl")
+endif ()
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/library")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmha")
+
 if (BUILD_SEPARATED)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmop")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmjl")
@@ -106,3 +141,5 @@ endif ()
 if (BUILD_TESTS)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
 endif ()
+
+#add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/heap")
