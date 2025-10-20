@@ -41,9 +41,10 @@ namespace Service {
         void start() noexcept {
             try {
                 setStatus(SERVICE_START_PENDING);
-                Server::start();
-                setStatus(SERVICE_RUNNING);
-                return; /** Не удаляй, смотри дальше. **/
+                if (Server::start()) {
+                    setStatus(SERVICE_RUNNING);
+                    return; /** Не удаляй, смотри дальше. **/
+                }
             } catch (const Failure & e) {
                 LOG_ERROR_TS(e);
             } catch (const std::exception & e) {
@@ -52,7 +53,7 @@ namespace Service {
                 LOG_ERROR_TS(Wcs::c_startingFailed);
             }
 
-            setStatus(SERVICE_STOPPED, NO_ERROR);
+            setStatus(SERVICE_STOPPED, ERROR_SERVICE_NO_THREAD);
         }
 
         void stop() noexcept {

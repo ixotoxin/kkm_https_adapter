@@ -13,8 +13,6 @@
 #include "kkmjl_core.h"
 
 int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
-    START_MEMORY_PROFILING;
-
     try {
         if (argc == 3) {
             Config::setBaseVars(envp);
@@ -23,8 +21,11 @@ int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
         }
         std::wcerr
             << L"{\n"
-            L"    \"" << Text::convert(Json::Mbs::c_successKey) << L"\": false,\n"
-            L"    \"" << Text::convert(Json::Mbs::c_messageKey) << L"\": \"Неверное использование\",\n"
+#if WITH_ASAN || WITH_CRTDBG
+            L"    \"" MEMORY_PROFILING_FLAG_KEY "\": \"" MEMORY_PROFILING_FLAG_VALUE "\",\n"
+#endif
+            L"    \"" << Json::Wcs::c_successKey << L"\": false,\n"
+            L"    \"" << Json::Wcs::c_messageKey << L"\": \"Неверное использование\",\n"
             L"    \"!version\": \"" << BUILD_VERSION << L"\",\n"
             L"    \"!usage\": \"" << argv[0] << L" {сн} {вф}\"\n"
             L"}\n";

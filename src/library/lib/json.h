@@ -25,6 +25,8 @@ inline std::wostream & operator<<(std::wostream & stream, const Nln::Json & json
 namespace Json {
     namespace Wcs {
         LIB_WSTR(c_jsonObjectWasExpected, L"Ожидался JSON-объект");
+        LIB_WCSTR(c_successKey, L"!success");
+        LIB_WCSTR(c_messageKey, L"!message");
     }
 
     namespace Mbs {

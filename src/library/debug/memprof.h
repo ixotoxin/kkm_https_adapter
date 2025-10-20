@@ -63,8 +63,11 @@
 
 #undef START_MEMORY_PROFILING
 
+#define MEMORY_PROFILING_FLAG_KEY "!debug"
+
 #if WITH_ASAN
 #   define START_MEMORY_PROFILING Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (AddressSanitizer)");
+#   define MEMORY_PROFILING_FLAG_VALUE "Memory profiling enabled (AddressSanitizer)"
 #elif WITH_CRTDBG
 #   define _CRTDBG_MAP_ALLOC // NOLINT(*-reserved-identifier)
 #   include <lib/winapi.h>
@@ -72,6 +75,7 @@
 #   include <cstdlib>
 #   include <format>
 #   define START_MEMORY_PROFILING Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (CRT Debug)");
+#   define MEMORY_PROFILING_FLAG_VALUE "Memory profiling enabled (CRT Debug)"
 namespace Init {
     EXECUTE_BEFORE_MAIN(startMemoryProfiling) {
         constexpr auto _reportMode_ = /*_CRTDBG_MODE_DEBUG |*/ _CRTDBG_MODE_FILE /*| _CRTDBG_MODE_WNDW*/;
@@ -86,4 +90,5 @@ namespace Init {
 }
 #else
 #   define START_MEMORY_PROFILING do {} while (false)
+#   define MEMORY_PROFILING_FLAG_VALUE ""
 #endif

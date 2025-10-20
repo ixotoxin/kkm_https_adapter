@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(kkm_https_adapter VERSION 1.7.9 LANGUAGES CXX)
+project(kkm_https_adapter VERSION 1.7.10 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -88,16 +88,13 @@ add_definitions(/DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /DNOMINMAX /D_WIN32_W
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/fptr10")
 
-set(KKMHA_CONF_INCL_DIR "${PROJECT_BINARY_DIR}/_Include_${CMAKE_BUILD_TYPE}")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/options.h.in" "${KKMHA_CONF_INCL_DIR}/cmake/options.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/variables.h.in" "${KKMHA_CONF_INCL_DIR}/cmake/variables.h")
-include_directories("${KKMHA_CONF_INCL_DIR}" BEFORE)
+set(KKMHA_CONFIG_INCLUDE_DIR "${PROJECT_BINARY_DIR}/_Include_${CMAKE_BUILD_TYPE}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/options.h.in" "${KKMHA_CONFIG_INCLUDE_DIR}/cmake/options.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cmake/variables.h.in" "${KKMHA_CONFIG_INCLUDE_DIR}/cmake/variables.h")
+include_directories("${KKMHA_CONFIG_INCLUDE_DIR}" BEFORE)
 
-file(GLOB_RECURSE KKMHA_LIB_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/lib/*.cpp")
-file(GLOB_RECURSE KKMHA_MAIN_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/main/*.cpp")
-file(GLOB_RECURSE KKMHA_LOG_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/log/*.cpp")
-file(GLOB_RECURSE KKMHA_KKM_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/kkm/*.cpp")
-file(GLOB_RECURSE KKMHA_CONFIG_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/config/*.cpp")
+file(GLOB_RECURSE KKMHA_LIBRARY_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/lib/*.cpp")
+file(GLOB_RECURSE KKMHA_COMMON_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/*/*.cpp")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/library" BEFORE)
 
 if (BUILD_TESTS)
@@ -105,7 +102,7 @@ if (BUILD_TESTS)
 endif ()
 
 set(
-    KKMHA_PUB_DEFS
+    KKMHA_PUBLIC_DEFS
         ASIO_STANDALONE
         ASIO_NO_WIN32_LEAN_AND_MEAN
         ASIO_NO_NOMINMAX
@@ -117,7 +114,7 @@ set(
 
 if (BUILD_SEPARATED)
     set(
-        KKMHA_PRI_DEFS
+        KKMHA_PRIVATE_DEFS
             EXTERNAL_LIB_VARIABLES
             EXTERNAL_MAIN_VARIABLES
             EXTERNAL_LOG_VARIABLES
@@ -125,7 +122,7 @@ if (BUILD_SEPARATED)
             EXTERNAL_CONFIG_VARIABLES
     )
 else ()
-    set(KKMHA_PRI_DEFS)
+    set(KKMHA_PRIVATE_DEFS)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmop")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/kkmjl")
 endif ()

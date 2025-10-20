@@ -1,36 +1,34 @@
 {
     "log": {
         "console": {
-            "level": "debug",
+            "level": "info",
             "outputTimestamp": false,
             "outputLevel": true
         },
         "file": {
             "level": {
                 "foreground": "none",
-                "background": "debug"
+                "background": "info"
             },
             "directory": "logs"
         },
         "eventLog": {
-            "level": {
-                "foreground": "none",
-                "background": "info"
-            }
+            "level": "none"
         },
         "appendLocation": false
     },
     "server": {
         "ipv4Only": false,
         "port": 5757,
+        "requestTimeout": 180,
         "concurrencyLimit": 10,
-        "enableLegacyTls": "no",
+        "enableLegacyTls": "yes",
         "securityLevel": 5,
         "certificateChainFile": "kkmha.test.ss.crt",
         "privateKeyFile": "kkmha.test.ss.key",
         "privateKeyPassword": "",
         "secret": "lorem.ipsum.dolor.sit.amet",
-        "loopbackWithoutSecret": false,
+        "loopbackWithoutSecret": true,
         "enableStatic": false,
         "staticDirectory": "..\\static",
         "indexFile": "index.html",

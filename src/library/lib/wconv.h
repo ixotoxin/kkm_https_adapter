@@ -10,13 +10,15 @@
 #include <string>
 
 namespace Text {
-    constexpr int c_convertBufferReserve { 2 };
+    namespace {
+        constexpr int c_convertBufferReserve { 2 };
+    }
 
     [[maybe_unused]]
     inline bool convert(std::wstring & result, const std::string_view text) noexcept try {
         if (text.empty()) {
             result.clear();
-            return true;
+            return result.empty();
         }
         auto length = WIN_MB2WC_ESTIMATED(&text[0], static_cast<int>(text.size()));
         if (length <= 0) {
@@ -35,7 +37,7 @@ namespace Text {
             return false;
         }
         result.assign(buffer.get(), length);
-        return true;
+        return !result.empty();
 #endif
     } catch (...) {
         return false;
@@ -45,7 +47,7 @@ namespace Text {
     inline bool convert(std::string & result, const std::wstring_view text) noexcept try {
         if (text.empty()) {
             result.clear();
-            return true;
+            return result.empty();
         }
         auto length = WIN_WC2MB_ESTIMATED(&text[0], static_cast<int>(text.size()));
         if (length <= 0) {
@@ -64,7 +66,7 @@ namespace Text {
             return false;
         }
         result.assign(buffer.get(), length);
-        return true;
+        return !result.empty();
 #endif
     } catch (...) {
         return false;

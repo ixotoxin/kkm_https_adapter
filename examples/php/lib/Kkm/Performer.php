@@ -51,7 +51,7 @@ abstract class Performer
                 '!success' => false,
                 '!httpStatus' => 0,
                 '!origin' => '',
-                '!elapsedTime' => 0
+                '!elapsedTime' => '   0.000'
             ];
         }
 
@@ -71,13 +71,13 @@ abstract class Performer
                 '!success' => false,
                 '!httpStatus' => 0,
                 '!origin' => $origin,
-                '!elapsedTime' => 0
+                '!elapsedTime' => '   0.000'
             ];
         }
 
         $result['!httpStatus'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $result['!origin'] = $origin;
-        $result['!elapsedTime'] = ($stop - $start) * 1000;
+        $result['!elapsedTime'] = sprintf('%8.3f', ($stop - $start) * 1000);
         curl_close($curl);
 
         return $result;

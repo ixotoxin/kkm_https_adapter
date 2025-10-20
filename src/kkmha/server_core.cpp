@@ -19,6 +19,7 @@
 #include <memory>
 #include <atomic>
 #include <latch>
+#include <thread>
 #include <chrono>
 
 namespace Server {
@@ -39,6 +40,20 @@ namespace Server {
     static Static::Handler s_staticHandler {};
     static Config::Handler s_configHandler {};
     static Ping::Handler s_pingHandler {};
+
+    /*inline*/ void logError() noexcept {
+        switch (s_state.load()) {
+            case State::Initial:
+            case State::Starting:
+            LOG_ERROR_TS(Wcs::c_startingFailed);
+                break;
+            case State::Stopping:
+            LOG_ERROR_TS(Wcs::c_stoppingFailed);
+                break;
+            default:
+            LOG_ERROR_TS(Wcs::c_servicingFailed);
+        }
+    }
 
     [[nodiscard]]
     /*inline*/ ProtoHandler & lookupHandler(const Http::Request & request) {
@@ -73,7 +88,7 @@ namespace Server {
                         }
                     ).detach();
                 },
-                token
+                std::forward<CompletionToken>(token)
             );
     }
 
@@ -404,26 +419,25 @@ namespace Server {
             }
         } catch (const Basic::Failure & e) {
             LOG_ERROR_TS(e);
+            logError();
+            s_shutdownSync.count_down();
+            s_state.store(State::Stopping);
+            s_hitman.completeOrder();
         } catch (const std::exception & e) {
             LOG_ERROR_TS(e);
+            logError();
+            s_shutdownSync.count_down();
+            s_state.store(State::Stopping);
+            s_hitman.completeOrder();
         } catch (...) {
             LOG_ERROR_TS(Basic::Wcs::c_somethingWrong);
+            logError();
+            s_shutdownSync.count_down();
+            s_state.store(State::Stopping);
+            s_hitman.completeOrder();
         }
 
         co_return;
-    }
-
-    /*inline*/ void logError() noexcept {
-        switch (s_state.load()) {
-            case State::Starting:
-                LOG_ERROR_TS(Wcs::c_startingFailed);
-                break;
-            case State::Stopping:
-                LOG_ERROR_TS(Wcs::c_stoppingFailed);
-                break;
-            default:
-                LOG_ERROR_TS(Wcs::c_servicingFailed);
-        }
     }
 
     void run() {
@@ -436,7 +450,7 @@ namespace Server {
                 Asio::IoContext ioContext { std::clamp(static_cast<int>(std::thread::hardware_concurrency()), 1, 4) };
                 Asio::SignalSet signals(ioContext, SIGINT, SIGTERM);
                 signals.async_wait([] (auto, auto) { std::thread(stop).detach(); });
-                s_hitman.placeOrder([&ioContext] { ioContext.stop(); });
+                s_hitman.placeOrder([& ioContext] { ioContext.stop(); });
                 asio::co_spawn(ioContext, listen(), asio::detached);
                 ioContext.run();
                 s_hitman.cancelOrder();
@@ -453,8 +467,24 @@ namespace Server {
         }
     }
 
-    void start() try {
-        std::thread(run).detach();
+    bool start() try {
+        std::thread server { run };
+        for (auto i = c_controlTimeout / c_sleepQuantum; i; --i) {
+            std::this_thread::sleep_for(c_sleepQuantum);
+            auto state = s_state.load();
+            if (state == State::Running) {
+                server.detach();
+                return true;
+            }
+            if (state == State::Shutdown || state == State::Stopping) {
+                break;
+            }
+        }
+        s_hitman.completeOrder();
+        if (server.joinable()) {
+            server.join();
+        }
+        return false;
     } catch (...) {
         logError();
         throw;

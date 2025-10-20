@@ -21,7 +21,7 @@ if (BUILD_SEPARATED)
     target_sources(kkmha PRIVATE kkmha_variables.cpp)
 endif ()
 
-target_compile_definitions(kkmha PUBLIC ${KKMHA_PUB_DEFS} PRIVATE ${KKMHA_PRI_DEFS})
+target_compile_definitions(kkmha PUBLIC ${KKMHA_PUBLIC_DEFS} PRIVATE ${KKMHA_PRIVATE_DEFS})
 target_link_libraries(kkmha PRIVATE kkmha_lib)
 target_link_libraries(kkmha PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(kkmha PRIVATE asio::asio)

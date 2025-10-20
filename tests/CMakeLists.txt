@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 find_package(Catch2 CONFIG REQUIRED PATHS "${KKMHA_DEPS_VCPKG}")
 
-add_library(tests_lib OBJECT ${KKMHA_LIB_SOURCE_FILES})
+add_library(tests_lib OBJECT ${KKMHA_LIBRARY_SOURCE_FILES})
 target_compile_definitions(tests_lib PUBLIC JSON_USE_IMPLICIT_CONVERSIONS=0)
 target_link_libraries(tests_lib PRIVATE nlohmann_json::nlohmann_json)
 
