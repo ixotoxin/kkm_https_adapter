@@ -46,6 +46,7 @@ namespace Server {
         constexpr Csv c_invalidContentType { "Заголовок 'Content-Type' отсутствует или некорректен" };
         constexpr Csv c_invalidXSecret { "Заголовок 'X-Secret' отсутствует или некорректен" };
         constexpr Csv c_invalidXIdempotencyKey { "Заголовок 'X-Idempotency-Key' отсутствует или некорректен" };
+        constexpr Csv c_connectionWith { "Установлено соединение с [{}]" };
         constexpr Csv c_requestedMethod { "От клиента [{}] поступил запрос [{} {}]" };
 
         constexpr Csv c_connectionAcceptStatus { "Connection accept: {}" };

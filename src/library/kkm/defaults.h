@@ -16,6 +16,7 @@ namespace Kkm {
     KKM_CONST(size_t, c_minLineLength, 24);
     KKM_CONST(size_t, c_maxLineLength, 192);
     KKM_DEF(size_t, c_defLineLength, 42);
+    KKM_CONST(size_t, c_maxTextLength, 512);
     KKM_CONST(DateTime::SleepUnit, c_minDocumentClosingTimeout, DateTime::c_basicSleepQuantum); // Миллисекунды
     KKM_CONST(DateTime::SleepUnit, c_maxDocumentClosingTimeout, 10 * DateTime::c_basicSleep); // Миллисекунды
     KKM_DEF(DateTime::SleepUnit, c_defDocumentClosingTimeout, DateTime::c_basicSleep); // Миллисекунды

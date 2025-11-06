@@ -61,6 +61,7 @@ namespace Kkm {
     std::wstring s_defaultBaudRate { L"115200" };
     const size_t c_minLineLength { 24 };
     const size_t c_maxLineLength { 192 };
+    const size_t c_maxTextLength { 512 };
     size_t s_defaultLineLength { 42 };
     TimeZone s_timeZone { TimeZone::Device };
     bool s_timeZoneConfigured { false };

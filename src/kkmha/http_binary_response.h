@@ -30,7 +30,7 @@ namespace Http {
     template<> struct isSmartPointer<Weak> : std::true_type {};
 
     template<CustomPointer T>
-    constexpr inline bool isSmart = isSmartPointer<T>::value;
+    inline constexpr bool isSmart = isSmartPointer<T>::value;
 
     template<CustomPointer T>
     struct BinaryResponse final : ProtoResponse {

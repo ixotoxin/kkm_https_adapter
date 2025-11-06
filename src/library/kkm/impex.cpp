@@ -326,8 +326,13 @@ namespace Kkm {
                 if (separator) {
                     separated = true;
                 } else {
-                    const bool found { Json::handleKey(block, "content", content, basePath) };
-                    if (!found) { // TODO: Добавить проверку длинны текста.
+                    const bool found {
+                        Json::handleKey(
+                            block, "content", content,
+                            Text::length<std::wstring>(1, c_maxTextLength), basePath
+                        )
+                    };
+                    if (!found) {
                         throw Failure(KKM_WFMT(Wcs::c_requiresProperty2, basePath, L"content")); // NOLINT(*-exception-baseclass)
                     }
                     Json::handleKey(block, "center", center, basePath);
@@ -413,7 +418,10 @@ namespace Kkm {
         Json::handleKey(
             json, "text",
             [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", details.m_text.m_content, path); // TODO: Добавить проверку длинны текста.
+                Json::handleKey(
+                    json, "content", details.m_text.m_content,
+                    Text::length<std::wstring>(1, c_maxTextLength), path
+                );
                 Json::handleKey(json, "center", details.m_text.m_center, path);
                 Json::handleKey(json, "magnified", details.m_text.m_magnified, path);
                 Json::handleKey(json, "separated", details.m_text.m_separated, path);
@@ -423,7 +431,10 @@ namespace Kkm {
         Json::handleKey(
             json, "headerText",
             [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", details.m_headerText.m_content, path); // TODO: Добавить проверку длинны текста.
+                Json::handleKey(
+                    json, "content", details.m_headerText.m_content,
+                    Text::length<std::wstring>(1, c_maxTextLength), path
+                );
                 Json::handleKey(json, "center", details.m_headerText.m_center, path);
                 Json::handleKey(json, "magnified", details.m_headerText.m_magnified, path);
                 Json::handleKey(json, "separated", details.m_headerText.m_separated, path);
@@ -433,7 +444,10 @@ namespace Kkm {
         Json::handleKey(
             json, "footerText",
             [& details] (const Nln::Json & json, const std::wstring & path) -> bool {
-                Json::handleKey(json, "content", details.m_footerText.m_content, path); // TODO: Добавить проверку длинны текста.
+                Json::handleKey(
+                    json, "content", details.m_footerText.m_content,
+                    Text::length<std::wstring>(1, c_maxTextLength), path
+                );
                 Json::handleKey(json, "center", details.m_footerText.m_center, path);
                 Json::handleKey(json, "magnified", details.m_footerText.m_magnified, path);
                 Json::handleKey(json, "separated", details.m_footerText.m_separated, path);

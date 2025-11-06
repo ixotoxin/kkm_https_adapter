@@ -104,6 +104,13 @@ namespace Server {
             Asio::CancellationSignal signal {};
             bool canceled { false };
 
+            LOG_DEBUG_TS(
+                [& request] {
+                    std::string message { std::format(Mbs::c_connectionWith, request.m_remote.to_string()) };
+                    return std::format(Mbs::c_prefixedText, request.m_id, message);
+                }
+            );
+
             timeoutTimer.expires_at(deadline);
             timeoutTimer.async_wait(
                 [& signal, & canceled]

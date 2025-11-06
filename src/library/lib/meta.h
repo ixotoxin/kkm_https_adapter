@@ -16,7 +16,7 @@ namespace Meta {
 
     template<classTplt T, classTplt U>
     [[maybe_unused]]
-    constexpr inline bool isSameTemplate = templatesComparing<T, U>::value;
+    inline constexpr bool isSameTemplate = templatesComparing<T, U>::value;
 
     template<class T, classTplt U>
     concept fromTemplate = requires(T t) { [] <typename ... V>(U<V ...> &) {} (t); };
