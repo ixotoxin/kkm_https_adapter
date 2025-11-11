@@ -4,11 +4,19 @@
 #pragma once
 
 #include "types.h"
+#include "defaults.h"
+#include "variables.h"
+#include "strings.h"
+#include <lib/except.h>
+#include <ctime>
+#include <concepts>
 #include <string>
 #include <vector>
-#include <ctime>
+#include <utility>
 
 namespace Kkm {
+    using Basic::DataError;
+
     struct PrintableText {
         std::wstring m_content {};
         int m_marginOuter { 0 };
@@ -20,7 +28,18 @@ namespace Kkm {
         PrintableText() = default;
         PrintableText(const PrintableText &) = default;
         PrintableText(PrintableText &&) noexcept = default;
-        [[maybe_unused]] PrintableText(std::wstring &&, bool, bool, bool, bool);
+
+        template<std::same_as<std::wstring> T>
+        [[maybe_unused]]
+        PrintableText(
+            T && content,
+            const bool center,
+            const bool magnified,
+            const bool separated,
+            const bool margin
+        ) : m_content(std::forward<T>(content)), m_marginInner(margin ? 1 : 0),
+            m_center(center), m_magnified(magnified), m_separated(separated) {}
+
         ~PrintableText() = default;
 
         PrintableText & operator=(const PrintableText &) = default;
@@ -222,7 +241,16 @@ namespace Kkm {
         OperatorDetails() = default;
         OperatorDetails(const OperatorDetails &) = default;
         OperatorDetails(OperatorDetails &&) noexcept = default;
-        [[maybe_unused]] OperatorDetails(std::wstring_view, std::wstring_view);
+
+        template<std::same_as<std::wstring> T>
+        [[maybe_unused]]
+        OperatorDetails(T && name, T && inn)
+        : m_operatorName { std::forward<T>(name) }, m_operatorInn { std::forward<T>(inn) } {}
+
+        [[maybe_unused]]
+        OperatorDetails(std::wstring_view name, std::wstring_view inn)
+        : m_operatorName { name }, m_operatorInn { inn } {}
+
         ~OperatorDetails() = default;
 
         OperatorDetails & operator=(const OperatorDetails &) = default;
@@ -243,8 +271,28 @@ namespace Kkm {
         ReceiptItemDetails() = delete;
         ReceiptItemDetails(const ReceiptItemDetails &) = default;
         ReceiptItemDetails(ReceiptItemDetails &&) noexcept = default;
-        [[maybe_unused]] ReceiptItemDetails(std::wstring_view, double, double, MeasurementUnit, Tax);
-        [[maybe_unused]] ReceiptItemDetails(std::wstring &&, double, double, MeasurementUnit, Tax);
+
+        template<std::same_as<std::wstring> T>
+        [[maybe_unused]]
+        ReceiptItemDetails(
+            T && commodityName,
+            const double price,
+            const double quantity,
+            const MeasurementUnit unit,
+            const Tax tax
+        ) : m_commodityName(std::forward<T>(commodityName)),
+            m_price(price), m_quantity(quantity), m_unit(unit), m_tax(tax) {
+            if (m_commodityName.empty()) {
+                throw DataError(Wcs::c_invalidData, L"commodityName"); // NOLINT(*-exception-baseclass)
+            }
+            if (m_price < c_minMaxPrice || m_price > s_maxPrice) {
+                throw DataError(Wcs::c_invalidData, L"price"); // NOLINT(*-exception-baseclass)
+            }
+            if (m_quantity < c_minQuantity || m_quantity > s_maxQuantity) {
+                throw DataError(Wcs::c_invalidData, L"quantity"); // NOLINT(*-exception-baseclass)
+            }
+        }
+
         ~ReceiptItemDetails() = default;
 
         ReceiptItemDetails & operator=(const ReceiptItemDetails &) = default;
@@ -267,7 +315,7 @@ namespace Kkm {
         std::wstring m_customerAddress {}; // Адрес покупателя (клиента)
         std::wstring m_electroPaymentId {};
         std::wstring m_electroPaymentAddInfo {};
-        std::vector<ReceiptItemDetails> m_items;
+        std::vector<ReceiptItemDetails> m_items {};
         double m_paymentSum { 0 };
         PaymentType m_paymentType { PaymentType::Cash };
         int m_electroPaymentMethod { 0 };
@@ -283,7 +331,17 @@ namespace Kkm {
         CloseDetails() = default;
         CloseDetails(const CloseDetails &) = default;
         CloseDetails(CloseDetails &&) noexcept = default;
-        [[maybe_unused]] CloseDetails(std::wstring_view, std::wstring_view, bool, bool);
+
+        template<std::same_as<std::wstring> T>
+        [[maybe_unused]]
+        CloseDetails(T && name, T && inn, bool closeShift, bool cashOut)
+        : OperatorDetails(std::forward<T>(name), std::forward<T>(inn)),
+          m_closeShift { closeShift }, m_cashOut { cashOut } {}
+
+        [[maybe_unused]]
+        CloseDetails(std::wstring_view name, std::wstring_view inn, bool closeShift, bool cashOut)
+        : OperatorDetails(name, inn), m_closeShift { closeShift }, m_cashOut { cashOut } {}
+
         ~CloseDetails() = default;
 
         CloseDetails & operator=(const CloseDetails &) = default;

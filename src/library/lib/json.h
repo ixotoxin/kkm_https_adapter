@@ -10,6 +10,7 @@
 #include "text.h"
 #include "path.h"
 #include <nlohmann/json.hpp>
+#include <cassert>
 
 namespace Nln {
     using Json = nlohmann::json;

@@ -9,6 +9,7 @@
 #include <kkm/strings.h>
 #include <kkm/device.h>
 #include <kkm/callhelpers.h>
+#include <cassert>
 #include <cstdlib>
 #include <optional>
 

@@ -6,6 +6,7 @@
 #include "strings.h"
 #include <lib/numeric.h>
 #include <log/write.h>
+#include <cassert>
 
 namespace Kkm {
     Device::Device(const std::wstring_view logPrefix) : m_logPrefix { logPrefix } {}

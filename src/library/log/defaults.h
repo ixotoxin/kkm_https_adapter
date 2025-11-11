@@ -13,7 +13,7 @@ namespace Log {
     LOG_CONST(std::wstring_view, c_directoryEnv, L"kkmha_logs_dir");
     LOG_CONST(std::wstring_view, c_directory, L"logs");
     LOG_CONST(std::wstring_view, c_logFileFormat, L"kkmha-{:04d}-{:02d}.log");
-    LOG_CONST(wchar_t *, c_eventSource, L"KKM HTTPS Adapter");
+    LOG_CONST(wchar_t *, c_eventSource, L"KKM HTTPS Accessor");
     LOG_CONST(::DWORD, c_eventId, 0);
     LOG_CONST(::WORD, c_eventCategory, 0);
 }

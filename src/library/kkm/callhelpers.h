@@ -5,6 +5,7 @@
 
 #include "device.h"
 #include "impex.h"
+#include <cassert>
 #include <type_traits>
 
 namespace Kkm {

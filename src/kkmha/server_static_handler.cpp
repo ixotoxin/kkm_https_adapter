@@ -10,6 +10,7 @@
 #include "server_cache_core.h"
 #include <lib/except.h>
 #include <lib/path.h>
+#include <cassert>
 #include <fstream>
 
 namespace Server::Static {

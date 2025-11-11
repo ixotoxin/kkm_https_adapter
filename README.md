@@ -1,6 +1,6 @@
 # KKM HTTPS Accessor
 
-### [If you are looking for the English version, click here.](README.EN.md)
+### [If you are looking for the English version, click here.](README.ENG.md)
 
 ## Описание
 

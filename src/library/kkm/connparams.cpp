@@ -6,6 +6,7 @@
 #include "variables.h"
 #include "strings.h"
 #include <lib/json.h>
+#include <cassert>
 #include <fstream>
 
 namespace Kkm {

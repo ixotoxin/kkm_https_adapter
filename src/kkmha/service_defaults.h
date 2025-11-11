@@ -9,7 +9,7 @@
 namespace Service {
     constexpr DateTime::SleepUnit c_sleepQuantum { DateTime::c_basicSleepQuantum }; // Миллисекунды
     constexpr const wchar_t * c_systemName { L"KKMHA" };
-    constexpr const wchar_t * c_displayName { L"KKM HTTPS Adapter" };
+    constexpr const wchar_t * c_displayName { L"KKM HTTPS Accessor" };
     constexpr ::DWORD c_startType { SERVICE_AUTO_START };
     constexpr const wchar_t * c_dependencies { L"\0\0" }; // Формат: "dep1\0dep2\0\0"
     constexpr const wchar_t * c_account { L"NT AUTHORITY\\LocalService" };

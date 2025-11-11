@@ -6,6 +6,7 @@
 #include "server_strings.h"
 #include "http_request.h"
 #include <log/write.h>
+#include <cassert>
 
 namespace Server {
     class ProtoHandler {

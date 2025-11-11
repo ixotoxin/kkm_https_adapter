@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(kkm_https_adapter VERSION 1.7.11 LANGUAGES CXX)
+project(kkm_https_accessor VERSION 1.7.12 LANGUAGES CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_FIND_DEBUG_MODE ON)
@@ -96,6 +96,9 @@ include_directories("${KKMHA_CONFIG_INCLUDE_DIR}" BEFORE)
 file(GLOB_RECURSE KKMHA_LIBRARY_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/lib/*.cpp")
 file(GLOB_RECURSE KKMHA_COMMON_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/library/*/*.cpp")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/library" BEFORE)
+
+#set(ENV{KKMHA_CONF_DIR} "${PROJECT_SOURCE_DIR}/_build/conf")
+#set(ENV{KKMHA_LOGS_DIR} "${PROJECT_SOURCE_DIR}/_build/logs")
 
 if (BUILD_TESTS)
     enable_testing()

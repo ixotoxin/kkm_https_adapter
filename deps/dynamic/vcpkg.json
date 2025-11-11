@@ -1,5 +1,5 @@
 {
-    "name": "kkm-https-adapter",
+    "name": "kkm-https-accessor",
     "version": "1.7",
     "dependencies": [
         {
