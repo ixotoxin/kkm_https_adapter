@@ -4,7 +4,7 @@
 #include <cmake/options.h>
 #include <cmake/variables.h>
 #include <lib/strings.h>
-#include <lib/setcou16.h>
+#include <lib/setcli.h>
 #include <main/variables.h>
 #include <main/varop.h>
 #include <log/write.h>
@@ -62,7 +62,10 @@ void usage(std::wostream & stream, const std::filesystem::path & path) {
 }
 
 int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
-    START_MEMORY_PROFILING;
+    Config::initConsole(Config::c_u16Text);
+    Config::initLogger();
+    Config::initProfiler();
+
     FORCE_MEMORY_LEAK;
 
     try {

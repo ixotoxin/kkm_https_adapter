@@ -91,3 +91,7 @@ namespace Log {
     [[maybe_unused]] void asBackgroundProcess() noexcept;
     [[maybe_unused]] std::wstring levelLabel(int);
 }
+
+namespace Config {
+    [[maybe_unused]] void initLogger();
+}

@@ -201,8 +201,9 @@ namespace Log {
     }
 }
 
-namespace Init {
-    EXECUTE_BEFORE_MAIN(closeLogChannels) {
+namespace Config {
+    [[maybe_unused]]
+    void initLogger() {
         std::atexit([] {
             ::Log::File::close();
             ::Log::EventLog::close();

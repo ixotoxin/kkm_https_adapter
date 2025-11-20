@@ -61,7 +61,8 @@ CMake options:
 | `WITH_CRTDBG`     | Enable CRT Debug for memory profiling.                    |
 | `WITH_LEAKS`      | Artificial memory leak generation.                        |
 | `WITH_RELSL`      | Use relative paths for source files in the application.   |
-| `WITH_SSIAC`      | Allow invasive access to the std::string buffer (heresy). |
+
+<!-- | `WITH_SBIAC`      | Allow invasive access to the std::string buffer (heresy). | -->
 
 After building with one of the `build_*.cmd` scripts, the file `kkmha.exe` will be placed into the `.\_build` directory,
 and in the case of a dynamic build, the files `libcrypto-?-x64.dll` and `libssl-?-x64.dll` will also be placed there.

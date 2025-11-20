@@ -20,39 +20,42 @@
 #   define WITH_CRTDBG 0
 #endif
 
-#ifdef WITH_LEAKS
-#   if !WITH_ASAN && !WITH_CRTDBG
-#       undef WITH_LEAKS
-#       define WITH_LEAKS 0
+#if WITH_ASAN || WITH_CRTDBG
+#   if defined(DEBUG) || defined(_DEBUG)
+#       include <log/core.h>
+#   else
+#       error Memory profiling allowed only in debug version
 #   endif
 #else
-#   define WITH_LEAKS 0
+#   ifdef WITH_LEAKS
+#       undef WITH_LEAKS
+#   endif
 #endif
 
-#if (WITH_ASAN || WITH_CRTDBG) && !defined(DEBUG) && !defined(_DEBUG)
-#   error Memory profiling allowed only in debug version
+#ifndef WITH_LEAKS
+#   define WITH_LEAKS 0
 #endif
 
 #undef FORCE_MEMORY_LEAK
 
 #if WITH_LEAKS
-#   include <log/core.h>
 #   define FORCE_MEMORY_LEAK \
         do { \
-            auto _memoryLeak_ = new unsigned short[32] { 0xadde, 0xefbe }; \
+            auto memoryLeak_d7xWJOjy6zu1v7Re = new unsigned short[32] { 0xadde, 0xefbe }; \
             if (Log::Console::ready(Log::Level::Warning)) { \
                 Log::Console::write( \
                     Log::Level::Warning, \
                     std::format( \
                         L"I'll put {:x}{:x} {:x}{:x} here (test message indicating that a leak has taken place)", \
-                        _memoryLeak_[0] & 0xff, _memoryLeak_[0] >> 8, _memoryLeak_[1] & 0xff, _memoryLeak_[1] >> 8 \
+                        memoryLeak_d7xWJOjy6zu1v7Re[0] & 0xff, memoryLeak_d7xWJOjy6zu1v7Re[0] >> 8, \
+                        memoryLeak_d7xWJOjy6zu1v7Re[1] & 0xff, memoryLeak_d7xWJOjy6zu1v7Re[1] >> 8 \
                     ) \
                 ); \
                 Log::Console::write( \
                     Log::Level::Warning, \
                     std::format( \
                         L"Address of leaked memory block: 0x{:016X}", \
-                        reinterpret_cast<uintptr_t>(_memoryLeak_) \
+                        reinterpret_cast<uintptr_t>(memoryLeak_d7xWJOjy6zu1v7Re) \
                     ) \
                 ); \
             } \
@@ -61,12 +64,9 @@
 #   define FORCE_MEMORY_LEAK do {} while (false)
 #endif
 
-#undef START_MEMORY_PROFILING
-
 #define MEMORY_PROFILING_FLAG_KEY "!debug"
 
 #if WITH_ASAN
-#   define START_MEMORY_PROFILING Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (AddressSanitizer)");
 #   define MEMORY_PROFILING_FLAG_VALUE "Memory profiling enabled (AddressSanitizer)"
 #elif WITH_CRTDBG
 #   define _CRTDBG_MAP_ALLOC // NOLINT(*-reserved-identifier)
@@ -74,21 +74,28 @@
 #   include <crtdbg.h>
 #   include <cstdlib>
 #   include <format>
-#   define START_MEMORY_PROFILING Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (CRT Debug)");
 #   define MEMORY_PROFILING_FLAG_VALUE "Memory profiling enabled (CRT Debug)"
-namespace Init {
-    EXECUTE_BEFORE_MAIN(startMemoryProfiling) {
-        constexpr auto _reportMode_ = /*_CRTDBG_MODE_DEBUG |*/ _CRTDBG_MODE_FILE /*| _CRTDBG_MODE_WNDW*/;
-        ::_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF /*| _CRTDBG_CHECK_CRT_DF*/ | _CRTDBG_LEAK_CHECK_DF);
-        ::_CrtSetReportMode(_CRT_ASSERT, _reportMode_);
-        ::_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-        ::_CrtSetReportMode(_CRT_WARN, _reportMode_);
-        ::_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-        ::_CrtSetReportMode(_CRT_ERROR, _reportMode_);
-        ::_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-    }
-}
 #else
-#   define START_MEMORY_PROFILING do {} while (false)
 #   define MEMORY_PROFILING_FLAG_VALUE ""
 #endif
+
+namespace Config {
+    [[maybe_unused]]
+    inline void initProfiler() {
+#if WITH_ASAN
+        Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (AddressSanitizer)");
+        Log::Console::write(Log::Level::Error, L"!! Unimplemented !!");
+        __debugbreak();
+#elif WITH_CRTDBG
+        constexpr auto reportMode = /*_CRTDBG_MODE_DEBUG |*/ _CRTDBG_MODE_FILE /*| _CRTDBG_MODE_WNDW*/;
+        ::_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF /*| _CRTDBG_CHECK_CRT_DF*/ | _CRTDBG_LEAK_CHECK_DF);
+        ::_CrtSetReportMode(_CRT_ASSERT, reportMode);
+        ::_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+        ::_CrtSetReportMode(_CRT_WARN, reportMode);
+        ::_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+        ::_CrtSetReportMode(_CRT_ERROR, reportMode);
+        ::_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+        Log::Console::write(Log::Level::Warning, L"Memory profiling enabled (CRT Debug)");
+#endif
+    }
+}

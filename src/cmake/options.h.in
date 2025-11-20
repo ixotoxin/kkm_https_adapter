@@ -10,4 +10,4 @@
 #cmakedefine01 WITH_CRTDBG
 #cmakedefine01 WITH_LEAKS
 #cmakedefine01 WITH_RELSL
-#cmakedefine01 WITH_SSIAC
+#cmakedefine01 WITH_SBIAC

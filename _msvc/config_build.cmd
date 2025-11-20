@@ -24,7 +24,7 @@ REM Использовать относительные пути исходны�
 SET RELSL=ON
 
 REM Разрешить инвазивный доступ к буферу std::string (ересь)
-SET SSIAC=OFF
+SET SBIAC=OFF
 
-SET RELEASE_OPTS=-D BUILD_SEPARATED=%SEPARATED% -D BUILD_STATIC=%STATIC% -D WITH_RELSL=%RELSL% -D WITH_SSIAC=%SSIAC%
+SET RELEASE_OPTS=-D BUILD_SEPARATED=%SEPARATED% -D BUILD_STATIC=%STATIC% -D WITH_RELSL=%RELSL% -D WITH_SBIAC=%SBIAC%
 SET DEBUG_OPTS=%RELEASE_OPTS% -D WITH_ASAN=%ASAN% -D WITH_UBSAN=%UBSAN% -D WITH_CRTDBG=%CRTDBG% -D WITH_LEAKS=%LEAKS%

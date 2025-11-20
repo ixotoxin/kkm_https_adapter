@@ -2,7 +2,8 @@
 // Distributed under the MIT License, see accompanying file LICENSE.txt
 
 #include <cmake/variables.h>
-#include <lib/setcou16.h>
+#include <lib/setcli.h>
+#include <log/core.h>
 #include <log/varop.h>
 #include <debug/memprof.h>
 #include <kkm/varop.h>
@@ -13,6 +14,10 @@
 #include "kkmjl_core.h"
 
 int wmain(int argc, wchar_t ** argv, wchar_t ** envp) {
+    Config::initConsole(Config::c_u16Text);
+    Config::initLogger();
+    Config::initProfiler();
+
     try {
         if (argc == 3) {
             Config::setBaseVars(envp);

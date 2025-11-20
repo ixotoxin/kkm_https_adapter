@@ -24,7 +24,7 @@ namespace Text {
         if (length <= 0) {
             return false;
         }
-#if WITH_SSIAC
+#if WITH_SBIAC
         result.resize(length + c_convertBufferReserve);
         length = WIN_MB2WC(&text[0], static_cast<int>(text.size()), &result[0], static_cast<int>(result.size()));
         result.resize(length);
@@ -53,7 +53,7 @@ namespace Text {
         if (length <= 0) {
             return false;
         }
-#if WITH_SSIAC
+#if WITH_SBIAC
         result.resize(length + c_convertBufferReserve);
         length = WIN_WC2MB(&text[0], static_cast<int>(text.size()), &result[0], static_cast<int>(result.size()));
         result.resize(length);
